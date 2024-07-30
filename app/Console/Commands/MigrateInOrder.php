@@ -57,6 +57,7 @@ class MigrateInOrder extends Command
             '2016_06_01_000005_create_oauth_personal_access_clients_table.php',
             '2019_08_19_000000_create_failed_jobs_table.php',
             '2019_12_14_000001_create_personal_access_tokens_table.php',
+            '2024_07_30_112343_alter_user_table_relevant_with_socialite.php',
         ];
 
         foreach($migrations as $migration)

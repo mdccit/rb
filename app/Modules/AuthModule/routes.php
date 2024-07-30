@@ -9,7 +9,11 @@ Route::group(['namespace' => 'App\Modules\AuthModule\Controllers','prefix' => 'a
 
         //TODO whatever not need to authenticate
         Route::post('/register', 'AuthController@authRegister')->name('auth.register');
-        Route::post('/login', 'AuthController@authLogin')->name('auth.register');
+        Route::post('/login', 'AuthController@authLogin')->name('auth.login');
+
+        Route::get('/google-auth-url', 'GoogleAuthController@getAuthUrl')->name('auth.google.url');
+        Route::post('/google-register', 'GoogleAuthController@authRegister')->name('auth.google.register');
+        Route::post('/google-login', 'GoogleAuthController@authLogin')->name('auth.google.login');
 
         Route::middleware('auth:api')->group(function () {
             //TODO whatever need to authenticate

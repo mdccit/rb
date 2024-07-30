@@ -36,6 +36,9 @@ class User extends Authenticatable
         'display_name',
         'email',
         'password',
+        'provider_id',
+        'provider_name',
+        'google_access_token_json',
         'user_role_id',
         'user_type_id'
     ];
