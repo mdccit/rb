@@ -15,7 +15,6 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->foreignId('user_role_id')->index()->constrained()->cascadeOnDelete();
             $table->foreignId('user_type_id')->index()->constrained()->cascadeOnDelete();
-            $table->unique(['user_role_id', 'user_type_id']);
             $table->string('first_name');
             $table->string('last_name');
             $table->string('other_names')->nullable();
