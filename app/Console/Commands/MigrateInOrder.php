@@ -2,6 +2,10 @@
 
 namespace App\Console\Commands;
 
+use Database\Seeders\CountrySeeder;
+use Database\Seeders\CurrencySeeder;
+use Database\Seeders\NationalitySeeder;
+use Database\Seeders\PlayerBudgetSeeder;
 use Database\Seeders\UserRoleSeeder;
 use Database\Seeders\UserTypeSeeder;
 use Illuminate\Console\Command;
@@ -48,7 +52,12 @@ class MigrateInOrder extends Command
         $migrations = [
             '2024_07_19_105012_create_user_roles_table.php',
             '2024_07_19_110343_create_user_types_table.php',
+            '2024_08_01_141538_create_countries_table.php',
+            '2024_08_06_045702_create_nationalities_table.php',
+            '2024_08_06_050114_create_currencies_table.php',
             '2014_10_12_000000_create_users_table.php',
+            '2024_08_05_143549_create_user_addresses_table.php',
+            '2024_08_05_143620_create_user_phones_table.php',
             '2014_10_12_100000_create_password_reset_tokens_table.php',
             '2016_06_01_000001_create_oauth_auth_codes_table.php',
             '2016_06_01_000002_create_oauth_access_tokens_table.php',
@@ -58,6 +67,13 @@ class MigrateInOrder extends Command
             '2019_08_19_000000_create_failed_jobs_table.php',
             '2019_12_14_000001_create_personal_access_tokens_table.php',
             '2024_07_30_112343_alter_user_table_relevant_with_socialite.php',
+            '2024_08_01_133328_create_player_parents_table.php',
+            '2024_08_06_045014_create_player_budgets_table.php',
+            '2024_08_01_055112_create_players_table.php',
+            '2024_08_05_162756_create_schools_table.php',
+            '2024_08_05_162815_create_businesses_table.php',
+            '2024_08_05_162739_create_coaches_table.php',
+            '2024_08_05_162830_create_business_managers_table.php',
         ];
 
         foreach($migrations as $migration)
@@ -73,6 +89,10 @@ class MigrateInOrder extends Command
         //Execute Seeders
         $this->call(UserRoleSeeder::class);
         $this->call(UserTypeSeeder::class);
+        $this->call(CountrySeeder::class);
+        $this->call(NationalitySeeder::class);
+        $this->call(CurrencySeeder::class);
+        $this->call(PlayerBudgetSeeder::class);
 
         //Passport Config
         //Create personal client for 'RecruitedProV2'

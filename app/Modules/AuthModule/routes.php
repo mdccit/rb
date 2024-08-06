@@ -18,6 +18,11 @@ Route::group(['namespace' => 'App\Modules\AuthModule\Controllers','prefix' => 'a
         Route::middleware('auth:api')->group(function () {
             //TODO whatever need to authenticate
             Route::put('/logout', 'AuthController@authLogout')->name('auth.logout');
+
+            Route::put('/player-register', 'RegisterController@playerRegister')->name('auth.player.register');
+            Route::put('/coach-register', 'RegisterController@coachRegister')->name('auth.coach.register');
+            Route::put('/business-manager-register', 'RegisterController@businessManagerRegister')->name('auth.business-manager.register');
+            Route::put('/parent-register', 'RegisterController@parentRegister')->name('auth.parent.register');
         });
 
     });

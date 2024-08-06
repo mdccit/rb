@@ -15,12 +15,16 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->foreignId('user_role_id')->index()->constrained()->cascadeOnDelete();
             $table->foreignId('user_type_id')->index()->constrained()->cascadeOnDelete();
+            $table->foreignId('country_id')->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignId('nationality_id')->nullable()->constrained()->cascadeOnDelete();
             $table->string('first_name');
             $table->string('last_name');
             $table->string('other_names')->nullable();
             $table->string('display_name');
             $table->string('email')->unique();
             $table->string('password');
+            $table->boolean('is_first_login')->default(true);
+            $table->boolean('is_approved')->default(false);
             $table->text('bio')->nullable();
             $table->date('date_of_birth')->nullable();
             $table->enum('gender', ['none', 'male', 'female', 'other'])->default('none');
