@@ -40,7 +40,11 @@ class User extends Authenticatable
         'provider_name',
         'google_access_token_json',
         'user_role_id',
-        'user_type_id'
+        'user_type_id',
+        'country_id',
+        'nationality_id',
+        'gender',
+        'date_of_birth'
     ];
 
     /**

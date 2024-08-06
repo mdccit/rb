@@ -45,7 +45,7 @@ class CreateNewModulePack extends Command
 
         $filesystem->makeDirectory($modulePath, 0755, true, true);
         $filesystem->makeDirectory("{$modulePath}/Controllers", 0755, true, true);
-//        $filesystem->makeDirectory("{$modulePath}/Models", 0755, true, true);
+        $filesystem->makeDirectory("{$modulePath}/Services", 0755, true, true);
         $filesystem->makeDirectory("{$modulePath}/Views", 0755, true, true);
         $filesystem->makeDirectory("{$modulePath}/lang/en", 0755, true, true);
         $filesystem->makeDirectory("{$modulePath}/lang/es", 0755, true, true);

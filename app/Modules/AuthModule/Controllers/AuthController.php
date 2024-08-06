@@ -3,8 +3,10 @@
 namespace App\Modules\AuthModule\Controllers;
 
 use App\Extra\CommonResponse;
+use App\Extra\ThirdPartyAPI\GoogleAuthAPI;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Modules\AuthModule\Services\AuthService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -12,6 +14,14 @@ use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
+    private $authService;
+
+    function __construct()
+    {
+        //Init models
+        $this->authService = new AuthService();
+    }
+
     public function authRegister(Request $request)
     {
         try{
@@ -30,7 +40,7 @@ class AuthController extends Controller
                 );
             }
 
-            $user = $this->createUser($request->all());
+            $user = $this->authService->createUser($request->all());
             $token = $user->createToken(config('app.name'))->accessToken;
 
             $responseData = [
@@ -50,19 +60,6 @@ class AuthController extends Controller
                 'Something went to wrong'
             );
         }
-    }
-
-    private function createUser(array $data){
-        return User::connect(config('database.default'))->create([
-            'first_name' => $data['first_name'],
-            'last_name' => $data['last_name'],
-            'display_name' => $data['first_name'].' '.$data['last_name'],
-            'email' => $data['email'],
-            'user_role_id' => config('app.user_roles.default'),
-            'user_type_id' => config('app.user_types.free'),
-            'password' => Hash::make($data['password']),
-            'remember_token' => Str::random(10)
-        ]);
     }
 
 

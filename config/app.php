@@ -226,6 +226,7 @@ return [
     |
     | user_roles - Includes all user roles and their default ids
     | user_types - Includes all user types(means which plan currently they using) and their default ids
+    | currencies - Includes all currencies and their default ids
     |
     |
     */
@@ -244,6 +245,10 @@ return [
         'none'=>1,
         'free'=>2,
         'premium'=>3,
+    ],
+
+    'currencies' => [
+        'default'=>1,
     ],
 
 ];
