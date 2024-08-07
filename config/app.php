@@ -217,6 +217,7 @@ return [
     'modules' => [
         'PublicModule',
         'AuthModule',
+        'CommonModule',
     ],
 
     /*
