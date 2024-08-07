@@ -44,7 +44,8 @@ class AuthController extends Controller
             $token = $user->createToken(config('app.name'))->accessToken;
 
             $responseData = [
-                'token' => $token
+                'token' => $token,
+                'user_role' => $user->getUserRole->short_name,
             ];
 
             return CommonResponse::getResponse(
@@ -85,6 +86,7 @@ class AuthController extends Controller
                     $token = $user->createToken(config('app.name'))->accessToken;
                     $responseData = [
                         'token' => $token,
+                        'user_role' => $user->getUserRole->short_name,
                     ];
 
                     return CommonResponse::getResponse(

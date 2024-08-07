@@ -67,14 +67,15 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
+
     public function getUserRole()
     {
-        return $this->belongsTo(UserRole::class);
+        return $this->belongsTo(UserRole::class, 'user_role_id');
     }
 
     public function getUserType()
     {
-        return $this->belongsTo(UserType::class);
+        return $this->belongsTo(UserType::class, 'user_type_id');
     }
 
     /**
