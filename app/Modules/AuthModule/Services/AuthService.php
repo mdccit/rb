@@ -12,7 +12,7 @@ class AuthService
 {
     public function createUser(array $data, $is_google_auth = false){
         if($is_google_auth){
-            return User::connect(config('database.default'))
+            $user = User::connect(config('database.default'))
                 ->create([
                 'first_name' => $data['first_name'],
                 'last_name' => $data['last_name'],
@@ -27,7 +27,7 @@ class AuthService
                 'remember_token' => Str::random(10)
             ]);
         }else{
-            return User::connect(config('database.default'))
+            $user = User::connect(config('database.default'))
                 ->create([
                 'first_name' => $data['first_name'],
                 'last_name' => $data['last_name'],
@@ -40,5 +40,27 @@ class AuthService
             ]);
         }
 
+        $user->sendEmailVerificationNotification();
+
+        return $user;
+
+    }
+
+    public function verifyUserAccount($user_id){
+        $user = User::connect(config('database.default'))->findOrFail($user_id);
+
+        if (!$user->hasVerifiedEmail()) {
+            $user->markEmailAsVerified();
+        }
+    }
+
+    public function resendVerificationEmail($user_id){
+        $user = User::connect(config('database.default'))->findOrFail($user_id);
+
+        if (!$user->hasVerifiedEmail()) {
+            $user->sendEmailVerificationNotification();
+        }
+
+        return $user;
     }
 }
