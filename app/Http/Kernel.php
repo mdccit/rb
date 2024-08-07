@@ -24,7 +24,6 @@ class Kernel extends HttpKernel
         \App\Http\Middleware\Custom\Locale::class,
         \App\Http\Middleware\Custom\ForceJsonResponse::class,
         \App\Http\Middleware\Custom\Cors::class,
-        \App\Http\Middleware\Custom\AccessKey::class,
     ];
 
     /**

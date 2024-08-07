@@ -137,4 +137,60 @@ class AuthController extends Controller
             );
         }
     }
+
+    public function verifyEmail($user_id, Request $request) {
+        try{
+            if (!$request->hasValidSignature()) {
+                return CommonResponse::getResponse(
+                    401,
+                    'Invalid/Expired url provided.',
+                    'Invalid/Expired url provided'
+                );
+                //TODO Must need to redirect verification failed page
+            }
+
+            $this->authService->verifyUserAccount($user_id);
+
+            return CommonResponse::getResponse(
+                200,
+                'Successfully verified',
+                'Successfully verified'
+            );
+            //TODO Must need to redirect verification success page
+            //return redirect()->to('/');
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    }
+
+    public function resendVerificationEmail($user_id, Request $request) {
+        try{
+            $user = $this->authService->resendVerificationEmail($user_id);
+
+            if ($user->hasVerifiedEmail()) {
+                return CommonResponse::getResponse(
+                    422,
+                    'Email already verified.',
+                    'Email already verified.'
+                );
+            }
+
+            return CommonResponse::getResponse(
+                200,
+                'Successfully resend the verification',
+                'Successfully resend the verification, Please check your inbox'
+            );
+
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    }
 }
