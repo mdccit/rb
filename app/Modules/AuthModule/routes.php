@@ -17,6 +17,9 @@ Route::group(['namespace' => 'App\Modules\AuthModule\Controllers','prefix' => 'a
             Route::post('/google-register', 'GoogleAuthController@authRegister')->name('auth.google.register');
             Route::post('/google-login', 'GoogleAuthController@authLogin')->name('auth.google.login');
 
+            Route::post('/forgot-password-request', 'ForgotPasswordController@forgotPasswordRequest')->name('auth.forgot-password.request');
+            Route::put('/reset-password/{password_reset_id}', 'ForgotPasswordController@passwordReset')->name('auth.forgot-password.reset');
+
             Route::middleware('auth:api')->group(function () {
                 //TODO whatever need to authenticate
                 Route::put('/logout', 'AuthController@authLogout')->name('auth.logout');
