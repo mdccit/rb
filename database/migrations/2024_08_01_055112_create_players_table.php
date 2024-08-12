@@ -22,7 +22,7 @@ return new class extends Migration
             $table->unsignedFloat('gpa')->nullable();
             $table->decimal('height', 5, 2)->nullable(); // cm
             $table->decimal('weight', 5, 2)->nullable(); // kg
-            $table->json('other_data');
+            $table->json('other_data')->nullable();
             $table->timestamps();
         });
     }

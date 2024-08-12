@@ -218,6 +218,7 @@ return [
         'PublicModule',
         'AuthModule',
         'CommonModule',
+        'AdminModule',
     ],
 
     /*
