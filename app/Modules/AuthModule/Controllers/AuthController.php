@@ -40,7 +40,7 @@ class AuthController extends Controller
                 );
             }
 
-            $user = $this->authService->createUser($request->all());
+            $user = $this->authService->createUser($request->all(),false,$request->ip());
             $token = $user->createToken(config('app.name'))->accessToken;
 
             $responseData = [
@@ -83,6 +83,7 @@ class AuthController extends Controller
             $user = User::connect(config('database.default'))->where('email', $request->email)->first();
             if ($user) {
                 if (Hash::check($request->password, $user->password)) {
+                    $this->authService->setLoggedUser($user->id,$request->ip());
                     $token = $user->createToken(config('app.name'))->accessToken;
                     $responseData = [
                         'token' => $token,

@@ -85,6 +85,7 @@ return [
     */
 
     'timezone' => 'UTC',
+    //'timezone' => 'Europe/Paris',
 
     /*
     |--------------------------------------------------------------------------
@@ -218,6 +219,7 @@ return [
         'PublicModule',
         'AuthModule',
         'CommonModule',
+        'AdminModule',
     ],
 
     /*

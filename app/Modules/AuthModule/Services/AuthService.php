@@ -5,12 +5,16 @@ namespace App\Modules\AuthModule\Services;
 
 
 use App\Models\User;
+use App\Models\UserSession;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use hisorange\BrowserDetect;
+use hisorange\BrowserDetect\Parser as Browser;
 
 class AuthService
 {
-    public function createUser(array $data, $is_google_auth = false){
+    public function createUser(array $data, $is_google_auth = false,$ip_address){
         if($is_google_auth){
             $user = User::connect(config('database.default'))
                 ->create([
@@ -24,7 +28,8 @@ class AuthService
                 'provider_name' => $data['provider_name'],
                 'provider_id' => $data['provider_id'],
                 'google_access_token_json' => $data['google_access_token_json'],
-                'remember_token' => Str::random(10)
+                'remember_token' => Str::random(10),
+                'last_logged_at' => Carbon::now(),
             ]);
         }else{
             $user = User::connect(config('database.default'))
@@ -36,14 +41,40 @@ class AuthService
                 'user_role_id' => config('app.user_roles.default'),
                 'user_type_id' => config('app.user_types.free'),
                 'password' => Hash::make($data['password']),
-                'remember_token' => Str::random(10)
+                'remember_token' => Str::random(10),
+                'last_logged_at' => Carbon::now(),
             ]);
         }
+
+        $description = Browser::browserName() . ' on ' .Browser::platformName() . ' (' . Browser::deviceType() . ' Device)';
+        UserSession::connect(config('database.default'))
+            ->create([
+                'user_id' => $user->id,
+                'sign_in_at' => Carbon::now(),
+                'ip_address' => $ip_address,
+                'description' => $description,
+            ]);
 
         $user->sendEmailVerificationNotification();
 
         return $user;
 
+    }
+
+    public function setLoggedUser($user_id,$ip_address){
+        User::connect(config('database.default'))
+            ->where('id', $user_id)
+            ->update([
+                'last_logged_at' => Carbon::now(),
+            ]);
+        $description = Browser::browserName() . ' on ' .Browser::platformName() . ' (' . Browser::deviceType() . ' Device)';
+        UserSession::connect(config('database.default'))
+            ->create([
+                'user_id' => $user_id,
+                'sign_in_at' => Carbon::now(),
+                'ip_address' => $ip_address,
+                'description' => $description,
+            ]);
     }
 
     public function verifyUserAccount($user_id){
