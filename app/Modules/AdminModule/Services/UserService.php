@@ -21,6 +21,7 @@ class UserService
         $user_role = array_key_exists("user_role",$data)?$data['user_role']:0;
         $is_email_verified = array_key_exists("is_email_verified",$data)?$data['is_email_verified']:'none';
         $last_seen_at = array_key_exists("last_seen_at",$data)?$data['last_seen_at']:null;
+        $search_key = array_key_exists("search_key",$data)?$data['search_key']:null;
 
         $query = User::connect(config('database.secondary'))
             ->join('user_roles', 'user_roles.id', '=' ,'users.user_role_id')
@@ -51,6 +52,10 @@ class UserService
 
         if ($last_seen_at != null) {
             $query->where('users.last_logged_at', '>=', now()->subDays($last_seen_at));
+        }
+
+        if ($search_key != null) {
+            $query->where('users.display_name', 'LIKE', '%' . $search_key . '%');
         }
 
 
@@ -137,4 +142,5 @@ class UserService
         }
 
     }
+
 }
