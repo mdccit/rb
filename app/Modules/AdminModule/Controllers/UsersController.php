@@ -18,6 +18,30 @@ class UsersController extends Controller
         $this->userService = new UserService();
     }
 
+    public function index(Request $request)
+    {
+        try{
+            $dataSets = $this->userService->getAllUsers($request->all());
+
+            $responseData = [
+                'dataSets' => $dataSets,
+            ];
+
+            return CommonResponse::getResponse(
+                200,
+                'Successfully fetched',
+                'Successfully fetched',
+                $responseData
+            );
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    }
+
     public function registerUser(Request $request)
     {
         try{
@@ -45,7 +69,7 @@ class UsersController extends Controller
             return CommonResponse::getResponse(
                 200,
                 'Successfully Registered',
-                'Successfully Registered',
+                'Successfully Registered'
             );
         }catch (\Exception $e){
             return CommonResponse::getResponse(

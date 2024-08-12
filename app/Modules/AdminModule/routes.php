@@ -21,7 +21,8 @@ Route::group(['namespace' => 'App\Modules\AdminModule\Controllers','prefix' => '
 
             //TODO only authenticated admin users can be access
             Route::middleware('auth.is_admin')->group(function () {
-                Route::post('/user-register', 'UsersController@registerUser')->name('admin.user.register');
+                Route::get('/users', 'UsersController@index')->name('admin.users.index');
+                Route::post('/user-register', 'UsersController@registerUser')->name('admin.users.register');
             });
 
             //TODO only authenticated operator users can be access

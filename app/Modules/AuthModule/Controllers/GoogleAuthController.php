@@ -84,7 +84,7 @@ class GoogleAuthController extends Controller
                     'google_access_token_json' => $this->googleAuthApi->getAccessToken(),
                 ];
 
-                $user = $this->authService->createUser($data,true);
+                $user = $this->authService->createUser($data,true,$request->ip());
                 $token = $user->createToken(config('app.name'))->accessToken;
 
                 $responseData = [
@@ -139,6 +139,7 @@ class GoogleAuthController extends Controller
                 ->where('provider_id', '=', $googleUser->id)
                 ->first();
             if ($user) {
+                $this->authService->setLoggedUser($user->id,$request->ip());
                 $token = $user->createToken(config('app.name'))->accessToken;
                 $responseData = [
                     'token' => $token,

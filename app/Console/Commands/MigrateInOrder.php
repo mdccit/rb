@@ -56,6 +56,7 @@ class MigrateInOrder extends Command
             '2024_08_06_045702_create_nationalities_table.php',
             '2024_08_06_050114_create_currencies_table.php',
             '2014_10_12_000000_create_users_table.php',
+            '2024_08_12_065634_create_user_sessions_table.php',
             '2024_08_05_143549_create_user_addresses_table.php',
             '2024_08_05_143620_create_user_phones_table.php',
             '2014_10_12_100000_create_password_reset_tokens_table.php',
