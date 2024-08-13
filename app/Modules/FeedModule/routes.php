@@ -8,7 +8,8 @@ Route::group(['namespace' => 'App\Modules\FeedModule\Controllers','prefix' => 'a
     Route::prefix('feed')->group(function () {
 
         //TODO whatever not need to authenticate
-        Route::get('/posts', 'PoastController@index')->name('post.index');
+        Route::get('/posts', 'PostController@index')->name('feed.posts.index');
+        Route::post('/post', 'PostController@store')->name('feed.posts.store');
 
         Route::middleware('auth:api')->group(function () {
             //TODO all authenticated users can be access
