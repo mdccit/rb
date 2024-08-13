@@ -8,6 +8,7 @@ use App\Models\BusinessManager;
 use App\Models\Coach;
 use App\Models\Country;
 use App\Models\Player;
+use App\Models\PlayerBudget;
 use App\Models\PlayerParent;
 use App\Models\User;
 use App\Models\UserPhone;
@@ -44,10 +45,13 @@ class RegisterService
         $player = Player::connect(config('database.secondary'))
             ->where('user_id', $user->id)->first();
         if(!$player){
+            $player_budget = PlayerBudget::connect(config('database.secondary'))->find($data['player_budget']);
             $height = $data['height_in_cm']?$data['height_cm']:(($data['height_ft']*12)+$data['height_in'])*2.54;
             $other_data = [
                 'utr' => $data['utr'],
                 'handedness' => $data['handedness'],
+                'budget_min' => $player_budget->budget_min,
+                'budget_max' => $player_budget->budget_max,
             ];
             $graduation_month_year = Carbon::createFromFormat('Y-m', $data['graduation_month_year']);
 
