@@ -220,6 +220,8 @@ return [
         'AuthModule',
         'CommonModule',
         'AdminModule',
+        'UserModule',
+        'FeedModule'
     ],
 
     /*
