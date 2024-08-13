@@ -23,6 +23,18 @@ Route::group(['namespace' => 'App\Modules\AdminModule\Controllers','prefix' => '
             Route::middleware('auth.is_admin')->group(function () {
                 Route::get('/users', 'UsersController@index')->name('admin.users.index');
                 Route::post('/user-register', 'UsersController@registerUser')->name('admin.users.register');
+                
+                //resource category
+                Route::get('/resource-categories', 'ResourceCategoriesController@index')->name('admin.resources-category.index');
+                Route::post('/resource-categories-create', 'ResourceCategoriesController@storeCategory')->name('admin.resources-category.create');
+                Route::put('/resource-categories-update/{id}', 'ResourceCategoriesController@updateCategory')->name('admin.resources-category.update');
+                Route::delete('/resource-categories-delete/{id}', 'ResourceCategoriesController@destroyCategory')->name('admin.resources-category.delete');
+                
+                //resource
+                Route::get('/resource', 'ResourceController@index')->name('admin.resources.index');
+                Route::post('/resource-create', 'ResourceController@store')->name('admin.resources.create');
+                Route::put('/resource-update/{id}', 'ResourceController@update')->name('admin.resources.update');
+                Route::delete('/resource-delete/{id}', 'ResourceController@destroy')->name('admin.resources.delete');
             });
 
             //TODO only authenticated operator users can be access
