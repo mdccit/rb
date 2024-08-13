@@ -11,6 +11,16 @@ class Feed extends Model
 
     protected $fillable = ['name'];
 
+    /**
+     * Connect the relevant database
+     *
+     */
+    public static function connect($connection = null)
+    {
+        $connection = $connection ?: config('database.default');
+        return (new static)->setConnection($connection);
+    }
+
     public function posts()
     {
         return $this->hasMany(Post::class);
