@@ -5,12 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Post extends Model
+class Like extends Model
 {
     use HasFactory;
-    protected $fillable = ['feed_id', 'type', 'title', 'description'];
 
-    /**
+    protected $fillable = ['post_id', 'user_id'];
+
+      /**
      * Connect the relevant database
      *
      */
@@ -20,20 +21,14 @@ class Post extends Model
         return (new static)->setConnection($connection);
     }
 
-    public function comments()
+
+    public function post()
     {
-        return $this->hasMany(Comment::class);
+        return $this->belongsTo(Post::class);
     }
 
-    public function likes()
+    public function user()
     {
-        return $this->hasMany(Like::class);
+        return $this->belongsTo(User::class);
     }
-
-
-    const TYPES = [
-        'POST' => 'post',
-        'EVENT' => 'event',
-        'BLOG' => 'blog',
-    ];
 }

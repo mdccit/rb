@@ -80,4 +80,62 @@ class PostController extends Controller
         // Delete and confirm the deletion of the specified post
         return $this->feedService->deletePost($id);
     }
+
+
+ /**
+     * Add a comment to a post.
+     *
+     * @param Request $request
+     * @param int $postId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function addComment(Request $request, $postId)
+    {
+        return $this->feedService->addComment($postId, $request->all());
+    }
+
+    /**
+     * Update a comment.
+     *
+     * @param Request $request
+     * @param int $commentId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateComment(Request $request, $commentId)
+    {
+        return $this->feedService->updateComment($commentId, $request->all());
+    }
+
+    /**
+     * Delete a comment.
+     *
+     * @param int $commentId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function deleteComment($commentId)
+    {
+        return $this->feedService->deleteComment($commentId);
+    }
+
+    /**
+     * Add a like to a post.
+     *
+     * @param int $postId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function addLike($postId, Request $request)
+    {
+        return $this->feedService->addLike($postId, $request->user_id);
+    }
+
+    /**
+     * Remove a like from a post.
+     *
+     * @param int $postId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function removeLike($postId, Request $request)
+    {
+        return $this->feedService->removeLike($postId, $request->user_id);
+    }
 }

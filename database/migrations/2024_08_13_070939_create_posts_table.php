@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('posts', function (Blueprint $table) {
             $table->id();
             $table->foreignId('feed_id')->constrained()->onDelete('cascade');
-            $table->enum('type', ['blog', 'event', 'status']);
+            $table->enum('type', ['blog', 'event', 'post']);
             $table->string('title')->nullable();
             $table->text('description');
             $table->timestamps();

@@ -3,6 +3,8 @@
 namespace App\Modules\FeedModule\Services;
 
 use App\Models\Post;
+use App\Models\Comment;
+use App\Models\Like;
 use Illuminate\Support\Facades\Validator;
 use App\Extra\CommonResponse;
 
@@ -199,6 +201,189 @@ class FeedService
             );
         } catch (\Exception $e) {
             // Return an error response if something goes wrong
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went wrong'
+            );
+        }
+    }
+
+
+
+   /**
+     * Add a comment to a post.
+     *
+     * @param int $postId
+     * @param array $data
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function addComment($postId, array $data)
+    {
+        try {
+            $validator = Validator::make($data, [
+                'content' => 'required|string',
+                'user_id' => 'required|exists:users,id',
+            ]);
+
+            if ($validator->fails()) {
+                return CommonResponse::getResponse(
+                    422,
+                    $validator->errors()->all(),
+                    'Input validation failed'
+                );
+            }
+
+            $comment = Comment::create([
+                'post_id' => $postId,
+                'content' => $data['content'],
+                'user_id' => $data['user_id'],
+            ]);
+
+            return CommonResponse::getResponse(
+                200,
+                $comment,
+                'Comment added successfully'
+            );
+
+        } catch (\Exception $e) {
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went wrong'
+            );
+        }
+    }
+
+    /**
+     * Update an existing comment.
+     *
+     * @param int $commentId
+     * @param array $data
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateComment($commentId, array $data)
+    {
+        try {
+            $comment = Comment::findOrFail($commentId);
+
+            $validator = Validator::make($data, [
+                'content' => 'required|string',
+            ]);
+
+            if ($validator->fails()) {
+                return CommonResponse::getResponse(
+                    422,
+                    $validator->errors()->all(),
+                    'Input validation failed'
+                );
+            }
+
+            $comment->update([
+                'content' => $data['content'],
+            ]);
+
+            return CommonResponse::getResponse(
+                200,
+                $comment,
+                'Comment updated successfully'
+            );
+
+        } catch (\Exception $e) {
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went wrong'
+            );
+        }
+    }
+
+    /**
+     * Delete a comment.
+     *
+     * @param int $commentId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function deleteComment($commentId)
+    {
+        try {
+            $comment = Comment::findOrFail($commentId);
+            $comment->delete();
+
+            return CommonResponse::getResponse(
+                200,
+                null,
+                'Comment deleted successfully'
+            );
+
+        } catch (\Exception $e) {
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went wrong'
+            );
+        }
+    }
+
+    /**
+     * Remove a like from a post.
+     *
+     * @param int $postId
+     * @param int $userId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function removeLike($postId, $userId)
+    {
+        try {
+            $like = Like::where('post_id', $postId)->where('user_id', $userId)->first();
+
+            if ($like) {
+                $like->delete();
+                return CommonResponse::getResponse(
+                    200,
+                    null,
+                    'Like removed successfully'
+                );
+            }
+
+            return CommonResponse::getResponse(
+                404,
+                null,
+                'Like not found'
+            );
+
+        } catch (\Exception $e) {
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went wrong'
+            );
+        }
+    }
+
+
+    /**
+     * Add a like to a post.
+     *
+     * @param int $postId
+     * @param int $userId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function addLike($postId, $userId)
+    {
+        try {
+            $like = Like::firstOrCreate([
+                'post_id' => $postId,
+                'user_id' => $userId,
+            ]);
+
+            return CommonResponse::getResponse(
+                200,
+                $like,
+                'Like added successfully'
+            );
+
+        } catch (\Exception $e) {
             return CommonResponse::getResponse(
                 422,
                 $e->getMessage(),
