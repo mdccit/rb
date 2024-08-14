@@ -21,6 +21,7 @@ class FeedService
         try {
             // Validate the incoming request data
             $validator = Validator::make($data, [
+                'user_id' => 'required|uuid|exists:users,id',
                 'title' => 'required|string|max:255',
                 'description' => 'required|string',
                 'type' => 'required|in:post,event,blog',
@@ -37,6 +38,7 @@ class FeedService
 
             // Create a new Post record using the default database connection
             $post = Post::connect(config('database.default'))->create([
+                'user_id' => $data['user_id'],
                 'title' => $data['title'],
                 'description' => $data['description'],
                 'type' => $data['type'],

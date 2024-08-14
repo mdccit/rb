@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('likes', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('post_id');  // Foreign key to the posts table
+            $table->uuid('post_id');  // Foreign key to the posts table
             $table->uuid('user_id'); // Use uuid to match the users table
             $table->timestamps();
 

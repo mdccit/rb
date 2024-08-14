@@ -26,6 +26,10 @@ class Post extends Model
         parent::boot();
 
         static::creating(function ($post) {
+
+            if (empty($post->id)) {
+                $post->id = (string) Str::uuid();
+            }
             // If the post type is 'post', use the UUID as the seo_url
             if ($post->type === 'post') {
                 $post->seo_url = Str::uuid();
@@ -36,6 +40,8 @@ class Post extends Model
         });
     }
 
+    public $incrementing = false; // Since we're using UUIDs, auto-increment should be disabled
+    protected $keyType = 'string'; // Ensure that the primary key type is string
 
     public function comments()
     {
@@ -47,6 +53,10 @@ class Post extends Model
         return $this->hasMany(Like::class);
     }
 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
     const TYPES = [
         'POST' => 'post',
