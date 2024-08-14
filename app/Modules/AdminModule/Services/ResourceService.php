@@ -27,7 +27,7 @@ class ResourceService
         
         $dataSet = array();
         if($per_page_items != 0 ){
-            $dataSet = $query->paginate(2);
+            $dataSet = $query->paginate($per_page_items);
         }else{
             $dataSet = $query->get();
         }
