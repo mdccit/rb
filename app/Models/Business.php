@@ -34,4 +34,13 @@ class Business extends Model
         'url',
         'other_data',
     ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected $casts = [
+        'other_data' => 'array',
+    ];
 }

@@ -37,6 +37,9 @@ Route::group(['namespace' => 'App\Modules\AdminModule\Controllers','prefix' => '
                 Route::put('/resource-update/{id}', 'ResourceController@update')->name('admin.resources.update');
                 Route::delete('/resource-delete/{id}', 'ResourceController@destroy')->name('admin.resources.delete');
                 Route::put('/user-update/{user_id}', 'UsersController@updateUser')->name('admin.users.update');
+
+                Route::get('/schools', 'SchoolsController@getAll')->name('admin.schools.get-all');
+                Route::post('/school-register', 'SchoolsController@registerSchool')->name('admin.schools.register');
             });
 
             //TODO only authenticated operator users can be access
