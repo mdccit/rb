@@ -24,6 +24,18 @@ Route::group(['namespace' => 'App\Modules\AdminModule\Controllers','prefix' => '
                 Route::get('/users', 'UsersController@getAll')->name('admin.users.get-all');
                 Route::get('/users/{user_id}', 'UsersController@get')->name('admin.users.get');
                 Route::post('/user-register', 'UsersController@registerUser')->name('admin.users.register');
+                
+                //resource category
+                Route::get('/resource-categories', 'ResourceCategoriesController@index')->name('admin.resources-category.index');
+                Route::post('/resource-categories-create', 'ResourceCategoriesController@storeCategory')->name('admin.resources-category.create');
+                Route::put('/resource-categories-update/{id}', 'ResourceCategoriesController@updateCategory')->name('admin.resources-category.update');
+                Route::delete('/resource-categories-delete/{id}', 'ResourceCategoriesController@destroyCategory')->name('admin.resources-category.delete');
+                
+                //resource
+                Route::get('/resource', 'ResourceController@index')->name('admin.resources.index');
+                Route::post('/resource-create', 'ResourceController@store')->name('admin.resources.create');
+                Route::put('/resource-update/{id}', 'ResourceController@update')->name('admin.resources.update');
+                Route::delete('/resource-delete/{id}', 'ResourceController@destroy')->name('admin.resources.delete');
                 Route::put('/user-update/{user_id}', 'UsersController@updateUser')->name('admin.users.update');
             });
 
