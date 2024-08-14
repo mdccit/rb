@@ -14,8 +14,13 @@ Route::group(['namespace' => 'App\Modules\UserModule\Controllers','prefix' => 'a
             //TODO all authenticated users can be access
             //Route::post('/user-register', 'UsersController@registerUser')->name('admin.users.register');
 
+            //resource
+            Route::get('/resource', 'ResourceController@index')->name('user.resources.index');
+
             //TODO only authenticated default users can be access
             Route::middleware('auth.is_default')->group(function () {
+
+                
 
             });
 
