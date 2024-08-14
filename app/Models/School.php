@@ -37,4 +37,13 @@ class School extends Model
         'genders_recruiting',
         'other_data',
     ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected $casts = [
+        'other_data' => 'array',
+    ];
 }

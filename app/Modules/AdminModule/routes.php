@@ -25,6 +25,9 @@ Route::group(['namespace' => 'App\Modules\AdminModule\Controllers','prefix' => '
                 Route::get('/users/{user_id}', 'UsersController@get')->name('admin.users.get');
                 Route::post('/user-register', 'UsersController@registerUser')->name('admin.users.register');
                 Route::put('/user-update/{user_id}', 'UsersController@updateUser')->name('admin.users.update');
+
+                Route::get('/schools', 'SchoolsController@getAll')->name('admin.schools.get-all');
+                Route::post('/school-register', 'SchoolsController@registerSchool')->name('admin.schools.register');
             });
 
             //TODO only authenticated operator users can be access

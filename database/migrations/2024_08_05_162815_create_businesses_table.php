@@ -21,7 +21,7 @@ return new class extends Migration
 
             $table->string('url')->nullable();
 
-            $table->json('other_data');
+            $table->json('other_data')->nullable();
 
             $table->timestamps();
         });

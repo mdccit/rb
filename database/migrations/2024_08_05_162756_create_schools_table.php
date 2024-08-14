@@ -25,7 +25,7 @@ return new class extends Migration
 
             $table->enum('genders_recruiting', ['male', 'female', 'all'])->nullable();
 
-            $table->json('other_data');
+            $table->json('other_data')->nullable();
 
             $table->timestamps();
         });
