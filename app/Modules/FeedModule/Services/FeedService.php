@@ -2,7 +2,6 @@
 
 namespace App\Modules\FeedModule\Services;
 
-use App\Models\Feed;
 use App\Models\Post;
 use Illuminate\Support\Facades\Validator;
 use App\Extra\CommonResponse;
@@ -10,23 +9,23 @@ use App\Extra\CommonResponse;
 class FeedService
 {
     /**
-     * Create a new Feed and associated Post.
+     * Create a new post with a given type (post, event, blog).
      *
      * @param array $data
      * @return \Illuminate\Http\JsonResponse
      */
-    public function createFeedAndPost(array $data)
+    public function createPost(array $data)
     {
         try {
-            // Validate the request data
+            // Validate the incoming request data
             $validator = Validator::make($data, [
-                'feed_name' => 'required|string|max:255',
                 'title' => 'required|string|max:255',
                 'description' => 'required|string',
-                'type' => 'required|in:blog,event,status',
+                'type' => 'required|in:post,event,blog',
             ]);
 
             if ($validator->fails()) {
+                // Return a validation error response
                 return CommonResponse::getResponse(
                     422,
                     $validator->errors()->all(),
@@ -34,27 +33,22 @@ class FeedService
                 );
             }
 
-            // Create a new Feed record using the default connection
-            $feed = Feed::connect(config('database.default'))->create([
-                'name' => $data['feed_name'],
-            ]);
-
-            // Create a new Post record using the feed's ID with the default connection
+            // Create a new Post record using the default database connection
             $post = Post::connect(config('database.default'))->create([
-                'feed_id' => $feed->id,
                 'title' => $data['title'],
                 'description' => $data['description'],
                 'type' => $data['type'],
             ]);
 
-            // Return success response
+            // Return a success response with the created post
             return CommonResponse::getResponse(
                 200,
                 $post,
-                'Feed and Post created successfully'
+                'Post created successfully'
             );
 
         } catch (\Exception $e) {
+            // Return an error response if something goes wrong
             return CommonResponse::getResponse(
                 422,
                 $e->getMessage(),
@@ -64,25 +58,33 @@ class FeedService
     }
 
     /**
-     * Retrieve all posts for a specific feed.
+     * Retrieve all posts, optionally filtered by type.
      *
-     * @param Feed $feed
+     * @param string|null $type
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getAllPostsForFeed(Feed $feed)
+    public function getAllPosts($type = null)
     {
         try {
-            // Retrieve posts using the secondary connection
-            $posts = Post::connect(config('database.secondary'))
-                ->where('feed_id', $feed->id)
-                ->get();
+            // Build the query using the secondary database connection
+            $query = Post::connect(config('database.secondary'));
 
+            // If a type is provided, filter the posts by the specified type
+            if ($type) {
+                $query->where('type', $type);
+            }
+
+            // Execute the query and get the results
+            $posts = $query->get();
+
+            // Return a success response with the retrieved posts
             return CommonResponse::getResponse(
                 200,
                 $posts,
                 'Posts retrieved successfully'
             );
         } catch (\Exception $e) {
+            // Return an error response if something goes wrong
             return CommonResponse::getResponse(
                 422,
                 $e->getMessage(),
@@ -100,15 +102,17 @@ class FeedService
     public function getPostById($id)
     {
         try {
-            // Retrieve the post using the secondary connection
+            // Find the post by ID using the secondary database connection
             $post = Post::connect(config('database.secondary'))->findOrFail($id);
 
+            // Return a success response with the retrieved post
             return CommonResponse::getResponse(
                 200,
                 $post,
                 'Post retrieved successfully'
             );
         } catch (\Exception $e) {
+            // Return an error response if something goes wrong
             return CommonResponse::getResponse(
                 422,
                 $e->getMessage(),
@@ -118,7 +122,7 @@ class FeedService
     }
 
     /**
-     * Update an existing post.
+     * Update an existing post by its ID.
      *
      * @param int $id
      * @param array $data
@@ -127,17 +131,18 @@ class FeedService
     public function updatePost($id, array $data)
     {
         try {
-            // Find the post by ID using the secondary connection
+            // Find the post by ID using the secondary database connection
             $post = Post::connect(config('database.secondary'))->findOrFail($id);
 
-            // Validate the request data
+            // Validate the incoming request data
             $validator = Validator::make($data, [
                 'title' => 'required|string|max:255',
                 'description' => 'required|string',
-                'type' => 'required|in:blog,event,status',
+                'type' => 'required|in:post,event,blog',
             ]);
 
             if ($validator->fails()) {
+                // Return a validation error response
                 return CommonResponse::getResponse(
                     422,
                     $validator->errors()->all(),
@@ -145,7 +150,7 @@ class FeedService
                 );
             }
 
-            // Update the post with new data using the default connection
+            // Update the post using the default database connection
             $post->setConnection(config('database.default'));
             $post->update([
                 'title' => $data['title'],
@@ -153,7 +158,7 @@ class FeedService
                 'type' => $data['type'],
             ]);
 
-            // Return the updated post as a success response
+            // Return a success response with the updated post
             return CommonResponse::getResponse(
                 200,
                 $post,
@@ -161,6 +166,7 @@ class FeedService
             );
 
         } catch (\Exception $e) {
+            // Return an error response if something goes wrong
             return CommonResponse::getResponse(
                 422,
                 $e->getMessage(),
@@ -178,19 +184,21 @@ class FeedService
     public function deletePost($id)
     {
         try {
-            // Find the post by ID using the secondary connection
+            // Find the post by ID using the secondary database connection
             $post = Post::connect(config('database.secondary'))->findOrFail($id);
 
-            // Delete the post using the default connection
+            // Delete the post using the default database connection
             $post->setConnection(config('database.default'));
             $post->delete();
 
+            // Return a success response confirming the deletion
             return CommonResponse::getResponse(
                 200,
                 null,
                 'Post deleted successfully'
             );
         } catch (\Exception $e) {
+            // Return an error response if something goes wrong
             return CommonResponse::getResponse(
                 422,
                 $e->getMessage(),

@@ -20,8 +20,9 @@ class Post extends Model
         return (new static)->setConnection($connection);
     }
 
-    public function feed()
-    {
-        return $this->belongsTo(Feed::class);
-    }
+    const TYPES = [
+        'POST' => 'post',
+        'EVENT' => 'event',
+        'BLOG' => 'blog',
+    ];
 }

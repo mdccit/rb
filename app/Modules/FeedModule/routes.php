@@ -7,15 +7,17 @@ Route::group(['namespace' => 'App\Modules\FeedModule\Controllers', 'prefix' => '
     //TODO All PublicModule routes define here
     Route::prefix('feed')->group(function () {
 
-        Route::get('/posts', 'PostController@index')->name('feed.posts.index');
-        Route::get('/posts/{id}', 'PostController@show')->name('feed.posts.show');
-        Route::post('/post', 'PostController@store')->name('feed.posts.store');
-        Route::put('/posts/{id}', 'PostController@update')->name('feed.posts.update');
-        Route::delete('/posts/{id}', 'PostController@destroy')->name('feed.posts.destroy');
+        Route::get('/posts', 'PostController@index')->name('posts.index');
+        Route::get('/posts/{id}', 'PostController@show')->name('posts.show');
+        Route::post('/post', 'PostController@store')->name('posts.store');
+      
 
         Route::middleware('auth:api')->group(function () {
             //TODO all authenticated users can be access
             //Route::post('/user-register', 'UsersController@registerUser')->name('admin.users.register');
+
+            Route::put('/posts/{id}', 'PostController@update')->name('posts.update');
+            Route::delete('/posts/{id}', 'PostController@destroy')->name('posts.destroy');
 
             //TODO only authenticated default users can be access
             Route::middleware('auth.is_default')->group(function () {
