@@ -41,9 +41,9 @@ class ResourceCategoriesService
                         ]);
     }
 
-    public function updateCategory(array $data, int $id){
+    public function updateCategory(array $data, int $category_id){
         ResourceCategory::connect(config('database.default'))
-                ->where('id', $id)
+                ->where('id', $category_id)
                 ->update([
                     'title' => $data['title'],
                     'description' => $data['description'],
@@ -52,9 +52,9 @@ class ResourceCategoriesService
         
     }
 
-    public function destroyCategory(int $id){
+    public function destroyCategory(int $category_id){
         
-        ResourceCategory::connect(config('database.default'))->destroy($id);
+        ResourceCategory::connect(config('database.default'))->destroy($category_id);
         
     }
 }

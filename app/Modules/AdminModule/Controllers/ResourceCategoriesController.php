@@ -75,7 +75,7 @@ class ResourceCategoriesController extends Controller
 
     }
 
-    public function updateCategory(Request $request,$id){
+    public function updateCategory(Request $request,$category_id){
         try{
             
             $validator = $this->validationResourceCategory($request);
@@ -89,10 +89,10 @@ class ResourceCategoriesController extends Controller
                     'Input validation failed'
                 );
             }
-            $resources_category = ResourceCategory::connect(config('database.secondary'))->where('id', $id)->first();
+            $resources_category = ResourceCategory::connect(config('database.secondary'))->where('id', $category_id)->first();
             if($resources_category){
 
-                $this->resourceCategoriesService->updateCategory($request->all(), $id);
+                $this->resourceCategoriesService->updateCategory($request->all(), $category_id);
 
                 return CommonResponse::getResponse(
                     200,
@@ -115,12 +115,12 @@ class ResourceCategoriesController extends Controller
         }
     }
 
-    public function destroyCategory($id){
+    public function destroyCategory($category_id){
         try{
-            $resources_category = ResourceCategory::connect(config('database.secondary'))->where('id', $id)->first();
+            $resources_category = ResourceCategory::connect(config('database.secondary'))->where('id', $category_id)->first();
             if($resources_category){
 
-                $this->resourceCategoriesService->destroyCategory($id);
+                $this->resourceCategoriesService->destroyCategory($category_id);
 
                 return CommonResponse::getResponse(
                         200,

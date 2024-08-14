@@ -73,7 +73,7 @@ class ResourceController extends Controller
 
     }
 
-    public function update(Request $request,$id){
+    public function update(Request $request,$resource_id){
         try{
             
             $validator = $this->validationResource($request);
@@ -86,10 +86,10 @@ class ResourceController extends Controller
                     'Input validation failed'
                 );
             }
-            $resources = Resource::connect(config('database.secondary'))->where('id', $id)->first();
+            $resources = Resource::connect(config('database.secondary'))->where('id', $resource_id)->first();
             if($resources){
 
-                $this->resourceService->update($request->all(), $id);
+                $this->resourceService->update($request->all(), $resource_id);
                 
                 return CommonResponse::getResponse(
                         200,
@@ -113,14 +113,14 @@ class ResourceController extends Controller
         }
     }
 
-    public function destroy($id){
+    public function destroy($resource_id){
         try{
            
-            $resources = Resource::connect(config('database.secondary'))->where('id', $id)->first();
+            $resources = Resource::connect(config('database.secondary'))->where('id', $resource_id)->first();
 
             if($resources){
 
-                $this->resourceService->destroy($id);
+                $this->resourceService->destroy($resource_id);
 
                 return CommonResponse::getResponse(
                         200,
