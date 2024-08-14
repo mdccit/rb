@@ -61,7 +61,7 @@ class UserService
 
         $dataSet = array();
         if($per_page_items != 0 ){
-            $dataSet = $query->paginate(2);
+            $dataSet = $query->paginate($per_page_items);
         }else{
             $dataSet = $query->get();
         }
@@ -69,6 +69,48 @@ class UserService
         return $dataSet;
 
     }
+
+    public function getUser ($user_id){
+        $user = User::connect(config('database.secondary'))
+            ->join('user_roles', 'user_roles.id', '=' ,'users.user_role_id')
+            ->join('user_types', 'user_types.id', '=' ,'users.user_type_id')
+            ->where('users.id', $user_id)
+            ->select(
+                'users.id',
+                'users.first_name',
+                'users.last_name',
+                'users.other_names',
+                'users.display_name',
+                'users.email',
+                'users.is_approved',
+                'user_roles.id as user_role_id',
+                'user_roles.name as user_role',
+                'user_types.id as user_type_id',
+                'user_types.name as user_type',
+                'users.created_at as joined_at',
+                'users.last_logged_at as last_seen_at'
+            )
+            ->first();
+
+        $user_phone = UserPhone::connect(config('database.secondary'))
+            ->join('countries', 'countries.id', '=' ,'user_phones.country_id')
+            ->where('user_phones.user_id', $user_id)
+            ->where('user_phones.is_default', true)
+            ->select(
+                'user_phones.id',
+                'user_phones.phone_code',
+                'user_phones.phone_number',
+                'countries.id as country_id',
+                'countries.name as country'
+            )
+            ->first();
+
+        return [
+            'user_basic_info' => $user,
+            'user_contact_info' => $user_phone,
+        ];
+    }
+
     public function createUser(array $data){
         $user = User::connect(config('database.default'))
             ->create([
@@ -141,6 +183,96 @@ class UserService
             }
         }
 
+    }
+
+    public function updateUser(array $data, $user_id){
+        $user = User::connect(config('database.default'))
+            ->where('id', $user_id)
+            ->first();
+        if($user){
+            $user->update([
+                'first_name' => $data['first_name'],
+                'last_name' => $data['last_name'],
+                'other_names' => $data['other_names'],
+                'display_name' => $data['first_name'].' '.$data['last_name'],
+                'is_approved' => $data['is_approved'],
+            ]);
+
+            if ($data['email'] !== $user->email) {
+                $user->update([
+                    'email' => $data['email'],
+                    'email_verified_at' => null,
+                ]);
+            }
+
+            if (!empty($data['password'])) {
+                $user->update([
+                    'password' => Hash::make($data['password'])
+                ]);
+            }
+
+            if($data['is_set_email_verified']){
+                $user->update([
+                    'email_verified_at' => Carbon::now(),
+                ]);
+            }
+
+            $user_phone = UserPhone::connect(config('database.default'))
+                ->where('user_id', $user_id)->first();
+            if($user_phone){
+                $phone_code = Country::connect(config('database.secondary'))->find($data['phone_code_country'])->getPhoneCode();
+                $user_phone->update([
+                    'user_id' => $user_id,
+                    'country_id' => $data['phone_code_country'],
+                    'is_default' => true,
+                    'phone_code' => $phone_code,
+                    'phone_number' => $data['phone_number'],
+                ]);
+            }
+
+
+            if ($data['user_role'] !== $user->user_role_id) {
+                $user->update([
+                    'user_role_id' => $data['user_role'],
+                ]);
+
+                //Player
+                if($data['user_role'] == config('app.user_roles.player')){
+                    $player = Player::connect(config('database.secondary'))
+                        ->where('user_id', $user->id)->first();
+                    if(!$player){
+                        Player::connect(config('database.default'))
+                            ->create([
+                                'user_id' => $user->id,
+                            ]);
+                    }
+                }
+
+                //Coach
+                if($data['user_role'] == config('app.user_roles.coach')){
+                    $coach = Coach::connect(config('database.secondary'))
+                        ->where('user_id', $user->id)->first();
+                    if(!$coach){
+                        Coach::connect(config('database.default'))
+                            ->create([
+                                'user_id' => $user->id,
+                            ]);
+                    }
+                }
+
+                //Business Manager
+                if($data['user_role'] == config('app.user_roles.business_manager')){
+                    $business_manager = BusinessManager::connect(config('database.secondary'))
+                        ->where('user_id', $user->id)->first();
+                    if(!$business_manager){
+                        BusinessManager::connect(config('database.default'))
+                            ->create([
+                                'user_id' => $user->id,
+                            ]);
+                    }
+                }
+            }
+        }
     }
 
 }
