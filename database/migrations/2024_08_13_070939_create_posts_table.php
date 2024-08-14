@@ -12,10 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('posts', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->foreignId('feed_id')->constrained()->onDelete('cascade');
             $table->enum('type', ['blog', 'event', 'post']);
             $table->string('title')->nullable();
+            $table->string('seo_url')->unique()->after('title');
             $table->text('description');
             $table->timestamps();
         });

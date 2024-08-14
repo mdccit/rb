@@ -4,11 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Post extends Model
 {
     use HasFactory;
-    protected $fillable = ['feed_id', 'type', 'title', 'description'];
+    protected $fillable = ['user_id', 'type', 'title', 'description', 'seo_url'];
 
     /**
      * Connect the relevant database
@@ -19,6 +20,22 @@ class Post extends Model
         $connection = $connection ?:config('database.default');
         return (new static)->setConnection($connection);
     }
+
+    public static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($post) {
+            // If the post type is 'post', use the UUID as the seo_url
+            if ($post->type === 'post') {
+                $post->seo_url = Str::uuid();
+            } else {
+                // For other types, generate an SEO-friendly slug from the title
+                $post->seo_url = Str::slug($post->title, '-');
+            }
+        });
+    }
+
 
     public function comments()
     {
