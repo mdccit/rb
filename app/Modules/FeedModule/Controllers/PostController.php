@@ -28,8 +28,13 @@ class PostController extends Controller
      */
     public function index(Request $request)
     {
-        // Retrieve and return all posts, optionally filtered by type
-        return $this->feedService->getAllPosts($request->query('type'));
+    // Retrieve the query parameters from the request
+    $type = $request->query('type');      
+    $sortBy = $request->query('sortBy', 'created_at');   
+    $sortOrder = $request->query('sortOrder', 'desc');  
+
+    // Call the getAllPosts method in FeedService with the retrieved parameters
+    return $this->feedService->getAllPosts($type, $sortBy, $sortOrder);
     }
 
     /**
@@ -136,6 +141,6 @@ class PostController extends Controller
      */
     public function removeLike($postId, Request $request)
     {
-        return $this->feedService->removeLike($postId, $request->user_id);
+        return $this->feedService->removeLike($postId);
     }
 }

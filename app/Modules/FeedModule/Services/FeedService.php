@@ -7,6 +7,8 @@ use App\Models\Comment;
 use App\Models\Like;
 use Illuminate\Support\Facades\Validator;
 use App\Extra\CommonResponse;
+use Illuminate\Support\Facades\Auth;
+
 
 class FeedService
 {
@@ -18,10 +20,11 @@ class FeedService
      */
     public function createPost(array $data)
     {
+
+        // dd(Auth::id());
         try {
             // Validate the incoming request data
             $validator = Validator::make($data, [
-                'user_id' => 'required|uuid|exists:users,id',
                 'title' => [
                     'required_if:type,blog,event', 
                     'nullable',                 
@@ -29,6 +32,7 @@ class FeedService
                     'max:255'
                 ],
                 'description' => 'required|string',
+                'publisher_type' => 'required|in:user,school,business',
                 'type' => 'required|in:post,event,blog',
             ]);
 
@@ -43,7 +47,7 @@ class FeedService
 
 
             $dataToInsert = [
-                'user_id' => $data['user_id'],
+                'user_id' => Auth::id(),
                 'description' => $data['description'],
                 'type' => $data['type'],
             ];
@@ -80,20 +84,23 @@ class FeedService
      * @param string|null $type
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getAllPosts($type = null)
+    public function getAllPosts($type = null, $sortBy = 'created_at', $sortOrder = 'desc')
     {
         try {
             // Build the query using the secondary database connection
             $query = Post::connect(config('database.secondary'));
-
+    
             // If a type is provided, filter the posts by the specified type
             if ($type) {
                 $query->where('type', $type);
             }
-
+    
+            // Sort posts by the specified sort column and order
+            $query->orderBy($sortBy, $sortOrder);
+    
             // Execute the query and get the results
             $posts = $query->get();
-
+    
             // Return a success response with the retrieved posts
             return CommonResponse::getResponse(
                 200,
@@ -109,7 +116,7 @@ class FeedService
             );
         }
     }
-
+    
     /**
      * Retrieve a single post by its ID.
      *
@@ -237,8 +244,7 @@ class FeedService
     {
         try {
             $validator = Validator::make($data, [
-                'content' => 'required|string',
-                'user_id' => 'required|exists:users,id',
+                'content' => 'required|string',              
             ]);
 
             if ($validator->fails()) {
@@ -252,7 +258,7 @@ class FeedService
             $comment = Comment::create([
                 'post_id' => $postId,
                 'content' => $data['content'],
-                'user_id' => $data['user_id'],
+                'user_id' => Auth::id(),
             ]);
 
             return CommonResponse::getResponse(
@@ -347,10 +353,10 @@ class FeedService
      * @param int $userId
      * @return \Illuminate\Http\JsonResponse
      */
-    public function removeLike($postId, $userId)
+    public function removeLike($postId)
     {
         try {
-            $like = Like::where('post_id', $postId)->where('user_id', $userId)->first();
+            $like = Like::where('post_id', $postId)->where('user_id', Auth::id())->first();
 
             if ($like) {
                 $like->delete();
@@ -389,7 +395,7 @@ class FeedService
         try {
             $like = Like::firstOrCreate([
                 'post_id' => $postId,
-                'user_id' => $userId,
+                'user_id' => Auth::id(),
             ]);
 
             return CommonResponse::getResponse(

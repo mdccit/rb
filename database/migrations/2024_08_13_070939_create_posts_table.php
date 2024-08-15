@@ -10,7 +10,11 @@ class CreatePostsTable extends Migration
     {
         Schema::create('posts', function (Blueprint $table) {
             $table->uuid('id')->primary(); 
-            $table->uuid('user_id')->nullable();
+            $table->foreignUuid('user_id')->constrained()->onDelete('cascade');
+            $table->foreignUuid('school_id')->nullable()->constrained()->onDelete('cascade');
+            $table->foreignUuid('business_id')->nullable()->constrained('businesses')->onDelete('cascade');
+            $table->enum('publisher_type', ['user', 'school', 'business'])->notNull(); 
+            $table->boolean('has_media')->default(false);
             $table->enum('type', ['blog', 'event', 'post'])->notNull(); 
             $table->string('title')->nullable(); 
             $table->string('seo_url')->unique()->notNull(); 

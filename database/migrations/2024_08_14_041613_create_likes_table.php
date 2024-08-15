@@ -13,14 +13,9 @@ return new class extends Migration
     {
         Schema::create('likes', function (Blueprint $table) {
             $table->id();
-            $table->uuid('post_id');  // Foreign key to the posts table
-            $table->uuid('user_id'); // Use uuid to match the users table
+            $table->foreignUuid('user_id')->constrained()->onDelete('cascade');
+            $table->foreignUuid('post_id')->constrained()->onDelete('cascade');
             $table->timestamps();
-
-            // Setting up the foreign key constraints
-            $table->foreign('post_id')->references('id')->on('posts')->onDelete('cascade');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-
             // Ensuring that a user can like a post only once
             $table->unique(['post_id', 'user_id']);
         });
