@@ -2,14 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class School extends Model
+class SchoolUser extends Model
 {
     use HasFactory;
-    use HasUuids;
 
     /**
      * Connect the relevant database
@@ -27,25 +25,8 @@ class School extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
-        'bio',
-        'is_verified',
-        'is_approved',
-        'gov_id',
-        'gov_sync_settings',
-        'url',
-        'genders_recruiting',
-        'conference_id',
-        'division_id',
-        'other_data',
-    ];
-
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected $casts = [
-        'other_data' => 'array',
+        'school_id',
+        'user_id',
+        'role',
     ];
 }

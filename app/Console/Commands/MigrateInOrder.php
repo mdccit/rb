@@ -2,8 +2,10 @@
 
 namespace App\Console\Commands;
 
+use Database\Seeders\ConferenceSeeder;
 use Database\Seeders\CountrySeeder;
 use Database\Seeders\CurrencySeeder;
+use Database\Seeders\DivisionSeeder;
 use Database\Seeders\NationalitySeeder;
 use Database\Seeders\PlayerBudgetSeeder;
 use Database\Seeders\UserRoleSeeder;
@@ -72,7 +74,10 @@ class MigrateInOrder extends Command
             '2024_08_01_133328_create_player_parents_table.php',
             '2024_08_06_045014_create_player_budgets_table.php',
             '2024_08_01_055112_create_players_table.php',
+            '2024_08_15_132902_create_conferences_table.php',
+            '2024_08_15_133010_create_divisions_table.php',
             '2024_08_05_162756_create_schools_table.php',
+            '2024_08_15_150542_create_school_users_table.php',
             '2024_08_05_162815_create_businesses_table.php',
             '2024_08_05_162739_create_coaches_table.php',
             '2024_08_05_162830_create_business_managers_table.php',
@@ -97,6 +102,8 @@ class MigrateInOrder extends Command
         $this->call(NationalitySeeder::class);
         $this->call(CurrencySeeder::class);
         $this->call(PlayerBudgetSeeder::class);
+        $this->call(ConferenceSeeder::class);
+        $this->call(DivisionSeeder::class);
 
         //Passport Config
         //Create personal client for 'RecruitedProV2'

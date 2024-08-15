@@ -4,7 +4,9 @@
 namespace App\Modules\CommonModule\Services;
 
 
+use App\Models\Conference;
 use App\Models\Country;
+use App\Models\Division;
 use App\Models\Nationality;
 use App\Models\PlayerBudget;
 
@@ -25,6 +27,18 @@ class DefaultDataService
     public function getPlayerBudgets(){
         return PlayerBudget::connect(config('database.secondary'))
             ->select('id as value', 'budget_range as label', 'budget_min', 'budget_max')
+            ->get();
+    }
+
+    public function getConferences(){
+        return Conference::connect(config('database.secondary'))
+            ->select('id as value', 'name as label', 'short_name')
+            ->get();
+    }
+
+    public function getDivisions(){
+        return Division::connect(config('database.secondary'))
+            ->select('id as value', 'name as label', 'short_name')
             ->get();
     }
 

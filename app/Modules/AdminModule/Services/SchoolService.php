@@ -68,10 +68,56 @@ class SchoolService
 
     }
 
+    public function getSchool ($school_id){
+        return School::connect(config('database.secondary'))
+            ->where('id', $school_id)
+            ->select(
+                'id',
+                'name',
+                'bio',
+                'is_verified',
+                'is_approved',
+                'gov_id',
+                'gov_sync_settings',
+                'url',
+                'genders_recruiting',
+                'created_at as joined_at',
+                'other_data'
+            )
+            ->first();
+    }
+
     public function createSchool(array $data){
         School::connect(config('database.default'))
             ->create([
                 'name' => $data['name'],
             ]);
     }
+
+    public function updateSchool(array $data, $school_id){
+        $school = School::connect(config('database.default'))
+            ->where('id', $school_id)
+            ->first();
+
+        if($school){
+            $other_data = [
+                'teams_count' => 0,
+                'total_staff' => 0,
+                'admin_staff' => 0,
+                'non_admin_staff' => 0,
+            ];
+
+            $school->update([
+                'name' => $data['name'],
+                'bio' => $data['bio'],
+                'is_approved' => $data['is_approved'],
+                'is_verified' => $data['is_verified'],
+                'conference_id' => $data['conference'],
+                'division_id' => $data['division'],
+                'other_data' => $other_data
+            ]);
+        }
+    }
+
+
 }
