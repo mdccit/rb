@@ -25,6 +25,8 @@ class DefaultDataController extends Controller
                 'genders' => $this->defaultDataService->getGenders(),
                 'handedness' => $this->defaultDataService->getHandedness(),
                 'player_budgets' => $this->defaultDataService->getPlayerBudgets(),
+                'conferences' => $this->defaultDataService->getConferences(),
+                'divisions' => $this->defaultDataService->getDivisions(),
                 'countries' => $this->defaultDataService->getCountries(),
                 'nationalities' => $this->defaultDataService->getNationalities(),
             ];

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignUuid('user_id')->constrained()->onDelete('cascade');
             $table->foreignUuid('school_id')->nullable()->constrained()->onDelete('cascade');
             $table->unique(['user_id']);
-            $table->enum('position', ['none','coach', 'assistant'])->default('none');
+            $table->enum('position', ['none','coach', 'assistant'])->default('coach');
             $table->enum('type', ['none','viewer', 'editor'])->default('none');
             $table->enum('status', ['pending', 'accepted', 'declined', 'cancelled'])->default('pending');
             $table->timestamps();
