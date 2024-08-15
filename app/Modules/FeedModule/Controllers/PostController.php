@@ -128,9 +128,9 @@ class PostController extends Controller
      * @param int $postId
      * @return \Illuminate\Http\JsonResponse
      */
-    public function addLike($postId, Request $request)
+    public function addLike($postId)
     {
-        return $this->feedService->addLike($postId, $request->user_id);
+        return $this->feedService->addLike($postId);
     }
 
     /**
@@ -142,5 +142,20 @@ class PostController extends Controller
     public function removeLike($postId, Request $request)
     {
         return $this->feedService->removeLike($postId);
+    }
+
+      /**
+     * Remove a like from a post.
+     *
+     * @param int $postId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getLoggedInUserPosts(Request $request)
+    {
+        // Retrieve the query parameters from the request
+        $type = $request->query('type');      
+        $sortBy = $request->query('sortBy', 'created_at');   
+        $sortOrder = $request->query('sortOrder', 'desc');  
+        return $this->feedService->getAllPostsLoggedUser($type, $sortBy, $sortOrder);
     }
 }

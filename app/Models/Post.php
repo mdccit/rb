@@ -4,11 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class Post extends Model
 {
     use HasFactory;
+    use HasUuids;
+
     protected $fillable = ['user_id', 'type', 'title', 'description', 'seo_url'];
 
     /**
@@ -24,20 +26,6 @@ class Post extends Model
     public static function boot()
     {
         parent::boot();
-
-        static::creating(function ($post) {
-
-            if (empty($post->id)) {
-                $post->id = (string) Str::uuid();
-            }
-            // If the post type is 'post', use the UUID as the seo_url
-            if ($post->type === 'post') {
-                $post->seo_url = Str::uuid();
-            } else {
-                // For other types, generate an SEO-friendly slug from the title
-                $post->seo_url = Str::slug($post->title, '-');
-            }
-        });
     }
 
     public $incrementing = false; // Since we're using UUIDs, auto-increment should be disabled

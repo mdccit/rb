@@ -8,6 +8,7 @@ use App\Models\Like;
 use Illuminate\Support\Facades\Validator;
 use App\Extra\CommonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 
 class FeedService
@@ -21,19 +22,31 @@ class FeedService
     public function createPost(array $data)
     {
 
-        // dd(Auth::id());
         try {
             // Validate the incoming request data
             $validator = Validator::make($data, [
                 'title' => [
-                    'required_if:type,blog,event', 
-                    'nullable',                 
+                    'required_if:type,blog,event',
+                    'nullable',
                     'string',
                     'max:255'
                 ],
                 'description' => 'required|string',
                 'publisher_type' => 'required|in:user,school,business',
                 'type' => 'required|in:post,event,blog',
+                'school_id' => [
+                    'nullable',
+                    'uuid',
+                    'exists:schools,id',
+                    'required_if:publisher_type,school',
+                ],
+                'business_id' => [
+                    'nullable',
+                    'uuid',
+                    'exists:businesses,id',
+                    'required_if:publisher_type,business',
+                ],
+                'has_media' => 'boolean',
             ]);
 
             if ($validator->fails()) {
@@ -44,22 +57,50 @@ class FeedService
                     'Input validation failed'
                 );
             }
-
-
             $dataToInsert = [
                 'user_id' => Auth::id(),
-                'description' => $data['description'],
+                'school_id' => $data['school_id'] ?? null,
+                'business_id' => $data['business_id'] ?? null,
+                'publisher_type' => $data['publisher_type'],
+                'has_media' => $data['has_media'] ?? false,
                 'type' => $data['type'],
+                'seo_url' => "",
+                'description' => $data['description'],
             ];
-            
             // Conditionally add the title if the type is blog or event
             if (in_array($data['type'], ['blog', 'event'])) {
                 $dataToInsert['title'] = $data['title'];
             }
-            
+
 
             // Create a new Post record using the default database connection
             $post = Post::connect(config('database.default'))->create($dataToInsert);
+
+
+            // Generate the SEO URL based on the type
+            if ($data['type'] === 'post') {
+                $seoUrl = $post->id; // Use the post ID as the SEO URL
+            } else {
+                // Generate a slug from the title
+                $baseSeoUrl = Str::slug($data['title']);
+                $seoUrl = $baseSeoUrl;
+
+                // Check if the SEO URL already exists in the posts table
+                $existingSeoUrlCount = Post::where('seo_url', 'like', "$baseSeoUrl%")->count();
+
+                if ($existingSeoUrlCount > 0) {
+                    // If it exists, append a unique suffix
+                    $seoUrl = "{$baseSeoUrl}-" . ($existingSeoUrlCount + 1);
+                }
+            }
+
+            // Ensure the SEO URL is unique (handle potential race conditions)
+            while (Post::where('seo_url', $seoUrl)->exists()) {
+                $seoUrl .= '-' . Str::random(8); // Add a random suffix to ensure uniqueness
+            }
+
+            // Update the post with the generated SEO URL
+            $post->update(['seo_url' => $seoUrl]);
 
             // Return a success response with the created post
             return CommonResponse::getResponse(
@@ -89,18 +130,18 @@ class FeedService
         try {
             // Build the query using the secondary database connection
             $query = Post::connect(config('database.secondary'));
-    
+
             // If a type is provided, filter the posts by the specified type
             if ($type) {
                 $query->where('type', $type);
             }
-    
+
             // Sort posts by the specified sort column and order
             $query->orderBy($sortBy, $sortOrder);
-    
+
             // Execute the query and get the results
             $posts = $query->get();
-    
+
             // Return a success response with the retrieved posts
             return CommonResponse::getResponse(
                 200,
@@ -116,7 +157,7 @@ class FeedService
             );
         }
     }
-    
+
     /**
      * Retrieve a single post by its ID.
      *
@@ -233,7 +274,7 @@ class FeedService
 
 
 
-   /**
+    /**
      * Add a comment to a post.
      *
      * @param int $postId
@@ -244,7 +285,7 @@ class FeedService
     {
         try {
             $validator = Validator::make($data, [
-                'content' => 'required|string',              
+                'content' => 'required|string',
             ]);
 
             if ($validator->fails()) {
@@ -350,7 +391,6 @@ class FeedService
      * Remove a like from a post.
      *
      * @param int $postId
-     * @param int $userId
      * @return \Illuminate\Http\JsonResponse
      */
     public function removeLike($postId)
@@ -362,7 +402,7 @@ class FeedService
                 $like->delete();
                 return CommonResponse::getResponse(
                     200,
-                    null,
+                    'Like removed successfully',
                     'Like removed successfully'
                 );
             }
@@ -387,11 +427,11 @@ class FeedService
      * Add a like to a post.
      *
      * @param int $postId
-     * @param int $userId
      * @return \Illuminate\Http\JsonResponse
      */
-    public function addLike($postId, $userId)
+    public function addLike($postId)
     {
+
         try {
             $like = Like::firstOrCreate([
                 'post_id' => $postId,
@@ -400,7 +440,7 @@ class FeedService
 
             return CommonResponse::getResponse(
                 200,
-                $like,
+                'Like added successfully',
                 'Like added successfully'
             );
 
@@ -412,4 +452,52 @@ class FeedService
             );
         }
     }
+
+
+    public function getAllPostsLoggedUser($type = null, $sortBy = 'created_at', $sortOrder = 'desc')
+{
+    try {
+        $userId = Auth::id(); 
+
+        $query = Post::connect(config('database.secondary'))
+            ->withCount('likes') 
+            ->with(['comments'])
+            ->with(['likes' => function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            }]); 
+
+        // If a type is provided, filter the posts by the specified type
+        if ($type) {
+            $query->where('type', $type);
+        }
+
+        // Sort posts by the specified sort column and order
+        $query->orderBy($sortBy, $sortOrder);
+
+        // Execute the query and get the results
+        $posts = $query->get()->map(function ($post) use ($userId) {
+            // Add the user's like status to each post
+            $post->user_has_liked = $post->likes->contains('user_id', $userId);
+            // Remove the likes relationship as we only needed it for checking the user's like status
+            unset($post->likes);
+            return $post;
+        });
+
+        // Return a success response with the retrieved posts and their interactions
+        return CommonResponse::getResponse(
+            200,
+            $posts,
+            'Posts for loggedin user retrieved successfully'
+        );
+
+    } catch (\Exception $e) {
+        // Return an error response if something goes wrong
+        return CommonResponse::getResponse(
+            422,
+            $e->getMessage(),
+            'Something went wrong'
+        );
+    }
+}
+
 }
