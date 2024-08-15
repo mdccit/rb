@@ -22,7 +22,12 @@ class FeedService
             // Validate the incoming request data
             $validator = Validator::make($data, [
                 'user_id' => 'required|uuid|exists:users,id',
-                'title' => 'required|string|max:255',
+                'title' => [
+                    'required_if:type,blog,event', 
+                    'nullable',                 
+                    'string',
+                    'max:255'
+                ],
                 'description' => 'required|string',
                 'type' => 'required|in:post,event,blog',
             ]);
@@ -36,13 +41,21 @@ class FeedService
                 );
             }
 
-            // Create a new Post record using the default database connection
-            $post = Post::connect(config('database.default'))->create([
+
+            $dataToInsert = [
                 'user_id' => $data['user_id'],
-                'title' => $data['title'],
                 'description' => $data['description'],
                 'type' => $data['type'],
-            ]);
+            ];
+            
+            // Conditionally add the title if the type is blog or event
+            if (in_array($data['type'], ['blog', 'event'])) {
+                $dataToInsert['title'] = $data['title'];
+            }
+            
+
+            // Create a new Post record using the default database connection
+            $post = Post::connect(config('database.default'))->create($dataToInsert);
 
             // Return a success response with the created post
             return CommonResponse::getResponse(
