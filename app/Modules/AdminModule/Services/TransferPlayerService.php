@@ -66,23 +66,28 @@ class TransferPlayerService
 
     public function store(array $data){
 
-        $height = $data['height_in_cm']?$data['height_cm']:(($data['height_ft']*12)+$data['height_in'])*2.54;
+        $height = null;
 
-        $transferPlayer = TransferPlayer::connect(config('database.default'))
+        if(isset($data['height_in_cm'])){
+
+            $height = $data['height_in_cm']?$data['height_cm']:(($data['height_ft']*12)+$data['height_in'])*2.54;
+        }
+
+        TransferPlayer::connect(config('database.default'))
             ->create([
                 'name' => $data['name'],
                 'school' => $data['school'],
                 'utr_score_manual' => $data['utr_score_manual'],
-                'year' => $data['year'],
-                'win' => $data['win'],
-                'loss' => $data['loss'],
-                'profile_photo_path' => $data['profile_photo_path'],
-                'handedness' => $data['handedness'],
-                'email' => $data['email'],
-                'phone_code' => $data['phone_code_country'],
-                'phone_number' => $data['phone_number'],
+                'year' => isset($data['year']) ? $data['year'] : 'freshman',
+                'win' =>  isset($data['win']) ? $data['win'] : 0 ,
+                'loss' => isset($data['loss'])? $data['loss'] : 0,
+                'profile_photo_path' => isset($data['profile_photo_path'])? $data['profile_photo_path'] : null,
+                'handedness' => isset($data['handedness'])? $data['handedness'] : 'both',
+                'email' => isset($data['email'])? $data['email'] :null,
+                'phone_code' => isset($data['phone_code_country'])? $data['phone_code_country'] : null,
+                'phone_number' => isset($data['phone_number'])? $data['phone_number'] : null,
                 'height' => $height,
-                'gender' => $data['gender'],
+                'gender' => isset($data['gender'])? $data['gender'] : 'none',
                 'created_by' => auth()->id(),
             ]);
         
@@ -91,7 +96,12 @@ class TransferPlayerService
 
     public function update(array $data, $transfer_id){
 
-        $height = $data['height_in_cm']?$data['height_cm']:(($data['height_ft']*12)+$data['height_in'])*2.54;
+        $height = null;
+
+        if(isset($data['height_in_cm'])){
+
+            $height = $data['height_in_cm']?$data['height_cm']:(($data['height_ft']*12)+$data['height_in'])*2.54;
+        }
 
         TransferPlayer::connect(config('database.default'))
         ->where('id', $transfer_id)
@@ -99,16 +109,16 @@ class TransferPlayerService
                 'name' => $data['name'],
                 'school' => $data['school'],
                 'utr_score_manual' => $data['utr_score_manual'],
-                'year' => $data['year'],
-                'win' => $data['win'],
-                'loss' => $data['loss'],
-                'profile_photo_path' => $data['profile_photo_path'],
-                'handedness' => $data['handedness'],
-                'email' => $data['email'],
-                'phone_code' => $data['phone_code_country'],
-                'phone_number' => $data['phone_number'],
-                'height' =>  $height,
-                'gender' => $data['gender'],
+                'year' => isset($data['year']) ? $data['year'] : 'freshman',
+                'win' =>  isset($data['win']) ? $data['win'] : 0 ,
+                'loss' => isset($data['loss'])? $data['loss'] : 0,
+                'profile_photo_path' => isset($data['profile_photo_path'])? $data['profile_photo_path'] : null,
+                'handedness' => isset($data['handedness'])? $data['handedness'] : 'both',
+                'email' => isset($data['email'])? $data['email'] :null,
+                'phone_code' => isset($data['phone_code_country'])? $data['phone_code_country'] : null,
+                'phone_number' => isset($data['phone_number'])? $data['phone_number'] : null,
+                'height' => $height,
+                'gender' => isset($data['gender'])? $data['gender'] : 'none',
         ]);
     }
 

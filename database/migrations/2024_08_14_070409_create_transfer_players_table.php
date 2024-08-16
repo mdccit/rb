@@ -14,14 +14,14 @@ return new class extends Migration
         Schema::create('transfer_players', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('school');
+            $table->string('school')->nullable();;
             $table->string('utr_score_manual')->nullable();
-            $table->enum('year', ['freshman', 'sophomore', 'junior','senior']);
+            $table->enum('year', ['freshman', 'sophomore', 'junior','senior'])->default('freshman');;
             $table->integer('win')->default(0);
             $table->integer('loss')->default(0);
             $table->string('profile_photo_path', 2048)->nullable();
-            $table->enum('handedness', ['right', 'left', 'both'])->nullable();
-            $table->string('email')->unique();
+            $table->enum('handedness', ['right', 'left', 'both'])->default('both');
+            $table->string('email')->nullable();
             $table->string('phone_code',20)->nullable();
             $table->string('phone_number')->nullable();
             $table->decimal('height', 5, 2)->nullable(); // cm
