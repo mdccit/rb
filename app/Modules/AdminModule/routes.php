@@ -24,6 +24,16 @@ Route::group(['namespace' => 'App\Modules\AdminModule\Controllers','prefix' => '
                 Route::get('/users', 'UsersController@getAll')->name('admin.users.get-all');
                 Route::get('/users/{user_id}', 'UsersController@get')->name('admin.users.get');
                 Route::post('/user-register', 'UsersController@registerUser')->name('admin.users.register');
+                Route::put('/user-update/{user_id}', 'UsersController@updateUser')->name('admin.users.update');
+
+                Route::get('/schools', 'SchoolsController@getAll')->name('admin.schools.get-all');
+                Route::get('/schools/{school_id}', 'SchoolsController@get')->name('admin.schools.get');
+                Route::post('/school-register', 'SchoolsController@registerSchool')->name('admin.schools.register');
+                Route::put('/school-update/{school_id}', 'SchoolsController@updateSchool')->name('admin.schools.update');
+
+                Route::get('/schools/users/{school_id}', 'SchoolUsersController@getAllSchoolUsers')->name('admin.schools.users.get-all');
+                Route::get('/schools/search-users/{school_id}', 'SchoolUsersController@searchUsers')->name('admin.schools.users.search');
+                Route::post('/schools/add-user', 'SchoolUsersController@addSchoolUser')->name('admin.schools.users.add');
                 
                 //resource category
                 Route::get('/resource-categories', 'ResourceCategoriesController@index')->name('admin.resources-category.index');

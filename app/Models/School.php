@@ -35,6 +35,17 @@ class School extends Model
         'gov_sync_settings',
         'url',
         'genders_recruiting',
+        'conference_id',
+        'division_id',
         'other_data',
+    ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected $casts = [
+        'other_data' => 'array',
     ];
 }

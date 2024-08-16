@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('schools', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->foreignId('conference_id')->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignId('division_id')->nullable()->constrained()->cascadeOnDelete();
             $table->string('name');
             $table->text('bio')->nullable();
 
@@ -25,7 +27,7 @@ return new class extends Migration
 
             $table->enum('genders_recruiting', ['male', 'female', 'all'])->nullable();
 
-            $table->json('other_data');
+            $table->json('other_data')->nullable();
 
             $table->timestamps();
         });

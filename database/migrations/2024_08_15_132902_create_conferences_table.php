@@ -11,18 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('businesses', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+        Schema::create('conferences', function (Blueprint $table) {
+            $table->id();
             $table->string('name');
-            $table->text('bio')->nullable();
-
-            $table->boolean('is_verified')->default(false);
-            $table->boolean('is_approved')->default(false);
-
-            $table->string('url')->nullable();
-
-            $table->json('other_data')->nullable();
-
+            $table->string('short_name')->nullable();
             $table->timestamps();
         });
     }
@@ -32,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('businesses');
+        Schema::dropIfExists('conferences');
     }
 };
