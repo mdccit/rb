@@ -17,10 +17,10 @@ class TransferPlayerService
 
        
        $year = config('app.year');
-       $junior = addslashes($year['junior']);
-       $senior = addslashes($year['senior']);
-       $freshman = addslashes($year['freshman']);
-       $sophomore = addslashes($year['sophomore']);
+       $junior = $year['junior'];
+       $senior = $year['senior'];
+       $freshman = $year['freshman'];
+       $sophomore = $year['sophomore'];
 
         $query = TransferPlayer::connect(config('database.secondary'))
                 ->select(

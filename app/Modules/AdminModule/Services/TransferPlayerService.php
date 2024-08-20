@@ -5,6 +5,7 @@ namespace App\Modules\AdminModule\Services;
 
 use App\Models\TransferPlayer;
 use DB;
+use App\Models\Country;
 
 class TransferPlayerService
 {
@@ -15,10 +16,10 @@ class TransferPlayerService
         
        
        $year = config('app.year');
-       $junior = addslashes($year['junior']);
-       $senior = addslashes($year['senior']);
-       $freshman = addslashes($year['freshman']);
-       $sophomore = addslashes($year['sophomore']);
+       $junior = $year['junior'];
+       $senior = $year['senior'];
+       $freshman = $year['freshman'];
+       $sophomore = $year['sophomore'];
 
         $query = TransferPlayer::connect(config('database.secondary'))
                 ->select(
@@ -73,6 +74,14 @@ class TransferPlayerService
             $height = $data['height_in_cm']?$data['height_cm']:(($data['height_ft']*12)+$data['height_in'])*2.54;
         }
 
+        $phone_code= null;
+
+        if(isset($data['phone_code_country'])){
+
+            $phone_code = Country::connect(config('database.secondary'))->find($data['phone_code_country'])->getPhoneCode();
+
+        }
+
         TransferPlayer::connect(config('database.default'))
             ->create([
                 'name' => $data['name'],
@@ -84,7 +93,7 @@ class TransferPlayerService
                 'profile_photo_path' => isset($data['profile_photo_path'])? $data['profile_photo_path'] : null,
                 'handedness' => isset($data['handedness'])? $data['handedness'] : 'both',
                 'email' => isset($data['email'])? $data['email'] :null,
-                'phone_code' => isset($data['phone_code_country'])? $data['phone_code_country'] : null,
+                'phone_code' =>  $phone_code,
                 'phone_number' => isset($data['phone_number'])? $data['phone_number'] : null,
                 'height' => $height,
                 'gender' => isset($data['gender'])? $data['gender'] : 'none',
@@ -102,6 +111,14 @@ class TransferPlayerService
 
             $height = $data['height_in_cm']?$data['height_cm']:(($data['height_ft']*12)+$data['height_in'])*2.54;
         }
+        
+        $phone_code= null;
+
+        if(isset($data['phone_code_country'])){
+
+            $phone_code = Country::connect(config('database.secondary'))->find($data['phone_code_country'])->getPhoneCode();
+
+        }
 
         TransferPlayer::connect(config('database.default'))
         ->where('id', $transfer_id)
@@ -115,7 +132,7 @@ class TransferPlayerService
                 'profile_photo_path' => isset($data['profile_photo_path'])? $data['profile_photo_path'] : null,
                 'handedness' => isset($data['handedness'])? $data['handedness'] : 'both',
                 'email' => isset($data['email'])? $data['email'] :null,
-                'phone_code' => isset($data['phone_code_country'])? $data['phone_code_country'] : null,
+                'phone_code' => $phone_code,
                 'phone_number' => isset($data['phone_number'])? $data['phone_number'] : null,
                 'height' => $height,
                 'gender' => isset($data['gender'])? $data['gender'] : 'none',
