@@ -46,6 +46,14 @@ Route::group(['namespace' => 'App\Modules\AdminModule\Controllers','prefix' => '
                 Route::post('/resource-create', 'ResourceController@store')->name('admin.resources.create');
                 Route::put('/resource-update/{id}', 'ResourceController@update')->name('admin.resources.update');
                 Route::delete('/resource-delete/{id}', 'ResourceController@destroy')->name('admin.resources.delete');
+                Route::put('/user-update/{user_id}', 'UsersController@updateUser')->name('admin.users.update');
+
+                
+                Route::get('/transfer-player', 'TransferPlayerController@getAllUsers')->name('admin.transfer.get-all');
+                Route::post('/transfer-player-register', 'TransferPlayerController@store')->name('admin.transfer.register');
+                Route::put('/transfer-player-update/{id}', 'TransferPlayerController@update')->name('admin.transfer.update');
+                Route::delete('/transfer-player-delete/{id}', 'TransferPlayerController@destory')->name('admin.transfer.delete');
+
             });
 
             //TODO only authenticated operator users can be access
