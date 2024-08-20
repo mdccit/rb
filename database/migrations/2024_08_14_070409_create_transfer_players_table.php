@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('profile_photo_path', 2048)->nullable();
             $table->enum('handedness', ['right', 'left', 'both'])->default('both');
             $table->string('email')->nullable();
+            $table->foreignId('country_id')->nullable()->constrained()->cascadeOnDelete();
             $table->string('phone_code',20)->nullable();
             $table->string('phone_number')->nullable();
             $table->decimal('height', 5, 2)->nullable(); // cm

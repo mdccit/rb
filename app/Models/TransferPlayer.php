@@ -29,6 +29,7 @@ class TransferPlayer extends Model
         'profile_photo_path',
         'handedness',
         'email',
+        'country_id',
         'phone_code',
         'phone_number',
         'height',
