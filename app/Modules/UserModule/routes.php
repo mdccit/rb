@@ -17,10 +17,14 @@ Route::group(['namespace' => 'App\Modules\UserModule\Controllers','prefix' => 'a
             //resource
             Route::get('/resource', 'ResourceController@index')->name('user.resources.index');
 
+            Route::post('/sent-to-message', 'ChatController@sendMessage')->name('chat.message.send');
+            Route::put('/delete-message/{id}', 'ChatController@deleteMessage')->name('chat.message.send');
+
             //TODO only authenticated default users can be access
             Route::middleware('auth.is_default')->group(function () {
-
                 
+                //Chat api
+
 
             });
 
