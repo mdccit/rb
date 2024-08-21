@@ -24,6 +24,9 @@ Route::group(['namespace' => 'App\Modules\AuthModule\Controllers','prefix' => 'a
                 //TODO whatever need to authenticate
                 Route::put('/logout', 'AuthController@authLogout')->name('auth.logout');
 
+                Route::get('/account-delete', 'UserController@userDelete')->name('auth.account.delete');
+
+
                 //TODO only authenticated default users can be access
                 Route::middleware('auth.is_default')->group(function () {
                     Route::put('/player-register', 'RegisterController@playerRegister')->name('auth.player.register');
