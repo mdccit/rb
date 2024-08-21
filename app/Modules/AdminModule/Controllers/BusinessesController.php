@@ -126,4 +126,43 @@ class BusinessesController extends Controller
             );
         }
     }
+
+    public function destroyBusiness(Request $request,$business_id)
+    {
+        try{
+            $this->businessService->deleteBusiness($business_id);
+
+            return CommonResponse::getResponse(
+                200,
+                'Successfully deleted',
+                'Successfully deleted'
+            );
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    }
+
+    public function viewBusiness(Request $request,$business_id)
+    {
+        try{
+            $responseData = $this->businessService->viewBusiness($business_id);
+
+            return CommonResponse::getResponse(
+                200,
+                'Successfully fetched',
+                'Successfully fetched',
+                $responseData
+            );
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    }
 }
