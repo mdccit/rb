@@ -118,9 +118,9 @@ class User extends Authenticatable implements MustVerifyEmail
         $this->notify(new \App\Notifications\VerifyEmailNotification($this));
     }
 
-    public function messages()
+    public function conversation()
     {
-        return $this->hasMany(ChatMessage::class);
+        return $this->hasMany(Conversation::class);
     }
 
 }

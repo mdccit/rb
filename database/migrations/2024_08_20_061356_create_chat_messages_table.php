@@ -13,15 +13,12 @@ return new class extends Migration
     {
         Schema::create('chat_messages', function (Blueprint $table) {
             $table->id();
-            $table->string('type');
-            $table->boolean('seen')->default(false);
+            $table->enum('type', ['text'])->default('text');
+            $table->enum('message_status', ['sent', 'delivered', 'seen'])->default('sent');
             $table->string('content', 5000);
-            $table->boolean('is_delete_from_user_chat')->default(false);
-            $table->boolean('is_delete_to_user_chat')->default(false);
+            $table->foreignUuid('created_by')->constrained('users');
+            $table->foreignId('conversation_id')->constrained('conversations');
             $table->timestamps();
-
-            $table->foreignUuid('from_user_id')->constrained('users');
-            $table->foreignUuid('to_user_id')->constrained('users');
         });
     }
 

@@ -4,27 +4,49 @@
 namespace App\Modules\UserModule\Services;
 
 use App\Models\ChatMessage;
-use Log;
+use App\Models\Conversation;
+use Illuminate\Support\Facades\DB;
+
 class ChatService
 {
     public function sendMessage (array $data){
        ChatMessage::connect(config('database.default'))
         ->create([
-            'content' => $data['message'],
+            'content' => $data['content'],
             'type' => 'text',
-            'is_delete_from_user_chat'=> false,
-            'is_delete_to_user_chat' => false,
-            'seen' => false,
-            'from_user_id' => auth()->id(),
-            'to_user_id' => $data['to_user_id'],
+            'message_status' => 'sent',
+            'created_by' => auth()->id(),
+            'conversation_id' => $data['conversation_id'],
         ]);
     }
     
-    public function deleteMessage (array $data, $message_id){
-        ChatMessage::connect(config('database.default'))
-            ->where('id', $message_id)
-            ->update([
-                $data['delete_type'] => true,
-        ]);
-     }
+   
+    public function unreadMessageCount(){
+
+        $count = Conversation::connect(config('database.secondary'))
+                   ->leftJoin('chat_messages', function($join) {
+                 $join->on('conversations.id', '=', 'chat_messages.conversation_id')
+                    ->where('chat_messages.message_status', '=', 'sent')
+                    ->where('chat_messages.created_by', '!=', auth()->id());
+                })
+                ->where(function($query) {
+                    $query->where(function($query) {
+                        $query->where('conversations.user1_id', '=', auth()->id())
+                        ->where('conversations.is_delete_user1', '=', 0);
+                })
+                ->orWhere(function($query) {
+                    $query->where('conversations.user2_id', '=', auth()->id())
+                    ->where('conversations.is_delete_user2', '=', 0);
+                });
+            })
+             ->count(DB::raw('DISTINCT chat_messages.id'));
+
+        return $count;
+
+    }
+
+    public function messages($conversation_id)
+    {
+        return ChatMessage::where('conversation_id',$conversation_id)->get();
+    }
 }

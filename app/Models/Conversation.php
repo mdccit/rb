@@ -5,12 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ChatMessage extends Model
+class Conversation extends Model
 {
     use HasFactory;
 
-
-    /**
+     /**
      * Connect the relevant database
      *
      */
@@ -20,16 +19,21 @@ class ChatMessage extends Model
         return (new static)->setConnection($connection);
     }
 
-    protected $fillable = ['type', 'message_status', 'content','created_by','conversation_id'];
+    protected $fillable = ['user1_id', 'user2_id', 'is_delete_user1','is_delete_user2'];
 
 
-    public function conversations()
+    public function messages()
     {
-        return $this->belongsTo(Conversation::class, 'conversation_id');
+        return $this->hasMany(ChatMessage::class);
     }
 
-    public function creator()
+    public function firstMessageUser()
     {
-        return $this->belongsTo(User::class, 'created_by');
+        return $this->belongsTo(User::class, 'user1_id');
+    }
+
+    public function receivedUser()
+    {
+        return $this->belongsTo(User::class, 'user2_id');
     }
 }
