@@ -100,7 +100,9 @@ class SchoolUserService
             ->where('user_id', $data['user'])->first();
         if($coach){
             $coach->update([
+                'school_id' => $data['school'],
                 'type' => 'viewer',
+                'status' => 'accepted',
             ]);
 
             $user = User::connect(config('database.secondary'))
