@@ -17,17 +17,16 @@ class UserController extends Controller
         $this->userService = new UserService();
     }
 
-    public function userDelete(Request $request)
+    public function userDelete()
     {
         try{
            
-            
-            $this->userService->userDelete($request->all());
+            $this->userService->userDelete();
             
             return CommonResponse::getResponse(
                 200,
-                'Successfully Deleted',
-                'Successfully Deleted',
+                'Successfully Account Deleted',
+                'Successfully Account Deleted',
                 );
 
         }catch (\Exception $e){
