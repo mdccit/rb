@@ -28,8 +28,10 @@ Route::group(['namespace' => 'App\Modules\AdminModule\Controllers','prefix' => '
 
                 Route::get('/schools', 'SchoolsController@getAll')->name('admin.schools.get-all');
                 Route::get('/schools/{school_id}', 'SchoolsController@get')->name('admin.schools.get');
+                Route::delete('/schools/{school_id}', 'SchoolsController@destroySchool')->name('admin.schools.delete');
                 Route::post('/school-register', 'SchoolsController@registerSchool')->name('admin.schools.register');
                 Route::put('/school-update/{school_id}', 'SchoolsController@updateSchool')->name('admin.schools.update');
+                Route::get('/school-view/{school_id}', 'SchoolsController@viewSchool')->name('admin.schools.view');
 
                 Route::get('/schools/users/{school_id}', 'SchoolUsersController@getAllSchoolUsers')->name('admin.schools.users.get-all');
                 Route::get('/schools/search-users/{school_id}', 'SchoolUsersController@searchUsers')->name('admin.schools.users.search');
