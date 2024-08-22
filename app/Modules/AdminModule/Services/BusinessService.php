@@ -110,7 +110,7 @@ class BusinessService
     }
 
     public function deleteBusiness ($business_id){
-        Business::connect(config('database.secondary'))
+        Business::connect(config('database.default'))
             ->where('id', $business_id)
             ->delete();
     }

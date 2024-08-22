@@ -5,6 +5,7 @@ namespace App\Modules\AdminModule\Services;
 
 
 use App\Models\School;
+use App\Models\SchoolUser;
 
 class SchoolService
 {
@@ -122,5 +123,49 @@ class SchoolService
         }
     }
 
+    public function deleteSchool ($school_id){
+        School::connect(config('database.default'))
+            ->where('id', $school_id)
+            ->delete();
+    }
+
+    public function viewSchool ($school_id){
+        $school = School::connect(config('database.secondary'))
+            ->where('id', $school_id)
+            ->select(
+                'id',
+                'name',
+                'bio',
+                'is_verified',
+                'is_approved',
+                'gov_id',
+                'gov_sync_settings',
+                'url',
+                'genders_recruiting',
+                'created_at as joined_at',
+                'other_data'
+            )
+            ->first();
+
+        $school_users = SchoolUser::connect(config('database.secondary'))
+            ->join('users', 'users.id', '=' ,'school_users.user_id')
+            ->join('user_roles', 'user_roles.id', '=' ,'users.user_role_id')
+            ->where('school_users.school_id', $school_id)
+            ->select(
+                'school_users.id',
+                'users.id as user_id',
+                'users.first_name',
+                'users.last_name',
+                'user_roles.name as user_role',
+                'school_users.role as school_user_role'
+            )
+            ->get();
+
+        $dataSet = [
+            'school' => $school,
+            'school_users' => $school_users,
+        ];
+        return $dataSet;
+    }
 
 }
