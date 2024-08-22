@@ -37,8 +37,10 @@ Route::group(['namespace' => 'App\Modules\AdminModule\Controllers','prefix' => '
 
                 Route::get('/businesses', 'BusinessesController@getAll')->name('admin.businesses.get-all');
                 Route::get('/businesses/{business_id}', 'BusinessesController@get')->name('admin.businesses.get');
+                Route::delete('/businesses/{business_id}', 'BusinessesController@destroyBusiness')->name('admin.businesses.delete');
                 Route::post('/business-register', 'BusinessesController@registerBusiness')->name('admin.businesses.register');
                 Route::put('/business-update/{business_id}', 'BusinessesController@updateBusiness')->name('admin.businesses.update');
+                Route::get('/business-view/{business_id}', 'BusinessesController@viewBusiness')->name('admin.businesses.view');
 
                 Route::get('/businesses/users/{business_id}', 'BusinessUsersController@getAllBusinessUsers')->name('admin.businesses.users.get-all');
                 Route::get('/businesses/search-users/{business_id}', 'BusinessUsersController@searchUsers')->name('admin.businesses.users.search');
