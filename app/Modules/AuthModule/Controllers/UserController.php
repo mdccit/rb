@@ -21,7 +21,7 @@ class UserController extends Controller
     public function userDelete()
     {
         try{
-            $user =User::connect(config('database.default'))->where('id',auth()->id())->first();
+            $user =User::connect(config('database.secondary'))->where('id',auth()->id())->first();
 
             if($user->user_role_id !=2){
             $this->userService->userDelete();
