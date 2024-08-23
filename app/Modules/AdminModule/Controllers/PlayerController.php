@@ -25,7 +25,7 @@ class PlayerController extends Controller
     {
         try{
 
-            $player = Player::connect(config('database.default'))
+            $player = Player::connect(config('database.secondary'))
                        ->where('user_id', $user_id)->first();
             if($player){
                 $responseData = $this->playerService->getUser($user_id);
@@ -77,7 +77,7 @@ class PlayerController extends Controller
                 );
             }
 
-            $player = Player::connect(config('database.default'))
+            $player = Player::connect(config('database.secondary'))
                      ->where('user_id', $user_id)->first();
             if($player){
                
