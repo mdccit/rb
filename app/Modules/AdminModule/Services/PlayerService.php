@@ -4,15 +4,8 @@
 namespace App\Modules\AdminModule\Services;
 
 
-use App\Models\BusinessManager;
-use App\Models\Coach;
-use App\Models\Country;
 use App\Models\Player;
 use App\Models\User;
-use App\Models\UserPhone;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 use App\Models\UserAddress;
 
 class PlayerService
