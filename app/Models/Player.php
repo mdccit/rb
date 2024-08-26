@@ -33,7 +33,6 @@ class Player extends Model
         'has_parent',
         'graduation_month_year',
         'gpa',
-        'nationality',
         'height',
         'weight',
         'other_data',
