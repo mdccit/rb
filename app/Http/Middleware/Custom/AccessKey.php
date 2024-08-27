@@ -22,10 +22,15 @@ class AccessKey
         error_log('access key header : '.$accessKey);
         error_log('access key app : '.config('app.access_key'));
         if(config('app.access_key') != $accessKey){
+            // return CommonResponse::getResponse(
+            //     401,
+            //     'Access Key Invalid',
+            //     'Access Key Invalid'
+            // );
             return CommonResponse::getResponse(
                 401,
-                'Access Key Invalid',
-                'Access Key Invalid'
+                'access key header : '.$accessKey,
+                'access key app : '.config('app.access_key')
             );
         }
         return $next($request);
