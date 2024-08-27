@@ -59,6 +59,11 @@ Route::group(['namespace' => 'App\Modules\AdminModule\Controllers','prefix' => '
                 Route::post('/resource-create', 'ResourceController@store')->name('admin.resources.create');
                 Route::put('/resource-update/{id}', 'ResourceController@update')->name('admin.resources.update');
                 Route::delete('/resource-delete/{id}', 'ResourceController@destroy')->name('admin.resources.delete');
+
+                //player
+                Route::get('/player-get/{id}', 'PlayerController@getUser')->name('admin.player.index');
+                Route::put('/player-update/{id}', 'PlayerController@updateUser')->name('admin.player.update');
+
             });
 
             //TODO only authenticated operator users can be access
