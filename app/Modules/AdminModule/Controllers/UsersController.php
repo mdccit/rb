@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Modules\AdminModule\Services\UserService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use App\Models\User;
 
 class UsersController extends Controller
 {
@@ -138,5 +139,37 @@ class UsersController extends Controller
                 'Something went to wrong'
             );
         }
+    }
+
+    public function userAccountDelete($user_id){
+        try{
+            $user =User::connect(config('database.secondary'))->where('id',$user_id)->first();
+
+            if($user->user_role_id !=2){
+
+                $this->userService->userDelete($user_id);
+                
+                return CommonResponse::getResponse(
+                    200,
+                    'Successfully Account Deleted',
+                    'Successfully Account Deleted',
+                );
+
+            }else{
+                return CommonResponse::getResponse(
+                    422,
+                    'Admin Account Can Not Delete',
+                    'Admin Account Can Not Delete'
+                ); 
+            }
+            
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    
     }
 }

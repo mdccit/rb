@@ -275,4 +275,10 @@ class UserService
         }
     }
 
+    public function userDelete($user_id){
+        
+        User::connect(config('database.default'))->destroy($user_id);
+       
+    }
+
 }

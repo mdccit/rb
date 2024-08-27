@@ -25,6 +25,7 @@ Route::group(['namespace' => 'App\Modules\AdminModule\Controllers','prefix' => '
                 Route::get('/users/{user_id}', 'UsersController@get')->name('admin.users.get');
                 Route::post('/user-register', 'UsersController@registerUser')->name('admin.users.register');
                 Route::put('/user-update/{user_id}', 'UsersController@updateUser')->name('admin.users.update');
+                Route::delete('/user-delete/{user_id}', 'UsersController@userAccountDelete')->name('admin.users.delete');
 
                 Route::get('/schools', 'SchoolsController@getAll')->name('admin.schools.get-all');
                 Route::get('/schools/{school_id}', 'SchoolsController@get')->name('admin.schools.get');
