@@ -17,7 +17,8 @@ class AccessKey
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $accessKey = $request->header("access_key","");
+        // $accessKey = $request->header("access_key","");
+        $accessKey = $request->server->get('access_key');
         error_log('access key header : '.$accessKey);
         error_log('access key app : '.config('app.access_key'));
         if(config('app.access_key') != $accessKey){
