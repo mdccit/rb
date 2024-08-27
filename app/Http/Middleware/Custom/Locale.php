@@ -15,7 +15,7 @@ class Locale
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $locale = $request->header("lang",config('app.fallback_locale'));
+        $locale = $request->header("Lang",config('app.fallback_locale'));
 
         if(!in_array($locale, config('app.accepted_locales'))){
             $locale = session('locale') ?: config('app.fallback_locale');

@@ -17,7 +17,7 @@ class AccessKey
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $accessKey = $request->header("access_key","");
+        $accessKey = $request->header("AccessKey","");
         if(config('app.access_key') != $accessKey){
             return CommonResponse::getResponse(
                 401,
