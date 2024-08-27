@@ -281,4 +281,16 @@ class UserService
        
     }
 
+    public function userSessionDelete($user_id){
+        
+        $user = User::connect(config('database.default'))->find($user_id);
+        $tokens = $user->tokens;
+
+        foreach($tokens as $token){
+            $token->revoke();
+        }
+       
+    }
+
+
 }

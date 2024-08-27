@@ -172,4 +172,36 @@ class UsersController extends Controller
         }
     
     }
+
+    public function userSessionDelete($user_id){
+        try{
+            $user =User::connect(config('database.secondary'))->where('id',$user_id)->first();
+
+            if($user->user_role_id !=2){
+
+                $token =$this->userService->userSessionDelete($user_id);
+                
+                return CommonResponse::getResponse(
+                    200,
+                    'Successfully Sessions Deleted',
+                    'Successfully Sessions Deleted',
+                );
+
+            }else{
+                return CommonResponse::getResponse(
+                    422,
+                    'Admin Session Can Not Delete',
+                    'Admin Session Can Not Delete'
+                ); 
+            }
+            
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    
+    }
 }
