@@ -17,19 +17,12 @@ class AccessKey
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $accessKey = $request->header("accessKey","");
-        error_log('access key header : '.$accessKey);
-        error_log('access key app : '.config('app.access_key'));
+        $accessKey = $request->header("access_key","");
         if(config('app.access_key') != $accessKey){
-            // return CommonResponse::getResponse(
-            //     401,
-            //     'Access Key Invalid',
-            //     'Access Key Invalid'
-            // );
             return CommonResponse::getResponse(
                 401,
-                'access key header : '.$accessKey.' | lang : '.$request->header("lang",""),
-                'access key app : '.config('app.access_key')
+                'Access Key Invalid',
+                'Access Key Invalid'
             );
         }
         return $next($request);
