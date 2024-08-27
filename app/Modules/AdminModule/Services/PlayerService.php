@@ -13,32 +13,40 @@ class PlayerService
     
 
     public function getUser ($user_id){
+
         $user = User::connect(config('database.secondary'))
-            ->join('players', 'players.user_id', '=' ,'users.id')
-            ->leftJoin('user_addresses', 'user_addresses.user_id', '=', 'users.id') 
-            ->where('users.id', $user_id)
-            ->select(
-                'users.id',
-                'users.gender',
-                'users.date_of_birth',
-                'players.graduation_month_year',
-                'players.gpa',
-                'players.height',
-                'players.weight',
-                'user_addresses.country_id',
-                'user_addresses.is_default',
-                'user_addresses.address_line_1',
-                'user_addresses.address_line_2',
-                'user_addresses.city',
-                'user_addresses.state_province',
-                'user_addresses.postal_code',
-                'user_addresses.type',
-                'players.other_data'
+                ->join('players', 'players.user_id', '=' ,'users.id')
+                ->where('users.id', $user_id)
+                ->select(
+                    'users.id',
+                    'users.gender',
+                    'users.date_of_birth',
+                    'players.graduation_month_year',
+                    'players.gpa',
+                    'players.height',
+                    'players.weight',
+                    'players.other_data'
+                )
+                ->first();
 
-            )
-            ->first();
-
-        return $user;
+        $user_address =  UserAddress::connect(config('database.secondary'))
+                        ->where('user_id', $user_id)
+                        ->where('type','=', 'permanent')
+                        ->select(
+                            'is_default',
+                            'address_line_1',
+                            'address_line_2',
+                            'city',
+                            'state_province',
+                            'postal_code',
+                            'type',
+                        )
+                        ->first();
+        return [
+                'user_profile_info' => $user,
+                'user_address_info' => $user_address,
+            ];
+        
     }
 
    
@@ -79,13 +87,13 @@ class PlayerService
         
         $addressData = [
             'country_id' => isset($data['country']) ? $data['country'] : null,
-            'is_default' => isset($data['is_default']) ? $data['is_default'] : false,
+            'is_default' =>  false,
             'address_line_1' => isset($data['address_line_1']) ? $data['address_line_1'] : null,
             'address_line_2' => isset($data['address_line_2']) ? $data['address_line_2'] : null,
             'city' => isset($data['city']) ? $data['city'] : null,
             'state_province' => isset($data['state_province']) ? $data['state_province'] : null,
             'postal_code' => isset($data['postal_code']) ? $data['postal_code'] : null,
-            'type' => isset($data['type']) ? $data['type'] : 'permanent'
+            'type' => 'permanent'
         ];
         //user address
         UserAddress::updateOrCreate(

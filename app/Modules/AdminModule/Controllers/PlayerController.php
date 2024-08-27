@@ -77,8 +77,6 @@ class PlayerController extends Controller
                 'national_ranking' =>'nullable',
                 'wtn_score_manual' => 'nullable',
                 'country' => 'nullable|numeric',
-                'is_default' => 'nullable|boolean',
-                'type' => 'nullable|in:permanent,residential,other',
                 'address_line_1' => 'nullable',
                 'address_line_2' => 'nullable',
                 'city' => 'nullable',
