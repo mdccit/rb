@@ -1,0 +1,44 @@
+version: '3'
+
+services:
+  mariadb:
+    image: docker.io/bitnami/mariadb:11.4.2
+    environment:
+      - ALLOW_EMPTY_PASSWORD=no
+      - MARIADB_ROOT_PASSWORD=Name9413
+      - MARIADB_DATABASE=recruited_pro_v2_primary
+      - MARIADB_PASSWORD=Name9413
+    restart: always
+    volumes:
+      - ./db_data:/bitnami/mariadb  # Use the default Bitnami volume path
+    ports:
+      - "3312:3306"
+    networks:
+      - internal_network
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/apache/Dockerfile
+    restart: unless-stopped
+    volumes:
+      - .:/var/www/html
+      - ./apache_log:/var/log/apache2
+    ports:
+      - 85:80
+    depends_on:
+      - mariadb
+    networks:
+      - internal_network
+
+  adminer:
+    image: adminer
+    restart: unless-stopped
+    ports:
+      - 8085:8080
+    networks:
+      - internal_network
+
+networks:
+  internal_network:
+    driver: bridge
