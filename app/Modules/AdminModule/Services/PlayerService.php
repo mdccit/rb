@@ -21,6 +21,7 @@ class PlayerService
                     'users.id',
                     'users.gender',
                     'users.date_of_birth',
+                    'users.nationality_id',
                     'players.graduation_month_year',
                     'players.gpa',
                     'players.height',
@@ -40,6 +41,7 @@ class PlayerService
                             'state_province',
                             'postal_code',
                             'type',
+                            'country_id'
                         )
                         ->first();
         return [
@@ -58,6 +60,7 @@ class PlayerService
         $user->update([
             'gender' =>isset($data['gender']) ? $data['gender'] : null,
             'date_of_birth' => isset($data['date_of_birth']) ? $data['date_of_birth'] : null,
+            'nationality_id' => isset($data['nationality_id']) ? $data['nationality_id'] : null,
         ]);
 
         $others_data = [
@@ -73,6 +76,8 @@ class PlayerService
             'itf_ranking' => isset($data['itf_ranking']) ? $data['itf_ranking'] : null,
             'national_ranking' => isset($data['national_ranking']) ? $data['national_ranking'] : null,
             'wtn_score_manual' => isset($data['wtn_score_manual']) ? $data['wtn_score_manual'] : null,
+            'bio' => isset($data['bio']) ? $data['bio'] : null,
+
         ];
         //Player
         $player = Player::connect(config('database.default'))
