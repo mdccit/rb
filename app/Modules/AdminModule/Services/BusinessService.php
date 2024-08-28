@@ -4,25 +4,23 @@
 namespace App\Modules\AdminModule\Services;
 
 
-use App\Models\School;
-use App\Models\SchoolUser;
+use App\Models\Business;
+use App\Models\BusinessManager;
 
-class SchoolService
+class BusinessService
 {
-    public function getAllSchools (array $data){
+    public function getAllBusinesses (array $data){
         $per_page_items = array_key_exists("per_page_items",$data)?$data['per_page_items']:0;
         $has_admins = array_key_exists("has_admins",$data)?$data['has_admins']:'none';
         $is_verified = array_key_exists("is_verified",$data)?$data['is_verified']:'none';
-        $is_connected_to_school = array_key_exists("is_connected_to_school",$data)?$data['is_connected_to_school']:'none';
         $has_coordinates = array_key_exists("has_coordinates",$data)?$data['has_coordinates']:'none';
         $search_key = array_key_exists("search_key",$data)?$data['search_key']:null;
 
-        $query = School::connect(config('database.secondary'))
+        $query = Business::connect(config('database.secondary'))
             ->select(
                 'id',
                 'name',
                 'bio',
-                'other_data->teams_count as teams_count',
                 'other_data->total_staff as total_staff',
                 'other_data->admin_staff as admin_staff',
                 'other_data->non_admin_staff as non_admin_staff',
@@ -39,12 +37,6 @@ class SchoolService
             $query->where('is_verified', true);
         } elseif ($is_verified === 'not_verified') {
             $query->where('is_verified', false);
-        }
-
-        if ($is_connected_to_school === 'connected_to_school') {
-            $query->whereNotNull('gov_id');
-        } elseif ($is_connected_to_school === 'not_connected_to_school') {
-            $query->whereNull('gov_id');
         }
 
         if ($has_coordinates === 'has_coordinates') {
@@ -69,103 +61,93 @@ class SchoolService
 
     }
 
-    public function getSchool ($school_id){
-        return School::connect(config('database.secondary'))
-            ->where('id', $school_id)
+    public function getBusiness ($business_id){
+        return Business::connect(config('database.secondary'))
+            ->where('id', $business_id)
             ->select(
                 'id',
                 'name',
                 'bio',
                 'is_verified',
                 'is_approved',
-                'gov_id',
-                'gov_sync_settings',
                 'url',
-                'genders_recruiting',
                 'created_at as joined_at',
                 'other_data'
             )
             ->first();
     }
 
-    public function createSchool(array $data){
-        School::connect(config('database.default'))
+    public function createBusiness(array $data){
+        Business::connect(config('database.default'))
             ->create([
                 'name' => $data['name'],
             ]);
     }
 
-    public function updateSchool(array $data, $school_id){
-        $school = School::connect(config('database.default'))
-            ->where('id', $school_id)
+    public function updateBusiness(array $data, $business_id){
+        $business = Business::connect(config('database.default'))
+            ->where('id', $business_id)
             ->first();
 
-        if($school){
-            $other_data = $school->other_data;
+        if($business){
+            $other_data = $business->other_data;
             if(!$other_data){
                 $other_data = [
-                    'teams_count' => 0,
                     'total_staff' => 0,
                     'admin_staff' => 0,
                     'non_admin_staff' => 0,
                 ];
             }
 
-            $school->update([
+            $business->update([
                 'name' => $data['name'],
                 'bio' => $data['bio'],
                 'is_approved' => $data['is_approved'],
                 'is_verified' => $data['is_verified'],
-                'conference_id' => $data['conference'],
-                'division_id' => $data['division'],
                 'other_data' => $other_data
             ]);
         }
     }
 
-    public function deleteSchool ($school_id){
-        School::connect(config('database.default'))
-            ->where('id', $school_id)
+    public function deleteBusiness ($business_id){
+        Business::connect(config('database.default'))
+            ->where('id', $business_id)
             ->delete();
     }
 
-    public function viewSchool ($school_id){
-        $school = School::connect(config('database.secondary'))
-            ->where('id', $school_id)
+    public function viewBusiness ($business_id){
+        $business = Business::connect(config('database.secondary'))
+            ->where('id', $business_id)
             ->select(
                 'id',
                 'name',
                 'bio',
                 'is_verified',
                 'is_approved',
-                'gov_id',
-                'gov_sync_settings',
                 'url',
-                'genders_recruiting',
                 'created_at as joined_at',
                 'other_data'
             )
             ->first();
 
-        $school_users = SchoolUser::connect(config('database.secondary'))
-            ->join('users', 'users.id', '=' ,'school_users.user_id')
+        $business_users = BusinessManager::connect(config('database.secondary'))
+            ->join('users', 'users.id', '=' ,'business_managers.user_id')
             ->join('user_roles', 'user_roles.id', '=' ,'users.user_role_id')
-            ->where('school_users.school_id', $school_id)
+            ->where('business_managers.business_id', $business_id)
             ->select(
-                'school_users.id',
+                'business_managers.id',
                 'users.id as user_id',
                 'users.first_name',
                 'users.last_name',
                 'user_roles.name as user_role',
-                'school_users.role as school_user_role'
+                'business_managers.type as business_user_role'
             )
             ->get();
 
         $dataSet = [
-            'school' => $school,
-            'school_users' => $school_users,
+            'business' => $business,
+            'business_users' => $business_users,
         ];
         return $dataSet;
     }
-
 }
