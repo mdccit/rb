@@ -82,6 +82,9 @@ class PlayerController extends Controller
                 'city' => 'nullable',
                 'state_province' => 'nullable',
                 'postal_code' => 'nullable',
+                'bio' => 'nullable',
+                'nationality_id' => 'nullable|numeric'
+
                
             ]);
 
