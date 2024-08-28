@@ -64,6 +64,14 @@ Route::group(['namespace' => 'App\Modules\AdminModule\Controllers','prefix' => '
                 Route::get('/player-get/{id}', 'PlayerController@getUser')->name('admin.player.index');
                 Route::put('/player-update/{id}', 'PlayerController@updateUser')->name('admin.player.update');
 
+
+                //synchronize 
+                Route::post('/matchResult', 'SyncController@matchResult')->name('admin.synchronize.match-result');
+                Route::get('/connect/{id}', 'SyncController@connect')->name('admin.synchronize.connect');
+                Route::get('/disconnect/{id}', 'SyncController@disconnect')->name('admin.synchronize.disconnect');
+                Route::get('/sync/{id}', 'SyncController@sync')->name('admin.synchronize.sync');
+                Route::put('/update-setting/{id}', 'SyncController@updateSetting')->name('admin.synchronize.update');
+
             });
 
             //TODO only authenticated operator users can be access

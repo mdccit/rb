@@ -2,14 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class School extends Model
+class SyncLog extends Model
 {
     use HasFactory;
-    use HasUuids;
 
     /**
      * Connect the relevant database
@@ -21,23 +19,12 @@ class School extends Model
         return (new static)->setConnection($connection);
     }
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
-        'name',
-        'bio',
-        'is_verified',
-        'is_approved',
-        'gov_id',
-        'gov_sync_settings',
-        'url',
-        'genders_recruiting',
-        'conference_id',
-        'division_id',
-        'other_data',
+        'school_id',
+        'status',
+        'data',
+        'created_by',
+        'updated_at'
     ];
 
     /**
@@ -46,12 +33,16 @@ class School extends Model
      * @return array<string, string>
      */
     protected $casts = [
-        'other_data' => 'array',
+        'data' => 'array',
     ];
 
-    public function syncLogs()
+    public function school()
     {
-        return $this->hasMany(SyncLog::class);
+        return $this->belongsTo(School::class);
     }
 
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
 }
