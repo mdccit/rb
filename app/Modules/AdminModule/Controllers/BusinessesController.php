@@ -4,24 +4,24 @@ namespace App\Modules\AdminModule\Controllers;
 
 use App\Extra\CommonResponse;
 use App\Http\Controllers\Controller;
-use App\Modules\AdminModule\Services\SchoolService;
+use App\Modules\AdminModule\Services\BusinessService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class SchoolsController extends Controller
+class BusinessesController extends Controller
 {
-    private $schoolService;
+    private $businessService;
 
     function __construct()
     {
         //Init models
-        $this->schoolService = new SchoolService();
+        $this->businessService = new BusinessService();
     }
 
     public function getAll(Request $request)
     {
         try{
-            $dataSets = $this->schoolService->getAllSchools($request->all());
+            $dataSets = $this->businessService->getAllBusinesses($request->all());
 
             $responseData = [
                 'dataSets' => $dataSets,
@@ -42,10 +42,10 @@ class SchoolsController extends Controller
         }
     }
 
-    public function get(Request $request,$school_id)
+    public function get(Request $request,$business_id)
     {
         try{
-            $responseData = $this->schoolService->getSchool($school_id);
+            $responseData = $this->businessService->getBusiness($business_id);
 
             return CommonResponse::getResponse(
                 200,
@@ -62,7 +62,7 @@ class SchoolsController extends Controller
         }
     }
 
-    public function registerSchool(Request $request)
+    public function registerBusiness(Request $request)
     {
         try{
             $validator = Validator::make($request->all(), [
@@ -77,7 +77,7 @@ class SchoolsController extends Controller
                 );
             }
 
-            $this->schoolService->createSchool($request->all());
+            $this->businessService->createBusiness($request->all());
 
             return CommonResponse::getResponse(
                 200,
@@ -93,16 +93,14 @@ class SchoolsController extends Controller
         }
     }
 
-    public function updateSchool(Request $request,$school_id)
+    public function updateBusiness(Request $request,$business_id)
     {
         try{
             $validator = Validator::make($request->all(), [
-                'name' => 'required|string|min:3|max:255|unique:schools,name,' . $school_id,
+                'name' => 'required|string|min:3|max:255|unique:businesses,name,' . $business_id,
                 'bio' => 'nullable|string|max:5000',
                 'is_verified' => 'required|boolean',
                 'is_approved' => 'required|boolean',
-                'conference' => 'nullable|numeric',
-                'division' => 'nullable|numeric',
             ]);
             if ($validator->fails())
             {
@@ -113,7 +111,7 @@ class SchoolsController extends Controller
                 );
             }
 
-            $this->schoolService->updateSchool($request->all(),$school_id);
+            $this->businessService->updateBusiness($request->all(),$business_id);
 
             return CommonResponse::getResponse(
                 200,
@@ -129,10 +127,10 @@ class SchoolsController extends Controller
         }
     }
 
-    public function destroySchool(Request $request,$school_id)
+    public function destroyBusiness(Request $request,$business_id)
     {
         try{
-            $this->schoolService->deleteSchool($school_id);
+            $this->businessService->deleteBusiness($business_id);
 
             return CommonResponse::getResponse(
                 200,
@@ -148,10 +146,10 @@ class SchoolsController extends Controller
         }
     }
 
-    public function viewSchool(Request $request,$school_id)
+    public function viewBusiness(Request $request,$business_id)
     {
         try{
-            $responseData = $this->schoolService->viewSchool($school_id);
+            $responseData = $this->businessService->viewBusiness($business_id);
 
             return CommonResponse::getResponse(
                 200,
