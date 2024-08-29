@@ -88,13 +88,13 @@ class SyncService
 
     }
 
-    public function connect ($school_id){
+    public function connect ($data,$school_id){
        // Get results from API
        $client = new Client();
 
        $response = $client->request('GET', 'https://api.data.gov/ed/collegescorecard/v1/schools', [
            'query' => [
-               'id' => $school_id,
+               'id' => $data['gov_id'],
            ],
            'headers' => [
                'X-Api-Key' => config('us-gov.api_key'),
@@ -160,6 +160,7 @@ class SyncService
 
         // Create new synclog
         $syncLog = SyncLog::connect(config('database.default'))->create([
+            'school_id' => $school_id,
             'status' => 'in-progress',
             'created_by' => auth()->id(),
         ]);

@@ -63,7 +63,7 @@ class SyncController extends Controller
                 );
             }
 
-            $dataSets = $this->syncService->getAllUsers($request->all());
+            $dataSets = $this->syncService->matchResult($request->all());
 
             $responseData = [
                 'dataSets' => $dataSets,
@@ -84,14 +84,18 @@ class SyncController extends Controller
         }
     }
 
-    public function connect($school_id)
+    public function connect(Request $request, $school_id)
     {
         try{
+            $validator = Validator::make($request->all(), [
+                'gov_id' => 'required|numeric',
+            ]);
+
             $school = School::connect(config('database.secondary'))->where('id', $school_id)->first();
 
-            if(isset($school->gov_id)){
+             if($school->gov_id == null){
 
-                $responseData = $this->syncService->connect($school_id);
+                $responseData = $this->syncService->connect($request->all(),$school_id);
 
                 return CommonResponse::getResponse(
                     200,
@@ -154,7 +158,7 @@ class SyncController extends Controller
 
             $school = School::connect(config('database.secondary'))->where('id', $school_id)->first();
 
-            if(isset($school->gov_id)){
+            if($school->gov_id !=null){
 
                 $responseData = $this->syncService->sync($school_id);
 
@@ -167,8 +171,8 @@ class SyncController extends Controller
             }else{
                 return CommonResponse::getResponse(
                     422,
-                    'This school is already connected to an GOV ID',
-                    'This school is already connected to an GOV ID'
+                    'This school is not connected to the API.',
+                    'This school is not connected to the API.'
                 );
             }
         }catch (\Exception $e){
