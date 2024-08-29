@@ -18,6 +18,9 @@ Route::group(['namespace' => 'App\Modules\UserModule\Controllers','prefix' => 'a
             Route::get('/resource', 'ResourceController@index')->name('user.resources.index');
 
             Route::get('/players/{user_id}', 'UsersController@getPlayerProfile')->name('user.players.view');
+            Route::get('/coaches/{user_id}', 'UsersController@getCoachProfile')->name('user.coaches.view');
+            Route::get('/business-managers/{user_id}', 'UsersController@getBusinessManagerProfile')->name('user.business-managers.view');
+            Route::get('/parents/{user_id}', 'UsersController@getParentProfile')->name('user.parents.view');
 
             //TODO only authenticated default users can be access
             Route::middleware('auth.is_default')->group(function () {
