@@ -25,6 +25,8 @@ Route::group(['namespace' => 'App\Modules\AdminModule\Controllers','prefix' => '
                 Route::get('/users/{user_id}', 'UsersController@get')->name('admin.users.get');
                 Route::post('/user-register', 'UsersController@registerUser')->name('admin.users.register');
                 Route::put('/user-update/{user_id}', 'UsersController@updateUser')->name('admin.users.update');
+                Route::delete('/user-delete/{user_id}', 'UsersController@userAccountDelete')->name('admin.users.delete');
+                Route::delete('/user-session-delete/{user_id}', 'UsersController@userSessionDelete')->name('admin.users.delete');
 
                 Route::get('/schools', 'SchoolsController@getAll')->name('admin.schools.get-all');
                 Route::get('/schools/{school_id}', 'SchoolsController@get')->name('admin.schools.get');
@@ -59,6 +61,11 @@ Route::group(['namespace' => 'App\Modules\AdminModule\Controllers','prefix' => '
                 Route::post('/resource-create', 'ResourceController@store')->name('admin.resources.create');
                 Route::put('/resource-update/{id}', 'ResourceController@update')->name('admin.resources.update');
                 Route::delete('/resource-delete/{id}', 'ResourceController@destroy')->name('admin.resources.delete');
+
+                //player
+                Route::get('/player-get/{id}', 'PlayerController@getUser')->name('admin.player.index');
+                Route::put('/player-update/{id}', 'PlayerController@updateUser')->name('admin.player.update');
+
             });
 
             //TODO only authenticated operator users can be access
