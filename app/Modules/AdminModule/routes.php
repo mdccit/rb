@@ -25,16 +25,31 @@ Route::group(['namespace' => 'App\Modules\AdminModule\Controllers','prefix' => '
                 Route::get('/users/{user_id}', 'UsersController@get')->name('admin.users.get');
                 Route::post('/user-register', 'UsersController@registerUser')->name('admin.users.register');
                 Route::put('/user-update/{user_id}', 'UsersController@updateUser')->name('admin.users.update');
+                Route::delete('/user-delete/{user_id}', 'UsersController@userAccountDelete')->name('admin.users.delete');
+                Route::delete('/user-session-delete/{user_id}', 'UsersController@userSessionDelete')->name('admin.users.delete');
 
                 Route::get('/schools', 'SchoolsController@getAll')->name('admin.schools.get-all');
                 Route::get('/schools/{school_id}', 'SchoolsController@get')->name('admin.schools.get');
+                Route::delete('/schools/{school_id}', 'SchoolsController@destroySchool')->name('admin.schools.delete');
                 Route::post('/school-register', 'SchoolsController@registerSchool')->name('admin.schools.register');
                 Route::put('/school-update/{school_id}', 'SchoolsController@updateSchool')->name('admin.schools.update');
+                Route::get('/school-view/{school_id}', 'SchoolsController@viewSchool')->name('admin.schools.view');
 
                 Route::get('/schools/users/{school_id}', 'SchoolUsersController@getAllSchoolUsers')->name('admin.schools.users.get-all');
                 Route::get('/schools/search-users/{school_id}', 'SchoolUsersController@searchUsers')->name('admin.schools.users.search');
                 Route::post('/schools/add-user', 'SchoolUsersController@addSchoolUser')->name('admin.schools.users.add');
-                
+
+                Route::get('/businesses', 'BusinessesController@getAll')->name('admin.businesses.get-all');
+                Route::get('/businesses/{business_id}', 'BusinessesController@get')->name('admin.businesses.get');
+                Route::delete('/businesses/{business_id}', 'BusinessesController@destroyBusiness')->name('admin.businesses.delete');
+                Route::post('/business-register', 'BusinessesController@registerBusiness')->name('admin.businesses.register');
+                Route::put('/business-update/{business_id}', 'BusinessesController@updateBusiness')->name('admin.businesses.update');
+                Route::get('/business-view/{business_id}', 'BusinessesController@viewBusiness')->name('admin.businesses.view');
+
+                Route::get('/businesses/users/{business_id}', 'BusinessUsersController@getAllBusinessUsers')->name('admin.businesses.users.get-all');
+                Route::get('/businesses/search-users/{business_id}', 'BusinessUsersController@searchUsers')->name('admin.businesses.users.search');
+                Route::post('/businesses/add-user', 'BusinessUsersController@addBusinessUser')->name('admin.businesses.users.add');
+
                 //resource category
                 Route::get('/resource-categories', 'ResourceCategoriesController@index')->name('admin.resources-category.index');
                 Route::post('/resource-categories-create', 'ResourceCategoriesController@storeCategory')->name('admin.resources-category.create');
@@ -48,11 +63,15 @@ Route::group(['namespace' => 'App\Modules\AdminModule\Controllers','prefix' => '
                 Route::delete('/resource-delete/{id}', 'ResourceController@destroy')->name('admin.resources.delete');
                 Route::put('/user-update/{user_id}', 'UsersController@updateUser')->name('admin.users.update');
 
-                
                 Route::get('/transfer-player', 'TransferPlayerController@getAllUsers')->name('admin.transfer.get-all');
                 Route::post('/transfer-player-register', 'TransferPlayerController@store')->name('admin.transfer.register');
                 Route::put('/transfer-player-update/{id}', 'TransferPlayerController@update')->name('admin.transfer.update');
                 Route::delete('/transfer-player-delete/{id}', 'TransferPlayerController@destory')->name('admin.transfer.delete');
+
+
+                //player
+                Route::get('/player-get/{id}', 'PlayerController@getUser')->name('admin.player.index');
+                Route::put('/player-update/{id}', 'PlayerController@updateUser')->name('admin.player.update');
 
             });
 
