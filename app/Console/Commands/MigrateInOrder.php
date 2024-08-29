@@ -83,10 +83,12 @@ class MigrateInOrder extends Command
             '2024_08_05_162830_create_business_managers_table.php',
             '2024_08_13_065442_create_resource_categories_table.php',
             '2024_08_13_100733_create_resources_table.php',
+            '2024_08_14_070409_create_transfer_players_table.php',
             '2024_08_13_070939_create_posts_table.php',
             '2024_08_14_041548_create_comments_table.php',
             '2024_08_14_041613_create_likes_table.php'
- ];
+        ];
+
 
         foreach($migrations as $migration)
         {

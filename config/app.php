@@ -256,4 +256,11 @@ return [
         'default'=>1,
     ],
 
+    'year' => [
+        'freshman'=> "Freshman",
+        'sophomore'=>"Sophomore",
+        'junior'=>"Junior",
+        'senior'=>"Senior & 5th year",
+    ],
+
 ];
