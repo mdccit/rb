@@ -31,6 +31,23 @@ class SchoolUserService
             ->get();
     }
 
+    public function getManageSchoolUser ($user_id, $school_id){
+        return SchoolUser::connect(config('database.secondary'))
+            ->join('users', 'users.id', '=' ,'school_users.user_id')
+            ->join('user_roles', 'user_roles.id', '=' ,'users.user_role_id')
+            ->where('school_users.user_id', $user_id)
+            ->where('school_users.school_id', $school_id)
+            ->select(
+                'school_users.id',
+                'users.id as user_id',
+                'users.first_name',
+                'users.last_name',
+                'user_roles.name as user_role',
+                'school_users.role as school_user_role'
+            )
+            ->get();
+    }
+
     public function searchUsers (array $data,$school_id){
         $per_page_items = array_key_exists("per_page_items",$data)?$data['per_page_items']:0;
         $search_key = array_key_exists("search_key",$data)?$data['search_key']:null;

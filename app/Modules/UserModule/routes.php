@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::group(['namespace' => 'App\Modules\UserModule\Controllers','prefix' => 'api/'.config('app.version'), 'middleware' => ['api','access.key','locale','cors', 'json.response']], function() {
 
-    //TODO All PublicModule routes define here
+    //TODO All UserModule routes define here
     Route::prefix('user')->group(function () {
 
         //TODO whatever not need to authenticate
@@ -16,6 +16,11 @@ Route::group(['namespace' => 'App\Modules\UserModule\Controllers','prefix' => 'a
 
             //resource
             Route::get('/resource', 'ResourceController@index')->name('user.resources.index');
+
+            Route::get('/players/{user_id}', 'UsersController@getPlayerProfile')->name('user.players.view');
+            Route::get('/coaches/{user_id}', 'UsersController@getCoachProfile')->name('user.coaches.view');
+            Route::get('/business-managers/{user_id}', 'UsersController@getBusinessManagerProfile')->name('user.business-managers.view');
+            Route::get('/parents/{user_id}', 'UsersController@getParentProfile')->name('user.parents.view');
 
             //TODO only authenticated default users can be access
             Route::middleware('auth.is_default')->group(function () {
