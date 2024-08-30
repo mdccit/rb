@@ -13,6 +13,7 @@ use App\Models\UserPhone;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use App\Models\ModerationRequest;
 
 class UserService
 {
@@ -123,6 +124,14 @@ class UserService
                 'password' => Hash::make($data['password']),
                 'remember_token' => Str::random(10)
             ]);
+
+        // Create moderation reques
+        ModerationRequest::create([
+            'moderatable_type' => User::class,
+            'moderatable_id' => $user->id,
+            'priority' => 'medium',
+            'created_by' => auth()->id(),
+        ]);
         $user_phone = UserPhone::connect(config('database.secondary'))
             ->where('user_id', $user->id)->first();
         $phone_code = Country::connect(config('database.secondary'))->find($data['phone_code_country'])->getPhoneCode();

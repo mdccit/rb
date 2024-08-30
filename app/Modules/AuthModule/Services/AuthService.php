@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use hisorange\BrowserDetect;
 use hisorange\BrowserDetect\Parser as Browser;
+use App\Models\ModerationRequest;
 
 class AuthService
 {
@@ -45,6 +46,15 @@ class AuthService
                 'last_logged_at' => Carbon::now(),
             ]);
         }
+
+         // Create moderation reques
+         ModerationRequest::create([
+            'moderatable_type' => User::class,
+            'moderatable_id' => $user->id,
+            'priority' => 'medium',
+            'created_by' => $user->id,
+            'notes' => 'User signup requires approval*',
+        ]);
 
         $description = Browser::browserName() . ' on ' .Browser::platformName() . ' (' . Browser::deviceType() . ' Device)';
         UserSession::connect(config('database.default'))

@@ -66,6 +66,15 @@ Route::group(['namespace' => 'App\Modules\AdminModule\Controllers','prefix' => '
                 Route::get('/player-get/{id}', 'PlayerController@getUser')->name('admin.player.index');
                 Route::put('/player-update/{id}', 'PlayerController@updateUser')->name('admin.player.update');
 
+                //morderation 
+                Route::get('/morderation-get-all', 'ModerationRequestController@getAll')->name('admin.morderation.get-all');
+                Route::get('/morderation-get/{id}', 'ModerationRequestController@get')->name('admin.morderation.get');
+                Route::get('/morderation-close/{id}', 'ModerationRequestController@close')->name('admin.morderation.close');
+                Route::get('/morderation-reopen/{id}', 'ModerationRequestController@reopen')->name('admin.morderation.reopen');
+                Route::delete('/morderation-delete/{id}', 'ModerationRequestController@delete')->name('admin.morderation.delete');
+                Route::get('/morderation-comment-get-all/{id}', 'ModerationCommentController@getAll')->name('admin.morderation-comment.get-all');
+                Route::post('/morderation-comment-create', 'ModerationCommentController@store')->name('admin.morderation-comment.store');
+
             });
 
             //TODO only authenticated operator users can be access
