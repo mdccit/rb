@@ -73,6 +73,7 @@ Route::group(['namespace' => 'App\Modules\AdminModule\Controllers','prefix' => '
                 Route::get('/disconnect/{id}', 'SyncController@disconnect')->name('admin.synchronize.disconnect');
                 Route::get('/sync/{id}', 'SyncController@sync')->name('admin.synchronize.sync');
                 Route::put('/update-setting/{id}', 'SyncController@updateSetting')->name('admin.synchronize.update');
+                Route::get('/history/{id}', 'SyncController@history')->name('admin.synchronize.history');
 
             });
 

@@ -248,4 +248,36 @@ class SyncController extends Controller
             );
         }
     }
+
+    public function history($school_id)
+    {
+        try{
+            $school = School::connect(config('database.secondary'))->where('id', $school_id)->first();
+
+            if($school){
+
+                $responseData = $this->syncService->history($school_id);
+
+                return CommonResponse::getResponse(
+                    200,
+                    'Successfully fetched',
+                    'Successfully fetched',
+                    $responseData
+                );
+            }else{
+                return CommonResponse::getResponse(
+                    422,
+                    'School does not exist',
+                    'School does not exist'
+                );
+            }
+            
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    }
 }

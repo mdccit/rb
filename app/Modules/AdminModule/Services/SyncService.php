@@ -300,6 +300,24 @@ class SyncService
                ]);
     }
 
+    public function history($school_id){
+
+        
+        return SyncLog::connect(config('database.secondary'))
+                    ->where('school_id', $school_id)
+                    ->join('users', 'users.id', '=' ,'sync_logs.created_by')
+                    ->select(
+                        'sync_logs.id',
+                        'sync_logs.school_id',
+                        'sync_logs.status',
+                        'sync_logs.data',
+                        'users.first_name as created_by',
+                        'sync_logs.created_at',
+                        'sync_logs.updated_at'
+                    )
+                    ->get();
+        
+    }
     
 
 }
