@@ -7,32 +7,32 @@ namespace App\Modules\AdminModule\Services;
 use App\Models\School;
 use GuzzleHttp\Client;
 use App\Models\SyncLog;
+use Carbon\Carbon;
+use App\Models\SyncSetting;
 
 class SyncService
 {
     // Define a mapping of fields to their paths in the $result array
     protected $fieldMapping = [
-        'name' => ['school', 'name'],
-        'url' => ['school', 'school_url'],
-        'tuition_in_state' => ['latest', 'cost', 'tuition', 'in_state'],
-        'tuition_out_state' => ['latest', 'cost', 'tuition', 'out_of_state'],
-        'cost_of_attendance' => ['latest', 'cost', 'avg_net_price', 'overall'],
-        'degrees_offered' => ['latest', 'academics', 'program', 'degree'],
-        'address' => ['school', 'address'],
-        'city' => ['school', 'city'],
-        'state' => ['school', 'state'],
-        'zip' => ['school', 'zip'],
-        // 'country' => [], // This is a static value, so we leave the array empty
-        'coords_lat' => ['location', 'lat'],
-        'coords_lng' => ['location', 'lon'],
-        'acceptance_rate' => ['latest', 'admissions', 'admission_rate', 'overall'],
-        'graduation_rate' => ['latest', 'completion', 'rate_suppressed', 'overall'],
-        'student_count' => ['latest', 'student', 'size'],
-        'earnings_1_year_after_graduation' => ['latest', 'earnings', '1_yr_after_completion', 'median'],
-        'earnings_3_years_after_graduation' => ['latest', 'earnings', '4_yrs_after_completion', 'median'],
-        'student_to_faculty_ratio' => ['latest', 'student', 'demographics', 'student_faculty_ratio'],
-        'percentage_of_international_students' => ['latest', 'student', 'demographics', 'share_born_US', 'home_ZIP'],
-    ];
+        
+         'tuition_in_state' => ['latest', 'cost', 'tuition', 'in_state'],
+         'tuition_out_state' => ['latest', 'cost', 'tuition', 'out_of_state'],
+         'cost_of_attendance' => ['latest', 'cost', 'avg_net_price', 'overall'],
+         'degrees_offered' => ['latest', 'academics', 'program', 'degree'],
+         'address' => ['school', 'address'],
+         'city' => ['school', 'city'],
+         'state' => ['school', 'state'],
+         'zip' => ['school', 'zip'],
+         'coords_lat' => ['location', 'lat'],
+         'coords_lng' => ['location', 'lon'],
+         'acceptance_rate' => ['latest', 'admissions', 'admission_rate', 'overall'],
+         'graduation_rate' => ['latest', 'completion', 'rate_suppressed', 'overall'],
+         'student_count' => ['latest', 'student', 'size'],
+         'earnings_1_year_after_graduation' => ['latest', 'earnings', '1_yr_after_completion', 'median'],
+         'earnings_3_years_after_graduation' => ['latest', 'earnings', '4_yrs_after_completion', 'median'],
+         'student_to_faculty_ratio' => ['latest', 'student', 'demographics', 'student_faculty_ratio'],
+         'percentage_of_international_students' => ['latest', 'student', 'demographics', 'share_born_US', 'home_ZIP'],
+     ];
 
     protected $disabledFieldsByDefault = [
         'name'
@@ -213,16 +213,13 @@ class SyncService
 
         $result = $response_results['results'][0];
 
-        // Get the gov_sync_settings from the school
-        $govSyncSettings = json_decode($school->gov_sync_settings, true);
+        
 
         // Initialize $updateData array
         $updateData = [];
 
-        // If $govSyncSettings is not provided, consider all fields for synchronization
-        if (!$govSyncSettings) {
-            $govSyncSettings = array_keys($this->fieldMapping);
-        }
+       $govSyncSettings = array_keys($this->fieldMapping);
+        
 
         // Loop over the field mapping, and if the field is enabled in the gov_sync_settings, add it to the $updateData array
         foreach ($this->fieldMapping as $field => $path) {
@@ -287,23 +284,17 @@ class SyncService
 
     public function updateSetting ($data, $school_id){
 
-        foreach (array_keys($this->fieldMapping) as $field) {
-            if (!isset($data['gov_sync_settings'][$field])) {
-                $data['gov_sync_settings'][$field] = false;
-            }
-        }
-
         School::connect(config('database.default'))
                 ->where('id', $school_id)
                  ->update([
                     'gov_sync_settings' =>  $data['gov_sync_settings'],
-               ]);
+            ]);
     }
 
     public function history($school_id){
 
         
-        return SyncLog::connect(config('database.secondary'))
+        $history = SyncLog::connect(config('database.secondary'))
                     ->where('school_id', $school_id)
                     ->join('users', 'users.id', '=' ,'sync_logs.created_by')
                     ->select(
@@ -316,7 +307,22 @@ class SyncService
                         'sync_logs.updated_at'
                     )
                     ->get();
-        
+
+        return $history;
+                    
+    }
+
+    public function sysnGovSettings($school_id){
+        $school = School::connect(config('database.secondary'))->where('id', $school_id)->first();
+      
+        $gov_sync_settings = json_decode($school->gov_sync_settings, true) ?? [];
+
+        if($gov_sync_settings == null) {
+           $gov_sync_settings = SyncSetting::connect(config('database.secondary'))->get();
+            
+        }
+
+        return  $gov_sync_settings;
     }
     
 

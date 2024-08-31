@@ -187,40 +187,11 @@ class SyncController extends Controller
     public function updateSetting(Request $request, $school_id)
     {
         try{
-            $request->merge([
-                'gov_sync_settings' => array_map(function ($value) {
-                    return filter_var($value, FILTER_VALIDATE_BOOLEAN);
-                }, $request->input('gov_sync_settings', [])),
+            
+            $validator = Validator::make($request->all(), [
+                'gov_sync_settings' => 'required|array'
             ]);
-
-            // Define validation rules
-            $rules = [
-                'gov_sync_settings' => [
-                    'required',
-                    'array',
-                        function ($attribute, $value, $fail) {
-                            foreach ($value as $key => $val) {
-                                if (!in_array($key, array_keys($this->fieldMapping))) {
-                                     $fail("$attribute.$key is not a valid key.");
-                                }
-                                if (!is_bool($val)) {
-                                    $fail("$attribute.$key must be a boolean. Value given: " . var_export($val, true));
-                               }
-                            }
-                        }
-                ],
-            ];
-
-            $validator = Validator::make($request->all(), $rules);
-
-            $validator->after(function ($validator) use ($request) {
-                foreach (array_keys($request->input('gov_sync_settings', [])) as $field) {
-                    if (!array_key_exists($field, $this->fieldMapping)) {
-                        $validator->errors()->add('gov_sync_settings', "The selected gov_sync_settings.$field is invalid.");
-                    }
-                }
-            });
-
+            
             if ($validator->fails())
             {
                 return CommonResponse::getResponse(
@@ -280,4 +251,38 @@ class SyncController extends Controller
             );
         }
     }
+
+    public function sysnGovSettings($school_id)
+    {
+        try{
+            $school = School::connect(config('database.secondary'))->where('id', $school_id)->first();
+
+            if($school){
+
+                $responseData = $this->syncService->sysnGovSettings($school_id);
+
+                return CommonResponse::getResponse(
+                    200,
+                    'Successfully fetched',
+                    'Successfully fetched',
+                    $responseData
+                );
+            }else{
+                return CommonResponse::getResponse(
+                    422,
+                    'School does not exist',
+                    'School does not exist'
+                );
+            }
+            
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    }
+
+
 }
