@@ -6,6 +6,7 @@ namespace App\Modules\AuthModule\Services;
 
 use App\Models\User;
 use App\Models\UserSession;
+use App\Traits\GeneralHelpers;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -14,6 +15,8 @@ use hisorange\BrowserDetect\Parser as Browser;
 
 class AuthService
 {
+    use GeneralHelpers;
+
     public function createUser(array $data, $is_google_auth = false,$ip_address){
         if($is_google_auth){
             $user = User::connect(config('database.default'))
@@ -22,6 +25,7 @@ class AuthService
                 'last_name' => $data['last_name'],
                 'display_name' => $data['first_name'].' '.$data['last_name'],
                 'email' => $data['email'],
+                'slug' => $this->generateSlug(new User(), $data['first_name'].' '.$data['last_name'],'slug'),
                 'user_role_id' => config('app.user_roles.default'),
                 'user_type_id' => config('app.user_types.free'),
                 'password' => Hash::make($data['password']),
@@ -38,6 +42,7 @@ class AuthService
                 'last_name' => $data['last_name'],
                 'display_name' => $data['first_name'].' '.$data['last_name'],
                 'email' => $data['email'],
+                'slug' => $this->generateSlug(new User(), $data['first_name'].' '.$data['last_name'], 'slug'),
                 'user_role_id' => config('app.user_roles.default'),
                 'user_type_id' => config('app.user_types.free'),
                 'password' => Hash::make($data['password']),
