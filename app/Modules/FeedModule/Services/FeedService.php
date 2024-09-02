@@ -462,12 +462,15 @@ class FeedService
         $query = Post::connect(config('database.secondary'))
             ->withCount('likes') 
             ->withCount('comments') 
-            ->with(['comments'])
+            ->with(['comments' => function ($query) {
+                $query->with('user'); // Eager load the user relationship for each comment
+            }])
             ->with(['likes' => function ($query) use ($userId) {
                 $query->where('user_id', $userId);
             }])
             ->with('school')
-            ->with('business');
+            ->with('business')
+            ->with('user');
 
         // If a type is provided, filter the posts by the specified type
         if ($type) {
