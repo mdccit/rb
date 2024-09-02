@@ -34,6 +34,25 @@ class ConnectionService
        
     }
 
+    public function invitationList (){
+
+        return  ConnectionRequest::connect(config('database.secondary'))
+                    ->where('receiver_id', auth()->id())
+                    ->where('connection_status','=','pending')
+                    ->get();
+        
+    }
+
+    public function connectedList (){
+
+       return  ConnectionRequest::connect(config('database.secondary'))
+                    ->where('connection_status','=','accepted')
+                    ->where('receiver_id', auth()->id())
+                    ->orWhere('sender_id', auth()->id())
+                   ->get();
+        
+    }
+
 
 
 
