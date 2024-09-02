@@ -76,14 +76,14 @@ class ModerationRequestController extends Controller
         }
     }
 
-    public function close($morderation_id)
+    public function close($morderation_id , Request $request)
     {
         try{
             $morderation =ModerationRequest::connect(config('database.secondary'))->where('id',$morderation_id)->first();
 
             if($morderation){
 
-                $this->moderationRequestService->close($morderation_id);
+                $this->moderationRequestService->close($morderation_id,$request->all());
                 
                 return CommonResponse::getResponse(
                     200,
@@ -108,14 +108,14 @@ class ModerationRequestController extends Controller
         }
     }
 
-    public function reopen($morderation_id)
+    public function reopen($morderation_id , Request $request)
     {
         try{
             $morderation =ModerationRequest::connect(config('database.secondary'))->where('id',$morderation_id)->first();
 
             if($morderation){
 
-                $this->moderationRequestService->reopen($morderation_id);
+                $this->moderationRequestService->reopen($morderation_id, $request->all());
                 
                 return CommonResponse::getResponse(
                     200,

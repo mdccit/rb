@@ -75,7 +75,7 @@ class ModerationRequestService
     
     }
 
-    public function close($mordaration_id){
+    public function close($mordaration_id, $request){
         ModerationRequest::connect(config('database.default'))
                    ->where('id', $mordaration_id)
                     ->update([
@@ -85,7 +85,7 @@ class ModerationRequestService
                     ]);
     }
 
-    public function reopen($mordaration_id){
+    public function reopen($mordaration_id ,$request){
         
         ModerationRequest::connect(config('database.default'))
                 ->where('id', $mordaration_id)
