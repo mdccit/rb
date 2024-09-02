@@ -21,10 +21,17 @@ Route::group(['namespace' => 'App\Modules\UserModule\Controllers','prefix' => 'a
             Route::get('/coaches/{user_id}', 'UsersController@getCoachProfile')->name('user.coaches.view');
             Route::get('/business-managers/{user_id}', 'UsersController@getBusinessManagerProfile')->name('user.business-managers.view');
             Route::get('/parents/{user_id}', 'UsersController@getParentProfile')->name('user.parents.view');
+            
+            //connections
+            Route::post('/connections-request', 'ConnectionController@requestConnection')->name('connections.connect.request');
+            Route::put('/connections-accept/{id}', 'ConnectionController@connectionAccept')->name('connections.connect.accept');
+            Route::put('/connections-cancelle/{id}', 'ConnectionController@connectionCancell')->name('connections.connect.cancelle');
+            Route::put('/connections-reject/{id}', 'ConnectionController@connectionReject')->name('connections.connect.reject');
+            Route::put('/connections-remove/{id}', 'ConnectionController@connectionRemove')->name('connections.connect.remove');
 
             //TODO only authenticated default users can be access
             Route::middleware('auth.is_default')->group(function () {
-
+   
                 
 
             });
