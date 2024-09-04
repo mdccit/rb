@@ -1,7 +1,7 @@
 <?php
 
 
-namespace App\Modules\UserModule\Services;
+namespace App\Modules\PublicModule\Services;
 
 
 use App\Models\BusinessManager;

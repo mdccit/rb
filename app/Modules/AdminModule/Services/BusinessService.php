@@ -146,6 +146,7 @@ class BusinessService
                 'users.id as user_id',
                 'users.first_name',
                 'users.last_name',
+                'users.slug',
                 'user_roles.name as user_role',
                 'business_managers.type as business_user_role'
             )
