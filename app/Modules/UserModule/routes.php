@@ -17,6 +17,10 @@ Route::group(['namespace' => 'App\Modules\UserModule\Controllers','prefix' => 'a
             //resource
             Route::get('/resource', 'ResourceController@index')->name('user.resources.index');
 
+            //search
+            Route::get('/search', 'SearchController@search')->name('user.search.search');
+
+
             //TODO only authenticated default users can be access
             Route::middleware('auth.is_default')->group(function () {
 
