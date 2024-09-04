@@ -32,6 +32,7 @@ class UserSeeder extends Seeder
                 'last_name' => $data['last_name'],
                 'display_name' => $data['first_name'].' '.$data['last_name'],
                 'email' => $data['email'],
+                'slug' => Str::uuid(),
                 'user_role_id' => $data['user_role'],
                 'user_type_id' => config('app.user_types.free'),
                 'password' => Hash::make($data['password']),
