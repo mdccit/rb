@@ -6,9 +6,12 @@ namespace App\Modules\AdminModule\Services;
 
 use App\Models\Business;
 use App\Models\BusinessManager;
+use App\Traits\GeneralHelpers;
 
 class BusinessService
 {
+    use GeneralHelpers;
+
     public function getAllBusinesses (array $data){
         $per_page_items = array_key_exists("per_page_items",$data)?$data['per_page_items']:0;
         $has_admins = array_key_exists("has_admins",$data)?$data['has_admins']:'none';
@@ -21,6 +24,7 @@ class BusinessService
                 'id',
                 'name',
                 'bio',
+                'slug',
                 'other_data->total_staff as total_staff',
                 'other_data->admin_staff as admin_staff',
                 'other_data->non_admin_staff as non_admin_staff',
@@ -68,6 +72,7 @@ class BusinessService
                 'id',
                 'name',
                 'bio',
+                'slug',
                 'is_verified',
                 'is_approved',
                 'url',
@@ -81,6 +86,7 @@ class BusinessService
         Business::connect(config('database.default'))
             ->create([
                 'name' => $data['name'],
+                'slug' => $this->generateSlug(new Business(), $data['name'], 'slug'),
             ]);
     }
 
@@ -122,6 +128,7 @@ class BusinessService
                 'id',
                 'name',
                 'bio',
+                'slug',
                 'is_verified',
                 'is_approved',
                 'url',
