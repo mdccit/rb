@@ -19,6 +19,7 @@ Route::group(['namespace' => 'App\Modules\UserModule\Controllers','prefix' => 'a
 
             //search
             Route::get('/search', 'SearchController@search')->name('user.search.search');
+            Route::get('/recent-search', 'SearchController@getRecentSearch')->name('user.search.recent');
 
 
             //TODO only authenticated default users can be access

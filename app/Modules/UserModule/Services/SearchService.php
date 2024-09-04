@@ -9,11 +9,8 @@ use App\Models\Coach;
 use App\Models\Country;
 use App\Models\Player;
 use App\Models\User;
-use App\Models\UserPhone;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 use App\Models\School;
+use App\Models\RecentSearch;
 
 class SearchService
 {
@@ -189,12 +186,30 @@ class SearchService
             
             $schoolDataSet =  $school_query->get();
         }
+
+       if($search_key != null){
+           RecentSearch::connect(config('database.default'))
+                ->create([
+                    'user_id' => auth()->id(),
+                    'name' => $search_key
+               ]);
+       }
         
         return [
             'users' => $dataSet,
             'school' =>  $schoolDataSet 
         ];
 
+    }
+
+
+    public function getRecentSearch(){
+        
+        return RecentSearch::connect(config('database.secondary'))
+                ->where('user_id',auth()->id())
+                ->orderBy('created_at', 'desc')
+                ->limit(3)
+                ->get();
     }
 
     
