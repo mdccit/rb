@@ -9,6 +9,7 @@ use Database\Seeders\DivisionSeeder;
 use Database\Seeders\NationalitySeeder;
 use Database\Seeders\PlayerBudgetSeeder;
 use Database\Seeders\UserRoleSeeder;
+use Database\Seeders\UserSeeder;
 use Database\Seeders\UserTypeSeeder;
 use Illuminate\Console\Command;
 
@@ -107,6 +108,8 @@ class MigrateInOrder extends Command
         $this->call(PlayerBudgetSeeder::class);
         $this->call(ConferenceSeeder::class);
         $this->call(DivisionSeeder::class);
+
+        $this->call(UserSeeder::class);
 
         //Passport Config
         //Create personal client for 'RecruitedProV2'
