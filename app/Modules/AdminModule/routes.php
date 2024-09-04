@@ -49,7 +49,7 @@ Route::group(['namespace' => 'App\Modules\AdminModule\Controllers','prefix' => '
                 Route::get('/businesses/users/{business_id}', 'BusinessUsersController@getAllBusinessUsers')->name('admin.businesses.users.get-all');
                 Route::get('/businesses/search-users/{business_id}', 'BusinessUsersController@searchUsers')->name('admin.businesses.users.search');
                 Route::post('/businesses/add-user', 'BusinessUsersController@addBusinessUser')->name('admin.businesses.users.add');
-                
+
                 //resource category
                 Route::get('/resource-categories', 'ResourceCategoriesController@index')->name('admin.resources-category.index');
                 Route::post('/resource-categories-create', 'ResourceCategoriesController@storeCategory')->name('admin.resources-category.create');
@@ -61,10 +61,26 @@ Route::group(['namespace' => 'App\Modules\AdminModule\Controllers','prefix' => '
                 Route::post('/resource-create', 'ResourceController@store')->name('admin.resources.create');
                 Route::put('/resource-update/{id}', 'ResourceController@update')->name('admin.resources.update');
                 Route::delete('/resource-delete/{id}', 'ResourceController@destroy')->name('admin.resources.delete');
+                Route::put('/user-update/{user_id}', 'UsersController@updateUser')->name('admin.users.update');
+
+                Route::get('/transfer-player', 'TransferPlayerController@getAllUsers')->name('admin.transfer.get-all');
+                Route::post('/transfer-player-register', 'TransferPlayerController@store')->name('admin.transfer.register');
+                Route::put('/transfer-player-update/{id}', 'TransferPlayerController@update')->name('admin.transfer.update');
+                Route::delete('/transfer-player-delete/{id}', 'TransferPlayerController@destory')->name('admin.transfer.delete');
+
 
                 //player
                 Route::get('/player-get/{id}', 'PlayerController@getUser')->name('admin.player.index');
                 Route::put('/player-update/{id}', 'PlayerController@updateUser')->name('admin.player.update');
+
+                //morderation 
+                Route::get('/morderation-get-all', 'ModerationRequestController@getAll')->name('admin.morderation.get-all');
+                Route::get('/morderation-get/{id}', 'ModerationRequestController@get')->name('admin.morderation.get');
+                Route::put('/morderation-close/{id}', 'ModerationRequestController@close')->name('admin.morderation.close');
+                Route::put('/morderation-reopen/{id}', 'ModerationRequestController@reopen')->name('admin.morderation.reopen');
+                Route::delete('/morderation-delete/{id}', 'ModerationRequestController@delete')->name('admin.morderation.delete');
+                Route::get('/morderation-comment-get-all/{id}', 'ModerationCommentController@getAll')->name('admin.morderation-comment.get-all');
+                Route::post('/morderation-comment-create', 'ModerationCommentController@store')->name('admin.morderation-comment.store');
 
             });
 
