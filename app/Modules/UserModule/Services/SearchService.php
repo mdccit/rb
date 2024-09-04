@@ -5,13 +5,11 @@ namespace App\Modules\UserModule\Services;
 
 
 use App\Models\BusinessManager;
-use App\Models\Coach;
-use App\Models\Country;
 use App\Models\Player;
 use App\Models\User;
 use App\Models\School;
 use App\Models\RecentSearch;
-
+use App\Models\SaveSearch;
 class SearchService
 {
     public function search (array $data){
@@ -204,12 +202,32 @@ class SearchService
 
 
     public function getRecentSearch(){
-        
+
         return RecentSearch::connect(config('database.secondary'))
                 ->where('user_id',auth()->id())
                 ->orderBy('created_at', 'desc')
                 ->limit(3)
                 ->get();
+    }
+
+
+    public function saveSearch(array $data){
+        SaveSearch::connect(config('database.default'))
+            ->create([
+                'user_id' => auth()->id(),
+                'name' => $data['name'],
+                'search_data' => $data['search_data']
+           ]);
+    }
+
+    public function getSaveSearch(){
+        return SaveSearch::connect(config('database.secondary'))
+                 ->where('user_id',auth()->id())
+                 ->get();
+    }
+
+    public function deleteSaveSearch($search_id){
+        SaveSearch::connect(config('database.default'))->destroy($search_id);
     }
 
     
