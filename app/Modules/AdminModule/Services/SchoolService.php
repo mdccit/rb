@@ -5,9 +5,13 @@ namespace App\Modules\AdminModule\Services;
 
 
 use App\Models\School;
+use App\Models\SchoolUser;
+use App\Traits\GeneralHelpers;
 
 class SchoolService
 {
+    use GeneralHelpers;
+
     public function getAllSchools (array $data){
         $per_page_items = array_key_exists("per_page_items",$data)?$data['per_page_items']:0;
         $has_admins = array_key_exists("has_admins",$data)?$data['has_admins']:'none';
@@ -21,17 +25,18 @@ class SchoolService
                 'id',
                 'name',
                 'bio',
-                'other_data->>teams_count as teams_count',
-                'other_data->>total_staff as total_staff',
-                'other_data->>admin_staff as admin_staff',
-                'other_data->>non_admin_staff as non_admin_staff',
+                'slug',
+                'other_data->teams_count as teams_count',
+                'other_data->total_staff as total_staff',
+                'other_data->admin_staff as admin_staff',
+                'other_data->non_admin_staff as non_admin_staff',
                 'created_at as joined_at'
             );
 
         if ($has_admins === 'has_admins') {
-            $query->where('other_data->>admin_staff', '>',0);
+            $query->where('other_data->admin_staff', '>',0);
         } elseif ($has_admins === 'no_admins') {
-            $query->where('other_data->>admin_staff',0);
+            $query->where('other_data->admin_staff',0);
         }
 
         if ($is_verified === 'verified') {
@@ -47,9 +52,9 @@ class SchoolService
         }
 
         if ($has_coordinates === 'has_coordinates') {
-            $query->where('other_data->>has_coordinates', true);
+            $query->where('other_data->has_coordinates', true);
         } elseif ($has_coordinates === 'no_coordinates') {
-            $query->where('other_data->>has_coordinates', false);
+            $query->where('other_data->has_coordinates', false);
         }
 
         if ($search_key != null) {
@@ -75,6 +80,7 @@ class SchoolService
                 'id',
                 'name',
                 'bio',
+                'slug',
                 'is_verified',
                 'is_approved',
                 'gov_id',
@@ -91,6 +97,7 @@ class SchoolService
         School::connect(config('database.default'))
             ->create([
                 'name' => $data['name'],
+                'slug' => $this->generateSlug(new School(), $data['name'], 'slug'),
             ]);
     }
 
@@ -100,12 +107,15 @@ class SchoolService
             ->first();
 
         if($school){
-            $other_data = [
-                'teams_count' => 0,
-                'total_staff' => 0,
-                'admin_staff' => 0,
-                'non_admin_staff' => 0,
-            ];
+            $other_data = $school->other_data;
+            if(!$other_data){
+                $other_data = [
+                    'teams_count' => 0,
+                    'total_staff' => 0,
+                    'admin_staff' => 0,
+                    'non_admin_staff' => 0,
+                ];
+            }
 
             $school->update([
                 'name' => $data['name'],
@@ -119,5 +129,51 @@ class SchoolService
         }
     }
 
+    public function deleteSchool ($school_id){
+        School::connect(config('database.default'))
+            ->where('id', $school_id)
+            ->delete();
+    }
+
+    public function viewSchool ($school_id){
+        $school = School::connect(config('database.secondary'))
+            ->where('id', $school_id)
+            ->select(
+                'id',
+                'name',
+                'bio',
+                'slug',
+                'is_verified',
+                'is_approved',
+                'gov_id',
+                'gov_sync_settings',
+                'url',
+                'genders_recruiting',
+                'created_at as joined_at',
+                'other_data'
+            )
+            ->first();
+
+        $school_users = SchoolUser::connect(config('database.secondary'))
+            ->join('users', 'users.id', '=' ,'school_users.user_id')
+            ->join('user_roles', 'user_roles.id', '=' ,'users.user_role_id')
+            ->where('school_users.school_id', $school_id)
+            ->select(
+                'school_users.id',
+                'users.id as user_id',
+                'users.first_name',
+                'users.last_name',
+                'users.slug',
+                'user_roles.name as user_role',
+                'school_users.role as school_user_role'
+            )
+            ->get();
+
+        $dataSet = [
+            'school' => $school,
+            'school_users' => $school_users,
+        ];
+        return $dataSet;
+    }
 
 }

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::group(['namespace' => 'App\Modules\UserModule\Controllers','prefix' => 'api/'.config('app.version'), 'middleware' => ['api','access.key','locale','cors', 'json.response']], function() {
 
-    //TODO All PublicModule routes define here
+    //TODO All UserModule routes define here
     Route::prefix('user')->group(function () {
 
         //TODO whatever not need to authenticate
@@ -24,6 +24,16 @@ Route::group(['namespace' => 'App\Modules\UserModule\Controllers','prefix' => 'a
             Route::put('/connections-reject/{id}', 'ConnectionController@connectionReject')->name('connections.connect.reject');
             Route::put('/connections-remove/{id}', 'ConnectionController@connectionRemove')->name('connections.connect.remove');
             Route::get('/connections-list', 'ConnectionController@userinivitationAndConnectedList')->name('connections.connect.connection-list');
+
+            //conversation
+            Route::post('/create-conversation', 'ConversationController@createConversation')->name('user.conversation.create');
+            Route::put('/delete-conversation/{id}', 'ConversationController@deleteConversation')->name('user.conversation.delete');
+            Route::get('/get-all-conversation', 'ConversationController@getAllConversation')->name('user.conversation.get');
+
+            //chat
+             Route::post('/send-message', 'ChatController@sendMessage')->name('chat.message.send');
+             Route::get('/get-message/{id}', 'ChatController@getMessages')->name('chat.message.get');
+             Route::get('/get-message-unread-count', 'ChatController@unreadMessageCount')->name('chat.message.unread-count');
 
             //TODO only authenticated default users can be access
             Route::middleware('auth.is_default')->group(function () {
@@ -50,6 +60,8 @@ Route::group(['namespace' => 'App\Modules\UserModule\Controllers','prefix' => 'a
 
             //TODO only authenticated coach users can be access
             Route::middleware('auth.is_coach')->group(function () {
+                //get transfer player
+                Route::get('/transfer-player', 'TransferPlayerController@getAllUsers')->name('user.transfer.get-all');
 
             });
 

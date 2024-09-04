@@ -44,6 +44,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'user_type_id',
         'country_id',
         'nationality_id',
+        'slug',
         'gender',
         'date_of_birth',
         'email_verified_at',
@@ -117,4 +118,10 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         $this->notify(new \App\Notifications\VerifyEmailNotification($this));
     }
+
+    public function conversation()
+    {
+        return $this->hasMany(Conversation::class);
+    }
+
 }

@@ -128,4 +128,43 @@ class SchoolsController extends Controller
             );
         }
     }
+
+    public function destroySchool(Request $request,$school_id)
+    {
+        try{
+            $this->schoolService->deleteSchool($school_id);
+
+            return CommonResponse::getResponse(
+                200,
+                'Successfully deleted',
+                'Successfully deleted'
+            );
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    }
+
+    public function viewSchool(Request $request,$school_id)
+    {
+        try{
+            $responseData = $this->schoolService->viewSchool($school_id);
+
+            return CommonResponse::getResponse(
+                200,
+                'Successfully fetched',
+                'Successfully fetched',
+                $responseData
+            );
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    }
 }

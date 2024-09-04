@@ -10,12 +10,16 @@ use App\Models\Country;
 use App\Models\Player;
 use App\Models\User;
 use App\Models\UserPhone;
+use App\Traits\GeneralHelpers;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use App\Models\ModerationRequest;
 
 class UserService
 {
+    use GeneralHelpers;
+
     public function getAllUsers (array $data){
         $per_page_items = array_key_exists("per_page_items",$data)?$data['per_page_items']:0;
         $user_role = array_key_exists("user_role",$data)?$data['user_role']:0;
@@ -34,6 +38,7 @@ class UserService
                 'users.last_name',
                 'users.display_name',
                 'users.email',
+                'users.slug',
                 'user_roles.name as user_role',
                 'user_types.name as user_type',
                 'users.created_at as joined_at',
@@ -82,6 +87,7 @@ class UserService
                 'users.other_names',
                 'users.display_name',
                 'users.email',
+                'users.slug',
                 'users.is_approved',
                 'user_roles.id as user_role_id',
                 'user_roles.name as user_role',
@@ -118,11 +124,20 @@ class UserService
                 'last_name' => $data['last_name'],
                 'display_name' => $data['first_name'].' '.$data['last_name'],
                 'email' => $data['email'],
+                'slug' => $this->generateSlug(new User(), $data['first_name'].' '.$data['last_name'], 'slug'),
                 'user_role_id' => $data['user_role'],
                 'user_type_id' => config('app.user_types.free'),
                 'password' => Hash::make($data['password']),
                 'remember_token' => Str::random(10)
             ]);
+
+        // Create moderation reques
+        ModerationRequest::create([
+            'moderatable_type' => User::class,
+            'moderatable_id' => $user->id,
+            'priority' => 'medium',
+            'created_by' => auth()->id(),
+        ]);
         $user_phone = UserPhone::connect(config('database.secondary'))
             ->where('user_id', $user->id)->first();
         $phone_code = Country::connect(config('database.secondary'))->find($data['phone_code_country'])->getPhoneCode();
@@ -274,5 +289,23 @@ class UserService
             }
         }
     }
+
+    public function userDelete($user_id){
+        
+        User::connect(config('database.default'))->destroy($user_id);
+       
+    }
+
+    public function userSessionDelete($user_id){
+        
+        $user = User::connect(config('database.default'))->find($user_id);
+        $tokens = $user->tokens;
+
+        foreach($tokens as $token){
+            $token->revoke();
+        }
+       
+    }
+
 
 }

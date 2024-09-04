@@ -6,14 +6,18 @@ namespace App\Modules\AuthModule\Services;
 
 use App\Models\User;
 use App\Models\UserSession;
+use App\Traits\GeneralHelpers;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use hisorange\BrowserDetect;
 use hisorange\BrowserDetect\Parser as Browser;
+use App\Models\ModerationRequest;
 
 class AuthService
 {
+    use GeneralHelpers;
+
     public function createUser(array $data, $is_google_auth = false,$ip_address){
         if($is_google_auth){
             $user = User::connect(config('database.default'))
@@ -22,6 +26,7 @@ class AuthService
                 'last_name' => $data['last_name'],
                 'display_name' => $data['first_name'].' '.$data['last_name'],
                 'email' => $data['email'],
+                'slug' => $this->generateSlug(new User(), $data['first_name'].' '.$data['last_name'],'slug'),
                 'user_role_id' => config('app.user_roles.default'),
                 'user_type_id' => config('app.user_types.free'),
                 'password' => Hash::make($data['password']),
@@ -38,6 +43,7 @@ class AuthService
                 'last_name' => $data['last_name'],
                 'display_name' => $data['first_name'].' '.$data['last_name'],
                 'email' => $data['email'],
+                'slug' => $this->generateSlug(new User(), $data['first_name'].' '.$data['last_name'], 'slug'),
                 'user_role_id' => config('app.user_roles.default'),
                 'user_type_id' => config('app.user_types.free'),
                 'password' => Hash::make($data['password']),
@@ -45,6 +51,15 @@ class AuthService
                 'last_logged_at' => Carbon::now(),
             ]);
         }
+
+         // Create moderation reques
+         ModerationRequest::create([
+            'moderatable_type' => User::class,
+            'moderatable_id' => $user->id,
+            'priority' => 'medium',
+            'created_by' => $user->id,
+            'notes' => 'User signup requires approval*',
+        ]);
 
         $description = Browser::browserName() . ' on ' .Browser::platformName() . ' (' . Browser::deviceType() . ' Device)';
         UserSession::connect(config('database.default'))
