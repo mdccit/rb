@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::group(['namespace' => 'App\Modules\UserModule\Controllers','prefix' => 'api/'.config('app.version'), 'middleware' => ['api','access.key','locale','cors', 'json.response']], function() {
 
-    //TODO All PublicModule routes define here
+    //TODO All UserModule routes define here
     Route::prefix('user')->group(function () {
 
         //TODO whatever not need to authenticate

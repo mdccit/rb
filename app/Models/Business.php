@@ -29,6 +29,7 @@ class Business extends Model
     protected $fillable = [
         'name',
         'bio',
+        'slug',
         'is_verified',
         'is_approved',
         'url',
