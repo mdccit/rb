@@ -9,6 +9,11 @@ Route::group(['namespace' => 'App\Modules\UserModule\Controllers','prefix' => 'a
 
         //TODO whatever not need to authenticate
 
+        Route::get('/players/{user_slug}', 'UsersController@getPlayerProfile')->name('user.players.view');
+        Route::get('/coaches/{user_slug}', 'UsersController@getCoachProfile')->name('user.coaches.view');
+        Route::get('/business-managers/{user_slug}', 'UsersController@getBusinessManagerProfile')->name('user.business-managers.view');
+        Route::get('/parents/{user_slug}', 'UsersController@getParentProfile')->name('user.parents.view');
+
 
         Route::middleware('auth:api')->group(function () {
             //TODO all authenticated users can be access
@@ -16,11 +21,6 @@ Route::group(['namespace' => 'App\Modules\UserModule\Controllers','prefix' => 'a
 
             //resource
             Route::get('/resource', 'ResourceController@index')->name('user.resources.index');
-
-            Route::get('/players/{user_slug}', 'UsersController@getPlayerProfile')->name('user.players.view');
-            Route::get('/coaches/{user_slug}', 'UsersController@getCoachProfile')->name('user.coaches.view');
-            Route::get('/business-managers/{user_slug}', 'UsersController@getBusinessManagerProfile')->name('user.business-managers.view');
-            Route::get('/parents/{user_slug}', 'UsersController@getParentProfile')->name('user.parents.view');
 
             //TODO only authenticated default users can be access
             Route::middleware('auth.is_default')->group(function () {

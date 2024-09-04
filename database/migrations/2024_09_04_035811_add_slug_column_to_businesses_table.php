@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->string('slug')->unique()->default(\Illuminate\Support\Facades\DB::raw('(UUID())'))->after('nationality_id');
+        Schema::table('businesses', function (Blueprint $table) {
+            $table->string('slug')->unique()->default(\Illuminate\Support\Facades\DB::raw('(UUID())'))->after('bio');
         });
     }
 
@@ -21,7 +21,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('businesses', function (Blueprint $table) {
             $table->dropColumn('slug');
         });
     }

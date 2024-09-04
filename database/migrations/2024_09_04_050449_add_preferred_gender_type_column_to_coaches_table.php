@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->string('slug')->unique()->default(\Illuminate\Support\Facades\DB::raw('(UUID())'))->after('nationality_id');
+        Schema::table('coaches', function (Blueprint $table) {
+            $table->enum('preferred_gender_type', ['male', 'female', 'all'])->default('all')->after('status');
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('slug');
+        Schema::table('coaches', function (Blueprint $table) {
+            $table->dropColumn('preferred_gender_type');
         });
     }
 };

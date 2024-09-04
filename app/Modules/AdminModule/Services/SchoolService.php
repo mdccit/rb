@@ -6,9 +6,12 @@ namespace App\Modules\AdminModule\Services;
 
 use App\Models\School;
 use App\Models\SchoolUser;
+use App\Traits\GeneralHelpers;
 
 class SchoolService
 {
+    use GeneralHelpers;
+
     public function getAllSchools (array $data){
         $per_page_items = array_key_exists("per_page_items",$data)?$data['per_page_items']:0;
         $has_admins = array_key_exists("has_admins",$data)?$data['has_admins']:'none';
@@ -22,6 +25,7 @@ class SchoolService
                 'id',
                 'name',
                 'bio',
+                'slug',
                 'other_data->teams_count as teams_count',
                 'other_data->total_staff as total_staff',
                 'other_data->admin_staff as admin_staff',
@@ -76,6 +80,7 @@ class SchoolService
                 'id',
                 'name',
                 'bio',
+                'slug',
                 'is_verified',
                 'is_approved',
                 'gov_id',
@@ -92,6 +97,7 @@ class SchoolService
         School::connect(config('database.default'))
             ->create([
                 'name' => $data['name'],
+                'slug' => $this->generateSlug(new School(), $data['name'], 'slug'),
             ]);
     }
 
@@ -136,6 +142,7 @@ class SchoolService
                 'id',
                 'name',
                 'bio',
+                'slug',
                 'is_verified',
                 'is_approved',
                 'gov_id',

@@ -31,6 +31,7 @@ class Coach extends Model
         'school_id',
         'position',
         'type',
-        'status'
+        'status',
+        'preferred_gender_type'
     ];
 }
