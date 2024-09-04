@@ -12,6 +12,7 @@ use Database\Seeders\UserRoleSeeder;
 use Database\Seeders\UserSeeder;
 use Database\Seeders\UserTypeSeeder;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 class MigrateInOrder extends Command
 {
@@ -92,9 +93,12 @@ class MigrateInOrder extends Command
             '2024_08_14_041548_create_comments_table.php',
             '2024_08_14_041613_create_likes_table.php',
             '2024_08_30_064700_create_moderation_requests_table.php',
-            '2024_08_30_064727_create_moderation_comments_table.php'
+            '2024_08_30_064727_create_moderation_comments_table.php',
+            '2024_08_30_105500_add_slug_column_to_users_table.php',
+            '2024_09_03_111301_add_slug_column_to_schools_table.php',
+            '2024_09_04_035811_add_slug_column_to_businesses_table.php',
+            '2024_09_04_050449_add_preferred_gender_type_column_to_coaches_table.php'
         ];
-
 
         foreach($migrations as $migration)
         {
