@@ -163,6 +163,7 @@ class SchoolService
                 'users.id as user_id',
                 'users.first_name',
                 'users.last_name',
+                'users.slug',
                 'user_roles.name as user_role',
                 'school_users.role as school_user_role'
             )

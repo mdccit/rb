@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Modules\UserModule\Controllers;
+namespace App\Modules\PublicModule\Controllers;
 
 use App\Extra\CommonResponse;
 use App\Http\Controllers\Controller;
-use App\Modules\UserModule\Services\UserService;
+use App\Modules\PublicModule\Services\UserService;
 use Illuminate\Http\Request;
 
 class UsersController extends Controller
