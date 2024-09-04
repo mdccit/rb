@@ -291,10 +291,10 @@ class ConnectionController extends Controller
         }
     }
 
-    public function invitationList()
+    public function userinivitationAndConnectedList()
     {
         try{
-            $dataSets = $this->connectionService->invitationList();
+            $dataSets = $this->connectionService->userinivitationAndConnectedList();
 
             $responseData = [
                 'dataSets' => $dataSets,
@@ -315,31 +315,6 @@ class ConnectionController extends Controller
         }
     }
 
-    public function connectedList()
-    {
-        try{
-            $dataSets = $this->connectionService->connectedList();
-
-            $responseData = [
-                'dataSets' => $dataSets,
-            ];
-
-            return CommonResponse::getResponse(
-                200,
-                'Successfully fetched',
-                'Successfully fetched',
-                $responseData
-            );
-        }catch (\Exception $e){
-            return CommonResponse::getResponse(
-                422,
-                $e->getMessage(),
-                'Something went to wrong'
-            );
-        }
-    }
-
-    
 
     
 }

@@ -28,8 +28,7 @@ Route::group(['namespace' => 'App\Modules\UserModule\Controllers','prefix' => 'a
             Route::put('/connections-cancelle/{id}', 'ConnectionController@connectionCancell')->name('connections.connect.cancelle');
             Route::put('/connections-reject/{id}', 'ConnectionController@connectionReject')->name('connections.connect.reject');
             Route::put('/connections-remove/{id}', 'ConnectionController@connectionRemove')->name('connections.connect.remove');
-            Route::get('/connections-invitation-list', 'ConnectionController@invitationList')->name('connections.connect.invitation-list');
-            Route::get('/connections-connected-list', 'ConnectionController@connectedList')->name('connections.connect.connected-list');
+            Route::get('/connections-list', 'ConnectionController@userinivitationAndConnectedList')->name('connections.connect.connection-list');
 
             //TODO only authenticated default users can be access
             Route::middleware('auth.is_default')->group(function () {

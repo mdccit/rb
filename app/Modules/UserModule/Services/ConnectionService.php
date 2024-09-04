@@ -6,7 +6,7 @@ namespace App\Modules\UserModule\Services;
 
 use App\Models\ConnectionRequest;
 
-
+use DB;
 class ConnectionService
 {
     public function requestConnection (array $data){
@@ -34,24 +34,25 @@ class ConnectionService
        
     }
 
-    public function invitationList (){
+    public function userinivitationAndConnectedList (){
 
-        return  ConnectionRequest::connect(config('database.secondary'))
-                    ->where('receiver_id', auth()->id())
-                    ->where('connection_status','=','pending')
-                    ->get();
+        $invitationList =   ConnectionRequest::connect(config('database.secondary'))
+                                ->where('receiver_id', auth()->id())
+                                ->where('connection_status','=','pending')
+                                ->get();
         
+        $connected  = ConnectionRequest::connect(config('database.secondary'))
+                        ->where('connection_status','=','accepted')
+                        ->where('receiver_id', auth()->id())
+                        ->orWhere('sender_id', auth()->id())
+                        ->get();
+        return [
+            'invitation_list' => $invitationList,
+            'connected_list' => $connected
+        ];
     }
 
-    public function connectedList (){
-
-       return  ConnectionRequest::connect(config('database.secondary'))
-                    ->where('connection_status','=','accepted')
-                    ->where('receiver_id', auth()->id())
-                    ->orWhere('sender_id', auth()->id())
-                   ->get();
-        
-    }
+    
 
 
 
