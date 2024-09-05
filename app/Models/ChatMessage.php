@@ -2,14 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Coach extends Model
+class ChatMessage extends Model
 {
     use HasFactory;
-    use HasUuids;
+
 
     /**
      * Connect the relevant database
@@ -21,17 +20,16 @@ class Coach extends Model
         return (new static)->setConnection($connection);
     }
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
-    protected $fillable = [
-        'user_id',
-        'school_id',
-        'position',
-        'type',
-        'status',
-        'preferred_gender_type'
-    ];
+    protected $fillable = ['type', 'message_status', 'content','created_by','conversation_id'];
+
+
+    public function conversations()
+    {
+        return $this->belongsTo(Conversation::class, 'conversation_id');
+    }
+
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
 }

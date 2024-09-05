@@ -2,16 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Coach extends Model
+class ModerationComment extends Model
 {
     use HasFactory;
-    use HasUuids;
 
-    /**
+     /**
      * Connect the relevant database
      *
      */
@@ -20,18 +18,24 @@ class Coach extends Model
         $connection = $connection ?:config('database.default');
         return (new static)->setConnection($connection);
     }
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
+        'moderation_request_id',
         'user_id',
-        'school_id',
-        'position',
-        'type',
-        'status',
-        'preferred_gender_type'
+        'comment',
     ];
+
+    public function moderationRequest()
+    {
+        return $this->belongsTo(ModerationRequest::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function isAuthor(User $user)
+    {
+        return $this->user_id === $user->id;
+    }
 }
