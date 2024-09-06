@@ -90,7 +90,8 @@ class MigrateInOrder extends Command
             '2024_08_14_041548_create_comments_table.php',
             '2024_08_14_041613_create_likes_table.php',
             '2024_08_30_064700_create_moderation_requests_table.php',
-            '2024_08_30_064727_create_moderation_comments_table.php'
+            '2024_08_30_064727_create_moderation_comments_table.php',
+            '2024_09_06_052537_create_moderation_logs_table.php'
  ];
 
 
