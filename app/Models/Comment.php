@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 class Comment extends Model
 {
   use HasFactory;
-  use HasUuids;
+  // use HasUuids;
 
   protected $fillable = ['post_id', 'content', 'user_id'];
 
@@ -24,7 +24,7 @@ class Comment extends Model
 
   public function post()
   {
-    return $this->belongsTo(Post::class);
+    return $this->belongsTo(Post::class, 'post_id');
   }
 
   public function user()
