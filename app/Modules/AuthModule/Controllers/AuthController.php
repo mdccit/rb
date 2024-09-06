@@ -168,7 +168,7 @@ class AuthController extends Controller
 //                    'Invalid/Expired url provided'
 //                );
                 //TODO Must need to redirect verification failed page
-                return redirect()->to(config('app.frontend_url').'verification-failed?message=Your verification link was expired or invalid');
+                return redirect()->to(config('app.frontend_url').'verification-failed?userId='.$user_id.'&message=Your verification link was expired or invalid');
             }
 
             $this->authService->verifyUserAccount($user_id);
