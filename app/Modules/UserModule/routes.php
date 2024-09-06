@@ -17,6 +17,13 @@ Route::group(['namespace' => 'App\Modules\UserModule\Controllers','prefix' => 'a
             //resource
             Route::get('/resource', 'ResourceController@index')->name('user.resources.index');
 
+            //search
+            Route::get('/search', 'SearchController@search')->name('user.search.search');
+            Route::get('/recent-search', 'SearchController@getRecentSearch')->name('user.search.recent');
+            Route::post('/save-search', 'SearchController@saveSearch')->name('user.search.save');
+            Route::get('/get-save-search', 'SearchController@getSaveSearch')->name('user.search.get');
+            Route::delete('/delete-search/{id}', 'SearchController@deleteSaveSearch')->name('user.search.delete');
+
             //TODO only authenticated default users can be access
             Route::middleware('auth.is_default')->group(function () {
 
