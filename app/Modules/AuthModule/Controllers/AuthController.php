@@ -168,7 +168,7 @@ class AuthController extends Controller
 //                    'Invalid/Expired url provided'
 //                );
                 //TODO Must need to redirect verification failed page
-                return redirect()->to(config('app.frontend_url').'/verification-failed?message=Your verification link was expired or invalid');
+                return redirect()->to(config('app.frontend_url').'verification-failed?message=Your verification link was expired or invalid');
             }
 
             $this->authService->verifyUserAccount($user_id);
@@ -179,7 +179,7 @@ class AuthController extends Controller
 //                'Successfully verified'
 //            );
             //TODO Must need to redirect verification success page
-            return redirect()->to(config('app.frontend_url').'/login?message=Your email address was successfully verified');
+            return redirect()->to(config('app.frontend_url').'login?message=Your email address was successfully verified');
         }catch (\Exception $e){
             return CommonResponse::getResponse(
                 422,
