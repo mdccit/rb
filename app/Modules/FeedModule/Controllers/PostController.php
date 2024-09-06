@@ -28,13 +28,13 @@ class PostController extends Controller
      */
     public function index(Request $request)
     {
-    // Retrieve the query parameters from the request
-    $type = $request->query('type');      
-    $sortBy = $request->query('sortBy', 'created_at');   
-    $sortOrder = $request->query('sortOrder', 'desc');  
+        // Retrieve the query parameters from the request
+        $type = $request->query('type');
+        $sortBy = $request->query('sortBy', 'created_at');
+        $sortOrder = $request->query('sortOrder', 'desc');
 
-    // Call the getAllPosts method in FeedService with the retrieved parameters
-    return $this->feedService->getAllPosts($type, $sortBy, $sortOrder);
+        // Call the getAllPosts method in FeedService with the retrieved parameters
+        return $this->feedService->getAllPosts($type, $sortBy, $sortOrder);
     }
 
     /**
@@ -86,8 +86,35 @@ class PostController extends Controller
         return $this->feedService->deletePost($id);
     }
 
+    /**
+     * Display the specified post.
+     *
+     * @param int $post_id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getCommentsByPostId($id)
+    {
+        // Retrieve and return a specific post by ID
+        return $this->feedService->getAllCommentsByPostId($id);
+    }
 
- /**
+
+
+    /**
+     * Display the specified post.
+     *
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getComment($id)
+    {
+        // Retrieve and return a specific post by ID
+        return $this->feedService->getCommentById($id);
+    }
+
+
+
+    /**
      * Add a comment to a post.
      *
      * @param Request $request
@@ -144,7 +171,7 @@ class PostController extends Controller
         return $this->feedService->removeLike($postId);
     }
 
-      /**
+    /**
      * Remove a like from a post.
      *
      * @param int $postId
@@ -153,9 +180,9 @@ class PostController extends Controller
     public function getLoggedInUserPosts(Request $request)
     {
         // Retrieve the query parameters from the request
-        $type = $request->query('type');      
-        $sortBy = $request->query('sortBy', 'created_at');   
-        $sortOrder = $request->query('sortOrder', 'desc');  
+        $type = $request->query('type');
+        $sortBy = $request->query('sortBy', 'created_at');
+        $sortOrder = $request->query('sortOrder', 'desc');
         return $this->feedService->getAllPostsLoggedUser($type, $sortBy, $sortOrder);
     }
 }
