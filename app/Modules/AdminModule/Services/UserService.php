@@ -31,7 +31,6 @@ class UserService
             ->join('user_roles', 'user_roles.id', '=' ,'users.user_role_id')
             ->join('user_types', 'user_types.id', '=' ,'users.user_type_id')
             ->where('users.id', '!=', auth()->user()->id) //Not included himself/herself
-            ->where('users.user_role_id', '!=', config('app.user_roles.default'))
             ->select(
                 'users.id',
                 'users.first_name',

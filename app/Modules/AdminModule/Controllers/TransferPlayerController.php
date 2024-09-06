@@ -70,7 +70,7 @@ class TransferPlayerController extends Controller
             {
                 return CommonResponse::getResponse(
                     422,
-                    $validator->errors()->all(),
+                    $validator->errors(),
                     'Input validation failed'
                 );
             }
@@ -123,7 +123,7 @@ class TransferPlayerController extends Controller
             {
                 return CommonResponse::getResponse(
                     422,
-                    $validator->errors()->all(),
+                    $validator->errors(),
                     'Input validation failed'
                 );
             }
