@@ -23,6 +23,7 @@ class ModerationLog extends Model
         'moderation_request_id',
         'log',
         'updated_by',
+        'status'
     ];
 
     public function moderationRequest()
