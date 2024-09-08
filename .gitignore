@@ -16,3 +16,7 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+.ssh/*
+.ssh/
+setup.sh
+.rnd

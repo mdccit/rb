@@ -275,6 +275,38 @@ class FeedService
 
 
     /**
+     * Retrieve all comments for a specific post by its ID.
+     *
+     * @param string $postId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getAllCommentsByPostId($postId)
+    {
+        try {
+            // Find all comments for the given post ID using the secondary database connection
+            $comments = Comment::on(config('database.secondary'))
+                ->where('post_id', $postId)
+                ->get();
+
+            // Return a success response with the retrieved comments
+            return CommonResponse::getResponse(
+                200,
+                $comments,
+                'Comments retrieved successfully'
+            );
+        } catch (\Exception $e) {
+            // Return an error response if something goes wrong
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went wrong'
+            );
+        }
+    }
+
+
+
+    /**
      * Add a comment to a post.
      *
      * @param int $postId
@@ -387,6 +419,36 @@ class FeedService
         }
     }
 
+
+    /**
+     * Retrieve a single comment by its ID.
+     *
+     * @param string $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getCommentById($id)
+    {
+        try {
+            // Find the comment by ID using the secondary database connection
+            $comment = Comment::on(config('database.secondary'))->findOrFail($id);
+
+            // Return a success response with the retrieved comment
+            return CommonResponse::getResponse(
+                200,
+                $comment,
+                'Comment retrieved successfully'
+            );
+        } catch (\Exception $e) {
+            // Return an error response if something goes wrong
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went wrong'
+            );
+        }
+    }
+
+
     /**
      * Remove a like from a post.
      *
@@ -455,49 +517,59 @@ class FeedService
 
 
     public function getAllPostsLoggedUser($type = null, $sortBy = 'created_at', $sortOrder = 'desc')
-{
-    try {
-        $userId = Auth::id(); 
+    {
+        try {
+            $userId = Auth::id();
 
-        $query = Post::connect(config('database.secondary'))
-            ->withCount('likes') 
-            ->with(['comments'])
-            ->with(['likes' => function ($query) use ($userId) {
-                $query->where('user_id', $userId);
-            }]); 
+            $query = Post::connect(config('database.secondary'))
+                ->withCount('likes')
+                ->withCount('comments')
+                ->with([
+                    'comments' => function ($query) {
+                        $query->with('user'); // Eager load the user relationship for each comment
+                    }
+                ])
+                ->with([
+                    'likes' => function ($query) use ($userId) {
+                        $query->where('user_id', $userId);
+                    }
+                ])
+                ->with('school')
+                ->with('business')
+                ->with('user');
 
-        // If a type is provided, filter the posts by the specified type
-        if ($type) {
-            $query->where('type', $type);
+            // If a type is provided, filter the posts by the specified type
+            if ($type) {
+                $query->where('type', $type);
+            }
+
+            // Sort posts by the specified sort column and order
+            $query->orderBy($sortBy, $sortOrder);
+
+            // Execute the query and get the results
+            $posts = $query->get()->map(function ($post) use ($userId) {
+                // Add the user's like status to each post
+                $post->user_has_liked = $post->likes->contains('user_id', $userId);
+                // Remove the likes relationship as we only needed it for checking the user's like status
+                unset($post->likes);
+                return $post;
+            });
+
+            // Return a success response with the retrieved posts and their interactions
+            return CommonResponse::getResponse(
+                200,
+                $posts,
+                'Posts for loggedin user retrieved successfully'
+            );
+
+        } catch (\Exception $e) {
+            // Return an error response if something goes wrong
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went wrong'
+            );
         }
-
-        // Sort posts by the specified sort column and order
-        $query->orderBy($sortBy, $sortOrder);
-
-        // Execute the query and get the results
-        $posts = $query->get()->map(function ($post) use ($userId) {
-            // Add the user's like status to each post
-            $post->user_has_liked = $post->likes->contains('user_id', $userId);
-            // Remove the likes relationship as we only needed it for checking the user's like status
-            unset($post->likes);
-            return $post;
-        });
-
-        // Return a success response with the retrieved posts and their interactions
-        return CommonResponse::getResponse(
-            200,
-            $posts,
-            'Posts for loggedin user retrieved successfully'
-        );
-
-    } catch (\Exception $e) {
-        // Return an error response if something goes wrong
-        return CommonResponse::getResponse(
-            422,
-            $e->getMessage(),
-            'Something went wrong'
-        );
     }
-}
 
 }

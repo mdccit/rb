@@ -17,9 +17,9 @@ class Post extends Model
      * Connect the relevant database
      *
      */
-    public static function connect($connection =null)
+    public static function connect($connection = null)
     {
-        $connection = $connection ?:config('database.default');
+        $connection = $connection ?: config('database.default');
         return (new static)->setConnection($connection);
     }
 
@@ -44,6 +44,16 @@ class Post extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function school()
+    {
+        return $this->belongsTo(School::class, 'school_id');
+    }
+
+    public function business()
+    {
+        return $this->belongsTo(Business::class, 'business_id');
     }
 
     const TYPES = [

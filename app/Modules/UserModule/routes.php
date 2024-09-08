@@ -17,6 +17,14 @@ Route::group(['namespace' => 'App\Modules\UserModule\Controllers','prefix' => 'a
             //resource
             Route::get('/resource', 'ResourceController@index')->name('user.resources.index');
 
+            //connections
+            Route::post('/connections-request', 'ConnectionController@requestConnection')->name('connections.connect.request');
+            Route::put('/connections-accept/{id}', 'ConnectionController@connectionAccept')->name('connections.connect.accept');
+            Route::put('/connections-cancelle/{id}', 'ConnectionController@connectionCancell')->name('connections.connect.cancelle');
+            Route::put('/connections-reject/{id}', 'ConnectionController@connectionReject')->name('connections.connect.reject');
+            Route::put('/connections-remove/{id}', 'ConnectionController@connectionRemove')->name('connections.connect.remove');
+            Route::get('/connections-list', 'ConnectionController@userinivitationAndConnectedList')->name('connections.connect.connection-list');
+
             //conversation
             Route::post('/create-conversation', 'ConversationController@createConversation')->name('user.conversation.create');
             Route::put('/delete-conversation/{id}', 'ConversationController@deleteConversation')->name('user.conversation.delete');
@@ -29,9 +37,8 @@ Route::group(['namespace' => 'App\Modules\UserModule\Controllers','prefix' => 'a
 
             //TODO only authenticated default users can be access
             Route::middleware('auth.is_default')->group(function () {
-                
-                //Chat api
 
+                
 
             });
 

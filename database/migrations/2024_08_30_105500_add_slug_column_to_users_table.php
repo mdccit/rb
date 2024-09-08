@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('slug')->unique()->default(\Illuminate\Support\Facades\DB::raw('(UUID())'))->after('nationality_id');
+            //$table->string('slug')->unique()->default(\Illuminate\Support\Facades\DB::raw('(UUID())'))->after('nationality_id');
+            $table->string('slug')->unique()->after('nationality_id');
         });
     }
 
