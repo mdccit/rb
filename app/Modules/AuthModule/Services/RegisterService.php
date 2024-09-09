@@ -12,12 +12,15 @@ use App\Models\PlayerBudget;
 use App\Models\PlayerParent;
 use App\Models\User;
 use App\Models\UserPhone;
+use App\Traits\GeneralHelpers;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class RegisterService
 {
+    use GeneralHelpers;
+
     public function createPlayer(array $data, $user){
         User::connect(config('database.default'))
             ->where('id', $user->id)
@@ -175,6 +178,7 @@ class RegisterService
                 'last_name' => $data['player_last_name'],
                 'display_name' => $data['player_first_name'].' '.$data['player_last_name'],
                 'email' => $data['email'],
+                'slug' => $this->generateSlug(new User(), $data['player_first_name'].' '.$data['player_last_name'],'slug'),
                 'user_role_id' => config('app.user_roles.player'),
                 'user_type_id' => config('app.user_types.free'),
                 'country_id' => $data['player_country'],
