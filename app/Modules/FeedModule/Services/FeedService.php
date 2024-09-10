@@ -168,8 +168,22 @@ class FeedService
     {
         try {
             // Find the post by ID using the secondary database connection
-            $post = Post::connect(config('database.secondary'))->findOrFail($id);
+            $post = Post::connect(config('database.secondary'))
+                     ->withCount('likes')
+                     ->withCount('comments')
+                     ->with([
+                        'comments' => function ($query) {
+                            $query->with('user'); // Eager load the user relationship for each comment
+                        }
+                    ])
+                     ->with('likes')
+                     ->with('school')
+                     ->with('business')
+                     ->with('user')
+                     ->findOrFail($id);
 
+            
+                
             // Return a success response with the retrieved post
             return CommonResponse::getResponse(
                 200,
