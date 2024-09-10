@@ -171,7 +171,11 @@ class FeedService
             $post = Post::connect(config('database.secondary'))
                      ->withCount('likes')
                      ->withCount('comments')
-                     ->with('comments')
+                     ->with([
+                        'comments' => function ($query) {
+                            $query->with('user'); // Eager load the user relationship for each comment
+                        }
+                    ])
                      ->with('likes')
                      ->with('school')
                      ->with('business')
