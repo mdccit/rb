@@ -53,7 +53,7 @@ class PlayersController extends Controller
     {
         try{
             $validator = Validator::make($request->all(), [
-                'address_line_1' => 'nullable|string|max:80',
+                'address_line_1' => 'required|string|max:80',
                 'address_line_2' => 'nullable|string|max:80',
                 'city' => 'nullable|required_with:address_line_1|string|max:48',
                 'state_province' => 'nullable|required_with:address_line_1|string|max:48',
@@ -68,17 +68,17 @@ class PlayersController extends Controller
                 'gender' => 'required|string|in:male,female,other',
                 'date_of_birth' => 'required|date',
 
-                'handedness' => 'nullable|string|in:left,right,both',
-                'preferred_surface' => 'nullable|string|in:hard,clay,grass,artificial',
+                'handedness' => 'required|string|in:left,right,both',
+                'preferred_surface' => 'required|string|in:hard,clay,grass,artificial',
 
-                'weight_in_kg' => 'boolean',
-                'weight_kg' => 'nullable|numeric',
-                'weight_lb' => 'nullable|numeric',
+                'weight_in_kg' => 'required|boolean',
+                'weight_kg' => 'nullable|required_if:weight_in_kg,true|numeric',
+                'weight_lb' => 'nullable|required_if:weight_in_kg,false|numeric',
 
-                'height_in_cm' => 'boolean',
-                'height_cm' => 'nullable|numeric',
-                'height_ft' => 'nullable|numeric',
-                'height_in' => 'nullable|numeric',
+                'height_in_cm' => 'required|boolean',
+                'height_cm' => 'nullable|required_if:height_in_cm,true|numeric',
+                'height_ft' => 'nullable|required_if:height_in_cm,false|numeric',
+                'height_in' => 'nullable|required_if:height_in_cm,false|numeric',
 
                 'graduation_month_year' => 'required|date',
             ]);
@@ -92,6 +92,76 @@ class PlayersController extends Controller
             }
 
             $this->playerService->updatePersonalOtherInfo($request->all(),$user_slug);
+
+            return CommonResponse::getResponse(
+                200,
+                'Successfully Updated',
+                'Successfully Updated'
+            );
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    }
+
+    public function updateBudget(Request $request,$user_slug)
+    {
+        try{
+            $validator = Validator::make($request->all(), [
+                'budget_max' => 'required|numeric',
+                'budget_min' => 'required|numeric',
+            ]);
+            if ($validator->fails())
+            {
+                return CommonResponse::getResponse(
+                    422,
+                    $validator->errors(),
+                    'Input validation failed'
+                );
+            }
+
+            $this->playerService->updateBudget($request->all(),$user_slug);
+
+            return CommonResponse::getResponse(
+                200,
+                'Successfully Updated',
+                'Successfully Updated'
+            );
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    }
+
+    public function updateCoreValues(Request $request,$user_slug)
+    {
+        try{
+            $validator = Validator::make($request->all(), [
+                'utr' => 'required|numeric',
+                'sat_score' => 'required|numeric',
+                'act_score' => 'required|numeric',
+                'toefl_score' => 'required|numeric',
+                'atp_ranking' => 'required|numeric',
+                'itf_ranking' => 'required|numeric',
+                'national_ranking' => 'required|numeric',
+                'wtn_score_manual' => 'required|numeric',
+            ]);
+            if ($validator->fails())
+            {
+                return CommonResponse::getResponse(
+                    422,
+                    $validator->errors(),
+                    'Input validation failed'
+                );
+            }
+
+            $this->playerService->updateCoreValues($request->all(),$user_slug);
 
             return CommonResponse::getResponse(
                 200,
