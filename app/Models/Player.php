@@ -35,7 +35,7 @@ class Player extends Model
         'gpa',
         'height',
         'weight',
-        'other_data',
+//        'other_data',
 
         'other_data->handedness',
         'other_data->preferred_surface',
