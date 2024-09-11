@@ -36,6 +36,21 @@ class Player extends Model
         'height',
         'weight',
         'other_data',
+
+        'other_data->handedness',
+        'other_data->preferred_surface',
+
+        'other_data->budget_max',
+        'other_data->budget_min',
+
+        'other_data->utr',
+        'other_data->sat_score',
+        'other_data->act_score',
+        'other_data->toefl_score',
+        'other_data->atp_ranking',
+        'other_data->itf_ranking',
+        'other_data->national_ranking',
+        'other_data->wtn_score_manual',
     ];
 
     /**
