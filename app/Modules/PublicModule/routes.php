@@ -37,7 +37,10 @@ Route::group(['namespace' => 'App\Modules\PublicModule\Controllers','prefix' => 
 
             //TODO only authenticated player users can be access
             Route::middleware('auth.is_player')->group(function () {
-
+                Route::put('/players/update-bio/{user_slug}', 'PlayersController@updateBio')->name('user.players.update.bio');
+                Route::put('/players/update-other-info/{user_slug}', 'PlayersController@updatePersonalOtherInfo')->name('user.players.update.other-info');
+                Route::put('/players/update-budget/{user_slug}', 'PlayersController@updateBudget')->name('user.players.update.budget');
+                Route::put('/players/update-core-values/{user_slug}', 'PlayersController@updateCoreValues')->name('user.players.update.core-values');
             });
 
             //TODO only authenticated coach users can be access
