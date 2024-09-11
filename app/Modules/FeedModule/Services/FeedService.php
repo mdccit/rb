@@ -49,6 +49,8 @@ class FeedService
                 'has_media' => 'boolean',
             ]);
 
+
+
             if ($validator->fails()) {
                 // Return a validation error response
                 return CommonResponse::getResponse(
@@ -57,57 +59,66 @@ class FeedService
                     'Input validation failed'
                 );
             }
-            $dataToInsert = [
-                'user_id' => Auth::id(),
-                'school_id' => $data['school_id'] ?? null,
-                'business_id' => $data['business_id'] ?? null,
-                'publisher_type' => $data['publisher_type'],
-                'has_media' => $data['has_media'] ?? false,
-                'type' => $data['type'],
-                'seo_url' => "",
-                'description' => $data['description'],
-            ];
-            // Conditionally add the title if the type is blog or event
-            if (in_array($data['type'], ['blog', 'event'])) {
-                $dataToInsert['title'] = $data['title'];
-            }
-
-
-            // Create a new Post record using the default database connection
-            $post = Post::connect(config('database.default'))->create($dataToInsert);
-
-
-            // Generate the SEO URL based on the type
-            if ($data['type'] === 'post') {
-                $seoUrl = $post->id; // Use the post ID as the SEO URL
-            } else {
-                // Generate a slug from the title
-                $baseSeoUrl = Str::slug($data['title']);
-                $seoUrl = $baseSeoUrl;
-
-                // Check if the SEO URL already exists in the posts table
-                $existingSeoUrlCount = Post::where('seo_url', 'like', "$baseSeoUrl%")->count();
-
-                if ($existingSeoUrlCount > 0) {
-                    // If it exists, append a unique suffix
-                    $seoUrl = "{$baseSeoUrl}-" . ($existingSeoUrlCount + 1);
+            if(Auth::user()->user_role_id==5){
+                $dataToInsert = [
+                    'user_id' => Auth::id(),
+                    'school_id' => $data['school_id'] ?? null,
+                    'business_id' => $data['business_id'] ?? null,
+                    'publisher_type' => $data['publisher_type'],
+                    'has_media' => $data['has_media'] ?? false,
+                    'type' => $data['type'],
+                    'seo_url' => "",
+                    'description' => $data['description'],
+                ];
+                // Conditionally add the title if the type is blog or event
+                if (in_array($data['type'], ['blog', 'event'])) {
+                    $dataToInsert['title'] = $data['title'];
                 }
+    
+    
+                // Create a new Post record using the default database connection
+                $post = Post::connect(config('database.default'))->create($dataToInsert);
+    
+    
+                // Generate the SEO URL based on the type
+                if ($data['type'] === 'post') {
+                    $seoUrl = $post->id; // Use the post ID as the SEO URL
+                } else {
+                    // Generate a slug from the title
+                    $baseSeoUrl = Str::slug($data['title']);
+                    $seoUrl = $baseSeoUrl;
+    
+                    // Check if the SEO URL already exists in the posts table
+                    $existingSeoUrlCount = Post::where('seo_url', 'like', "$baseSeoUrl%")->count();
+    
+                    if ($existingSeoUrlCount > 0) {
+                        // If it exists, append a unique suffix
+                        $seoUrl = "{$baseSeoUrl}-" . ($existingSeoUrlCount + 1);
+                    }
+                }
+    
+                // Ensure the SEO URL is unique (handle potential race conditions)
+                while (Post::where('seo_url', $seoUrl)->exists()) {
+                    $seoUrl .= '-' . Str::random(8); // Add a random suffix to ensure uniqueness
+                }
+    
+                // Update the post with the generated SEO URL
+                $post->update(['seo_url' => $seoUrl]);
+    
+                // Return a success response with the created post
+                return CommonResponse::getResponse(
+                    200,
+                    $post,
+                    'Post created successfully'
+                );
+            }else{
+                return CommonResponse::getResponse(
+                    422,
+                    "Only Coaches can create post",
+                    'Invalid User'
+                );
             }
-
-            // Ensure the SEO URL is unique (handle potential race conditions)
-            while (Post::where('seo_url', $seoUrl)->exists()) {
-                $seoUrl .= '-' . Str::random(8); // Add a random suffix to ensure uniqueness
-            }
-
-            // Update the post with the generated SEO URL
-            $post->update(['seo_url' => $seoUrl]);
-
-            // Return a success response with the created post
-            return CommonResponse::getResponse(
-                200,
-                $post,
-                'Post created successfully'
-            );
+           
 
         } catch (\Exception $e) {
             // Return an error response if something goes wrong
