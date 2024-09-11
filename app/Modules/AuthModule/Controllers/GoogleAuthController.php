@@ -89,9 +89,28 @@ class GoogleAuthController extends Controller
                 $user = $this->authService->createUser($data,true,$request->ip());
                 $token = $user->createToken(config('app.name'))->accessToken;
 
+                $user_permission_type = 'none';
+                //Coach
+                if($user->getUserRole->id == config('app.user_roles.coach')) {
+                    $coach = Coach::connect(config('database.secondary'))
+                        ->where('user_id', $user->id)->first();
+                    if($coach){
+                        $user_permission_type = $coach->type;
+                    }
+                }
+                //Business Manager
+                if($user->getUserRole->id == config('app.user_roles.business_manager')) {
+                    $business_manager = BusinessManager::connect(config('database.secondary'))
+                        ->where('user_id', $user->id)->first();
+                    if($business_manager){
+                        $user_permission_type = $business_manager->type;
+                    }
+                }
+
                 $responseData = [
                     'token' => $token,
                     'user_role' => $user->getUserRole->short_name,
+                    'user_permission_type' => $user_permission_type,
                 ];
 
                 return CommonResponse::getResponse(
