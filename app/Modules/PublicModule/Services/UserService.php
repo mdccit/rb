@@ -28,13 +28,19 @@ class UserService
                 'users.display_name',
                 'users.email',
                 'users.slug',
+                'users.bio',
+                'users.date_of_birth',
+                'users.gender',
+                'users.nationality_id',
                 'users.is_approved',
+                'users.is_first_login',
                 'user_roles.id as user_role_id',
                 'user_roles.name as user_role',
                 'user_types.id as user_type_id',
                 'user_types.name as user_type',
                 'users.created_at as joined_at',
-                'users.last_logged_at as last_seen_at'
+                'users.email_verified_at',
+                'users.last_logged_at as last_seen_at',
             )
             ->first();
 
@@ -108,13 +114,19 @@ class UserService
                 'users.display_name',
                 'users.email',
                 'users.slug',
+                'users.bio',
+                'users.date_of_birth',
+                'users.gender',
+                'users.nationality_id',
                 'users.is_approved',
+                'users.is_first_login',
                 'user_roles.id as user_role_id',
                 'user_roles.name as user_role',
                 'user_types.id as user_type_id',
                 'user_types.name as user_type',
                 'users.created_at as joined_at',
-                'users.last_logged_at as last_seen_at'
+                'users.email_verified_at',
+                'users.last_logged_at as last_seen_at',
             )
             ->first();
 
@@ -195,13 +207,19 @@ class UserService
                 'users.display_name',
                 'users.email',
                 'users.slug',
+                'users.bio',
+                'users.date_of_birth',
+                'users.gender',
+                'users.nationality_id',
                 'users.is_approved',
+                'users.is_first_login',
                 'user_roles.id as user_role_id',
                 'user_roles.name as user_role',
                 'user_types.id as user_type_id',
                 'user_types.name as user_type',
                 'users.created_at as joined_at',
-                'users.last_logged_at as last_seen_at'
+                'users.email_verified_at',
+                'users.last_logged_at as last_seen_at',
             )
             ->first();
 
@@ -278,13 +296,19 @@ class UserService
                 'users.display_name',
                 'users.email',
                 'users.slug',
+                'users.bio',
+                'users.date_of_birth',
+                'users.gender',
+                'users.nationality_id',
                 'users.is_approved',
+                'users.is_first_login',
                 'user_roles.id as user_role_id',
                 'user_roles.name as user_role',
                 'user_types.id as user_type_id',
                 'user_types.name as user_type',
                 'users.created_at as joined_at',
-                'users.last_logged_at as last_seen_at'
+                'users.email_verified_at',
+                'users.last_logged_at as last_seen_at',
             )
             ->first();
 
@@ -354,13 +378,20 @@ class UserService
                         'users.other_names',
                         'users.display_name',
                         'users.email',
+                        'users.slug',
+                        'users.bio',
+                        'users.date_of_birth',
+                        'users.gender',
+                        'users.nationality_id',
                         'users.is_approved',
+                        'users.is_first_login',
                         'user_roles.id as user_role_id',
                         'user_roles.name as user_role',
                         'user_types.id as user_type_id',
                         'user_types.name as user_type',
                         'users.created_at as joined_at',
-                        'users.last_logged_at as last_seen_at'
+                        'users.email_verified_at',
+                        'users.last_logged_at as last_seen_at',
                     )
                     ->get();
             }
