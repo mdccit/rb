@@ -4,6 +4,7 @@ namespace App\Modules\PublicModule\Controllers;
 
 use App\Extra\CommonResponse;
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Modules\PublicModule\Services\PlayerService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -18,6 +19,51 @@ class PlayersController extends Controller
         $this->playerService = new PlayerService();
     }
 
+    public function updateBasicInfo(Request $request,$user_slug)
+    {
+        try{
+            $validator = Validator::make($request->all(), [
+                'first_name' => 'required|string|max:45',
+                'last_name' => 'required|string|max:45',
+                'other_names' => 'nullable|string|max:255',
+            ]);
+            if ($validator->fails())
+            {
+                return CommonResponse::getResponse(
+                    422,
+                    $validator->errors(),
+                    'Input validation failed'
+                );
+            }
+
+            $user = User::connect(config('database.secondary'))
+                ->where('slug', $user_slug)
+                ->where('id', auth()->id())
+                ->first();
+            if(!$user) {
+                return CommonResponse::getResponse(
+                    401,
+                    'You can not update another user',
+                    'You can not update another user'
+                );
+            }
+
+            $this->playerService->updateBasicInfo($request->all(),$user_slug);
+
+            return CommonResponse::getResponse(
+                200,
+                'Successfully Updated',
+                'Successfully Updated'
+            );
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    }
+
     public function updateBio(Request $request,$user_slug)
     {
         try{
@@ -30,6 +76,18 @@ class PlayersController extends Controller
                     422,
                     $validator->errors(),
                     'Input validation failed'
+                );
+            }
+
+            $user = User::connect(config('database.secondary'))
+                ->where('slug', $user_slug)
+                ->where('id', auth()->id())
+                ->first();
+            if(!$user) {
+                return CommonResponse::getResponse(
+                    401,
+                    'You can not update another user',
+                    'You can not update another user'
                 );
             }
 
@@ -91,6 +149,18 @@ class PlayersController extends Controller
                 );
             }
 
+            $user = User::connect(config('database.secondary'))
+                ->where('slug', $user_slug)
+                ->where('id', auth()->id())
+                ->first();
+            if(!$user) {
+                return CommonResponse::getResponse(
+                    401,
+                    'You can not update another user',
+                    'You can not update another user'
+                );
+            }
+
             $this->playerService->updatePersonalOtherInfo($request->all(),$user_slug);
 
             return CommonResponse::getResponse(
@@ -123,6 +193,18 @@ class PlayersController extends Controller
                 );
             }
 
+            $user = User::connect(config('database.secondary'))
+                ->where('slug', $user_slug)
+                ->where('id', auth()->id())
+                ->first();
+            if(!$user) {
+                return CommonResponse::getResponse(
+                    401,
+                    'You can not update another user',
+                    'You can not update another user'
+                );
+            }
+
             $this->playerService->updateBudget($request->all(),$user_slug);
 
             return CommonResponse::getResponse(
@@ -143,14 +225,15 @@ class PlayersController extends Controller
     {
         try{
             $validator = Validator::make($request->all(), [
-                'utr' => 'required|numeric',
-                'sat_score' => 'required|numeric',
-                'act_score' => 'required|numeric',
-                'toefl_score' => 'required|numeric',
-                'atp_ranking' => 'required|numeric',
-                'itf_ranking' => 'required|numeric',
-                'national_ranking' => 'required|numeric',
-                'wtn_score_manual' => 'required|numeric',
+                'gpa' => 'required|numeric|between:0,99.99',
+                'utr' => 'required|numeric|between:0,99.99',
+                'sat_score' => 'required|numeric|between:0,99.99',
+                'act_score' => 'required|numeric|between:0,99.99',
+                'toefl_score' => 'required|numeric|between:0,99.99',
+                'atp_ranking' => 'required|numeric|between:0,99.99',
+                'itf_ranking' => 'required|numeric|between:0,99.99',
+                'national_ranking' => 'required|numeric|between:0,99.99',
+                'wtn_score_manual' => 'required|numeric|between:0,99.99',
             ]);
             if ($validator->fails())
             {
@@ -158,6 +241,18 @@ class PlayersController extends Controller
                     422,
                     $validator->errors(),
                     'Input validation failed'
+                );
+            }
+
+            $user = User::connect(config('database.secondary'))
+                ->where('slug', $user_slug)
+                ->where('id', auth()->id())
+                ->first();
+            if(!$user) {
+                return CommonResponse::getResponse(
+                    401,
+                    'You can not update another user',
+                    'You can not update another user'
                 );
             }
 
