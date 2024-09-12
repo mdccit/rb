@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Extra\CommonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
-
+use App\Models\SchoolUser;
 
 class FeedService
 {
@@ -34,12 +34,12 @@ class FeedService
                 'description' => 'required|string',
                 'publisher_type' => 'required|in:user,school,business',
                 'type' => 'required|in:post,event,blog',
-                'school_id' => [
-                    'nullable',
-                    'uuid',
-                    'exists:schools,id',
-                    'required_if:publisher_type,school',
-                ],
+                // 'school_id' => [
+                //     'nullable',
+                //     'uuid',
+                //     'exists:schools,id',
+                //     'required_if:publisher_type,school',
+                // ],
                 'business_id' => [
                     'nullable',
                     'uuid',
@@ -49,7 +49,7 @@ class FeedService
                 'has_media' => 'boolean',
             ]);
 
-
+            
 
             if ($validator->fails()) {
                 // Return a validation error response
@@ -59,15 +59,17 @@ class FeedService
                     'Input validation failed'
                 );
             }
+
             if(Auth::user()->user_role_id==5){
+                $school_User = SchoolUser::connect(config('database.secondary'))->where('user_id','=',auth()->id())->first();
                 $dataToInsert = [
                     'user_id' => Auth::id(),
-                    'school_id' => $data['school_id'] ?? null,
+                    'school_id' =>  $school_User->school_id,
                     'business_id' => $data['business_id'] ?? null,
                     'publisher_type' => $data['publisher_type'],
                     'has_media' => $data['has_media'] ?? false,
                     'type' => $data['type'],
-                    'seo_url' => "",
+                    'seo_url' =>  Str::random(8),
                     'description' => $data['description'],
                 ];
                 // Conditionally add the title if the type is blog or event
@@ -78,7 +80,6 @@ class FeedService
     
                 // Create a new Post record using the default database connection
                 $post = Post::connect(config('database.default'))->create($dataToInsert);
-    
     
                 // Generate the SEO URL based on the type
                 if ($data['type'] === 'post') {
@@ -210,7 +211,42 @@ class FeedService
             );
         }
     }
+    public function getPostBySingle($id)
+    {
+        try {
+            $userId = auth()->id();
+            // Find the post by ID using the secondary database connection
+            $post = Post::connect(config('database.secondary'))
+                     ->withCount('likes')
+                     ->withCount('comments')
+                     ->with([
+                        'comments' => function ($query) {
+                            $query->with('user'); // Eager load the user relationship for each comment
+                        }
+                    ])
+                     ->with('likes')
+                     ->with('school')
+                     ->with('business')
+                     ->with('user')
+                     ->findOrFail($id);
 
+            $post->user_has_liked = $post->likes->contains('user_id', $userId);
+                
+            // Return a success response with the retrieved post
+            return CommonResponse::getResponse(
+                200,
+                $post,
+                'Post retrieved successfully'
+            );
+        } catch (\Exception $e) {
+            // Return an error response if something goes wrong
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went wrong'
+            );
+        }
+    }
     /**
      * Update an existing post by its ID.
      *
