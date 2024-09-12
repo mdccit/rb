@@ -13,6 +13,20 @@ use Carbon\Carbon;
 
 class PlayerService
 {
+    public function updateBasicInfo (array $data, $user_slug){
+        $user = User::connect(config('database.default'))
+            ->where('slug', $user_slug)
+            ->first();
+        if($user) {
+            $user->update([
+                'first_name' => $data['first_name'],
+                'other_names' => $data['other_names'],
+                'last_name' => $data['last_name'],
+                'display_name' => $data['first_name'].' '.$data['last_name'],
+            ]);
+        }
+    }
+
     public function updateBio (array $data, $user_slug){
         $user = User::connect(config('database.default'))
             ->where('slug', $user_slug)
@@ -39,6 +53,8 @@ class PlayerService
             $height = $data['height_in_cm']?$data['height_cm']:(($data['height_ft']*12)+$data['height_in'])*2.54;
             $weight = $data['weight_in_kg']?$data['weight_kg']:$data['weight_lb']*0.4535;
             $graduation_month_year = Carbon::createFromFormat('Y-m', $data['graduation_month_year']);
+
+            $this ->getOtherData($user->id);
 
             Player::connect(config('database.default'))
                 ->where('user_id', $user->id)
@@ -106,6 +122,7 @@ class PlayerService
             ->where('slug', $user_slug)
             ->first();
         if($user) {
+            $this ->getOtherData($user->id);
             Player::connect(config('database.default'))
                 ->where('user_id', $user->id)
                 ->update([
@@ -120,9 +137,12 @@ class PlayerService
             ->where('slug', $user_slug)
             ->first();
         if($user) {
+            $this ->getOtherData($user->id);
+
             Player::connect(config('database.default'))
                 ->where('user_id', $user->id)
                 ->update([
+                    'gpa' => $data['gpa'],
                     'other_data->utr' => $data['utr'],
                     'other_data->sat_score' => $data['sat_score'],
                     'other_data->act_score' => $data['act_score'],
@@ -131,6 +151,33 @@ class PlayerService
                     'other_data->itf_ranking' => $data['itf_ranking'],
                     'other_data->national_ranking' => $data['national_ranking'],
                     'other_data->wtn_score_manual' => $data['wtn_score_manual'],
+                ]);
+        }
+    }
+
+    private function getOtherData($user_id){
+        $player = Player::connect(config('database.default'))
+            ->where('user_id', $user_id)
+            ->whereNull('other_data')
+            ->first();
+        if($player){
+            $other_data = [
+                'handedness' => '',
+                'preferred_surface' => '',
+                'budget_max' => 0,
+                'budget_min' => 0,
+                'utr' => 0,
+                'sat_score' => 0,
+                'act_score' => 0,
+                'toefl_score' => 0,
+                'atp_ranking' => 0,
+                'itf_ranking' => 0,
+                'national_ranking' => 0,
+                'wtn_score_manual' => 0,
+            ];
+
+            $player->update([
+                    'other_data' => $other_data,
                 ]);
         }
     }
