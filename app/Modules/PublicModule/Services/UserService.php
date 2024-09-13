@@ -11,6 +11,7 @@ use App\Models\PlayerParent;
 use App\Models\User;
 use App\Models\UserAddress;
 use App\Models\UserPhone;
+use Illuminate\Support\Facades\DB;
 
 class UserService
 {

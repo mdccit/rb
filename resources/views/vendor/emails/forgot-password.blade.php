@@ -30,6 +30,7 @@
       margin: auto;
       background-color: rgb(223, 233, 241);
       font-family: Figtree, sans-serif;
+	  padding: 30px;
     "
 >
 <div
