@@ -39,8 +39,6 @@ class School extends Model
         'conference_id',
         'division_id',
         'other_data',
-
-        'other_data->',
     ];
 
     /**
