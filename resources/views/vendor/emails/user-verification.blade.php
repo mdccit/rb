@@ -30,6 +30,7 @@
       margin: auto;
       background-color: rgb(223, 233, 241);
       font-family: Figtree, sans-serif;
+	  padding: 20px;
     "
 >
 <div
@@ -117,7 +118,7 @@
     </div>
 </div>
 <p style="font-size: 14px; text-align: center; margin-bottom: 15px; padding-bottom: 10px;">
-    © © {{ date('Y') }} Recruited. All rights reserved.
+    © {{ date('Y') }} Recruited. All rights reserved.
 </p>
 <br>
 </body>
