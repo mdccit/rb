@@ -46,7 +46,9 @@ Route::group(['namespace' => 'App\Modules\PublicModule\Controllers','prefix' => 
 
             //TODO only authenticated coach users can be access
             Route::middleware('auth.is_coach')->group(function () {
-
+                Route::put('/coaches/update-basic-info/{user_slug}', 'CoachesController@updateBasicInfo')->name('user.coaches.update.basic-info');
+                Route::put('/coaches/update-bio/{user_slug}', 'CoachesController@updateBio')->name('user.coaches.update.bio');
+                Route::put('/coaches/update-other-info/{user_slug}', 'CoachesController@updatePersonalOtherInfo')->name('user.coaches.update.other-info');
             });
 
             //TODO only authenticated business manager users can be access
