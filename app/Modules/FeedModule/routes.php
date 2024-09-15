@@ -23,6 +23,8 @@ Route::group(['namespace' => 'App\Modules\FeedModule\Controllers', 'prefix' => '
             Route::post('/posts/{id}/comment', 'PostController@addComment')->name('posts.add_comment');
             Route::put('/comments/{id}', 'PostController@updateComment')->name('posts.update_comment');
 
+            Route::get('/postcomments/{id}', 'PostController@getCommentsByPostId')->name('posts.get_all_comments');
+            Route::get('/comments/{id}', 'PostController@getComment')->name('posts.get_comment');
             Route::delete('/comments/{id}', 'PostController@deleteComment')->name('posts.delete_comment');
             Route::post('/posts/{id}/like', 'PostController@addLike')->name('posts.add_like');
             Route::delete('/posts/{id}/like', 'PostController@removeLike')->name('posts.remove_like');

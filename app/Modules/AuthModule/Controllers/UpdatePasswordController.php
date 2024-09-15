@@ -30,7 +30,7 @@ class UpdatePasswordController extends Controller
             if ($validator->fails()) {
                 return CommonResponse::getResponse(
                     422,
-                    $validator->errors()->all(),
+                    $validator->errors(),
                     'Input validation failed'
                 );
             }

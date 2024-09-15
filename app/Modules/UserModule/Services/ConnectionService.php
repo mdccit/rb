@@ -6,7 +6,7 @@ namespace App\Modules\UserModule\Services;
 
 use App\Models\ConnectionRequest;
 
-use DB;
+
 class ConnectionService
 {
     public function requestConnection (array $data){

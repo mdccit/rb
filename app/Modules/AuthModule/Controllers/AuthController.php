@@ -37,7 +37,7 @@ class AuthController extends Controller
             {
                 return CommonResponse::getResponse(
                     422,
-                    $validator->errors()->all(),
+                    $validator->errors(),
                     'Input validation failed'
                 );
             }
@@ -48,6 +48,7 @@ class AuthController extends Controller
             $responseData = [
                 'token' => $token,
                 'user_role' => $user->getUserRole->short_name,
+                'user_id' => $user->id,
             ];
 
             return CommonResponse::getResponse(
@@ -76,7 +77,7 @@ class AuthController extends Controller
             if ($validator->fails()) {
                 return CommonResponse::getResponse(
                     422,
-                    $validator->errors()->all(),
+                    $validator->errors(),
                     'Input validation failed'
                 );
             }
@@ -108,6 +109,7 @@ class AuthController extends Controller
                         'token' => $token,
                         'user_role' => $user->getUserRole->short_name,
                         'user_permission_type' => $user_permission_type,
+                        'user_id' => $user->id,
                     ];
 
                     return CommonResponse::getResponse(
@@ -162,23 +164,24 @@ class AuthController extends Controller
     public function verifyEmail($user_id, Request $request) {
         try{
             if (!$request->hasValidSignature()) {
-                return CommonResponse::getResponse(
-                    401,
-                    'Invalid/Expired url provided.',
-                    'Invalid/Expired url provided'
-                );
+//                return CommonResponse::getResponse(
+//                    401,
+//                    'Invalid/Expired url provided.',
+//                    'Invalid/Expired url provided'
+//                );
                 //TODO Must need to redirect verification failed page
+                return redirect()->to(config('app.frontend_url').'verification-failed?userId='.$user_id.'&message=Your verification link was expired or invalid');
             }
 
             $this->authService->verifyUserAccount($user_id);
 
-            return CommonResponse::getResponse(
-                200,
-                'Successfully verified',
-                'Successfully verified'
-            );
+//            return CommonResponse::getResponse(
+//                200,
+//                'Successfully verified',
+//                'Successfully verified'
+//            );
             //TODO Must need to redirect verification success page
-            //return redirect()->to('/');
+            return redirect()->to(config('app.frontend_url').'login?message=Your email address was successfully verified');
         }catch (\Exception $e){
             return CommonResponse::getResponse(
                 422,

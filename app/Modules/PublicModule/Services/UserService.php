@@ -1,7 +1,7 @@
 <?php
 
 
-namespace App\Modules\UserModule\Services;
+namespace App\Modules\PublicModule\Services;
 
 
 use App\Models\BusinessManager;
@@ -11,14 +11,15 @@ use App\Models\PlayerParent;
 use App\Models\User;
 use App\Models\UserAddress;
 use App\Models\UserPhone;
+use Illuminate\Support\Facades\DB;
 
 class UserService
 {
-    public function getPlayerProfile ($user_id){
+    public function getPlayerProfile ($user_slug){
         $user = User::connect(config('database.secondary'))
             ->join('user_roles', 'user_roles.id', '=' ,'users.user_role_id')
             ->join('user_types', 'user_types.id', '=' ,'users.user_type_id')
-            ->where('users.id', $user_id)
+            ->where('users.slug', $user_slug)
             ->where('users.user_role_id', config('app.user_roles.player'))
             ->select(
                 'users.id',
@@ -27,13 +28,20 @@ class UserService
                 'users.other_names',
                 'users.display_name',
                 'users.email',
+                'users.slug',
+                'users.bio',
+                'users.date_of_birth',
+                'users.gender',
+                'users.nationality_id',
                 'users.is_approved',
+                'users.is_first_login',
                 'user_roles.id as user_role_id',
                 'user_roles.name as user_role',
                 'user_types.id as user_type_id',
                 'user_types.name as user_type',
                 'users.created_at as joined_at',
-                'users.last_logged_at as last_seen_at'
+                'users.email_verified_at',
+                'users.last_logged_at as last_seen_at',
             )
             ->first();
 
@@ -44,7 +52,7 @@ class UserService
         if($user){
             $user_phone = UserPhone::connect(config('database.secondary'))
                 ->join('countries', 'countries.id', '=' ,'user_phones.country_id')
-                ->where('user_phones.user_id', $user_id)
+                ->where('user_phones.user_id', $user->id)
                 ->where('user_phones.is_default', true)
                 ->select(
                     'user_phones.id',
@@ -57,7 +65,7 @@ class UserService
 
             $user_address = UserAddress::connect(config('database.secondary'))
                 ->join('countries', 'countries.id', '=' ,'user_addresses.country_id')
-                ->where('user_addresses.user_id', $user_id)
+                ->where('user_addresses.user_id', $user->id)
                 ->where('user_addresses.is_default', true)
                 ->select(
                     'user_addresses.id',
@@ -73,7 +81,7 @@ class UserService
                 ->first();
 
             $player = Player::connect(config('database.secondary'))
-                ->where('user_id', $user_id)
+                ->where('user_id', $user->id)
                 ->select(
                     'has_parent',
                     'graduation_month_year',
@@ -93,11 +101,11 @@ class UserService
         ];
     }
 
-    public function getCoachProfile ($user_id){
+    public function getCoachProfile ($user_slug){
         $user = User::connect(config('database.secondary'))
             ->join('user_roles', 'user_roles.id', '=' ,'users.user_role_id')
             ->join('user_types', 'user_types.id', '=' ,'users.user_type_id')
-            ->where('users.id', $user_id)
+            ->where('users.slug', $user_slug)
             ->where('users.user_role_id', config('app.user_roles.coach'))
             ->select(
                 'users.id',
@@ -106,13 +114,20 @@ class UserService
                 'users.other_names',
                 'users.display_name',
                 'users.email',
+                'users.slug',
+                'users.bio',
+                'users.date_of_birth',
+                'users.gender',
+                'users.nationality_id',
                 'users.is_approved',
+                'users.is_first_login',
                 'user_roles.id as user_role_id',
                 'user_roles.name as user_role',
                 'user_types.id as user_type_id',
                 'user_types.name as user_type',
                 'users.created_at as joined_at',
-                'users.last_logged_at as last_seen_at'
+                'users.email_verified_at',
+                'users.last_logged_at as last_seen_at',
             )
             ->first();
 
@@ -123,7 +138,7 @@ class UserService
         if($user){
             $user_phone = UserPhone::connect(config('database.secondary'))
                 ->join('countries', 'countries.id', '=' ,'user_phones.country_id')
-                ->where('user_phones.user_id', $user_id)
+                ->where('user_phones.user_id', $user->id)
                 ->where('user_phones.is_default', true)
                 ->select(
                     'user_phones.id',
@@ -136,7 +151,7 @@ class UserService
 
             $user_address = UserAddress::connect(config('database.secondary'))
                 ->join('countries', 'countries.id', '=' ,'user_addresses.country_id')
-                ->where('user_addresses.user_id', $user_id)
+                ->where('user_addresses.user_id', $user->id)
                 ->where('user_addresses.is_default', true)
                 ->select(
                     'user_addresses.id',
@@ -153,7 +168,7 @@ class UserService
 
             $coach = Coach::connect(config('database.secondary'))
                 ->join('schools', 'schools.id', '=' ,'coaches.school_id')
-                ->where('coaches.user_id', $user_id)
+                ->where('coaches.user_id', $user->id)
                 ->select(
                     'coaches.id as coach_id',
                     'schools.id as school_id',
@@ -179,11 +194,11 @@ class UserService
         ];
     }
 
-    public function getBusinessManagerProfile ($user_id){
+    public function getBusinessManagerProfile ($user_slug){
         $user = User::connect(config('database.secondary'))
             ->join('user_roles', 'user_roles.id', '=' ,'users.user_role_id')
             ->join('user_types', 'user_types.id', '=' ,'users.user_type_id')
-            ->where('users.id', $user_id)
+            ->where('users.slug', $user_slug)
             ->where('users.user_role_id', config('app.user_roles.business_manager'))
             ->select(
                 'users.id',
@@ -192,13 +207,20 @@ class UserService
                 'users.other_names',
                 'users.display_name',
                 'users.email',
+                'users.slug',
+                'users.bio',
+                'users.date_of_birth',
+                'users.gender',
+                'users.nationality_id',
                 'users.is_approved',
+                'users.is_first_login',
                 'user_roles.id as user_role_id',
                 'user_roles.name as user_role',
                 'user_types.id as user_type_id',
                 'user_types.name as user_type',
                 'users.created_at as joined_at',
-                'users.last_logged_at as last_seen_at'
+                'users.email_verified_at',
+                'users.last_logged_at as last_seen_at',
             )
             ->first();
 
@@ -209,7 +231,7 @@ class UserService
         if($user){
             $user_phone = UserPhone::connect(config('database.secondary'))
                 ->join('countries', 'countries.id', '=' ,'user_phones.country_id')
-                ->where('user_phones.user_id', $user_id)
+                ->where('user_phones.user_id', $user->id)
                 ->where('user_phones.is_default', true)
                 ->select(
                     'user_phones.id',
@@ -222,7 +244,7 @@ class UserService
 
             $user_address = UserAddress::connect(config('database.secondary'))
                 ->join('countries', 'countries.id', '=' ,'user_addresses.country_id')
-                ->where('user_addresses.user_id', $user_id)
+                ->where('user_addresses.user_id', $user->id)
                 ->where('user_addresses.is_default', true)
                 ->select(
                     'user_addresses.id',
@@ -239,7 +261,7 @@ class UserService
 
             $business_manager = BusinessManager::connect(config('database.secondary'))
                 ->join('businesses', 'businesses.id', '=' ,'business_managers.business_id')
-                ->where('business_managers.user_id', $user_id)
+                ->where('business_managers.user_id', $user->id)
                 ->select(
                     'business_managers.id as business_manager_id',
                     'businesses.id as business_id',
@@ -261,11 +283,11 @@ class UserService
         ];
     }
 
-    public function getParentProfile ($user_id){
+    public function getParentProfile ($user_slug){
         $user = User::connect(config('database.secondary'))
             ->join('user_roles', 'user_roles.id', '=' ,'users.user_role_id')
             ->join('user_types', 'user_types.id', '=' ,'users.user_type_id')
-            ->where('users.id', $user_id)
+            ->where('users.slug', $user_slug)
             ->where('users.user_role_id', config('app.user_roles.parent'))
             ->select(
                 'users.id',
@@ -274,13 +296,20 @@ class UserService
                 'users.other_names',
                 'users.display_name',
                 'users.email',
+                'users.slug',
+                'users.bio',
+                'users.date_of_birth',
+                'users.gender',
+                'users.nationality_id',
                 'users.is_approved',
+                'users.is_first_login',
                 'user_roles.id as user_role_id',
                 'user_roles.name as user_role',
                 'user_types.id as user_type_id',
                 'user_types.name as user_type',
                 'users.created_at as joined_at',
-                'users.last_logged_at as last_seen_at'
+                'users.email_verified_at',
+                'users.last_logged_at as last_seen_at',
             )
             ->first();
 
@@ -292,7 +321,7 @@ class UserService
         if($user){
             $user_phone = UserPhone::connect(config('database.secondary'))
                 ->join('countries', 'countries.id', '=' ,'user_phones.country_id')
-                ->where('user_phones.user_id', $user_id)
+                ->where('user_phones.user_id', $user->id)
                 ->where('user_phones.is_default', true)
                 ->select(
                     'user_phones.id',
@@ -305,7 +334,7 @@ class UserService
 
             $user_address = UserAddress::connect(config('database.secondary'))
                 ->join('countries', 'countries.id', '=' ,'user_addresses.country_id')
-                ->where('user_addresses.user_id', $user_id)
+                ->where('user_addresses.user_id', $user->id)
                 ->where('user_addresses.is_default', true)
                 ->select(
                     'user_addresses.id',
@@ -321,7 +350,7 @@ class UserService
                 ->first();
 
             $parent = PlayerParent::connect(config('database.secondary'))
-                ->where('user_id', $user_id)
+                ->where('user_id', $user->id)
                 ->select(
                     'id as parent_id',
                     'child_count'
@@ -350,13 +379,20 @@ class UserService
                         'users.other_names',
                         'users.display_name',
                         'users.email',
+                        'users.slug',
+                        'users.bio',
+                        'users.date_of_birth',
+                        'users.gender',
+                        'users.nationality_id',
                         'users.is_approved',
+                        'users.is_first_login',
                         'user_roles.id as user_role_id',
                         'user_roles.name as user_role',
                         'user_types.id as user_type_id',
                         'user_types.name as user_type',
                         'users.created_at as joined_at',
-                        'users.last_logged_at as last_seen_at'
+                        'users.email_verified_at',
+                        'users.last_logged_at as last_seen_at',
                     )
                     ->get();
             }

@@ -11,7 +11,6 @@ class ConnectionRequest extends Model
     use HasFactory;
     use HasUuids;
 
-
     public static function connect($connection =null)
     {
         $connection = $connection ?:config('database.default');

@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Modules\UserModule\Controllers;
+namespace App\Modules\PublicModule\Controllers;
 
 use App\Extra\CommonResponse;
 use App\Http\Controllers\Controller;
-use App\Modules\UserModule\Services\UserService;
+use App\Modules\PublicModule\Services\UserService;
 use Illuminate\Http\Request;
 
 class UsersController extends Controller
@@ -17,10 +17,10 @@ class UsersController extends Controller
         $this->userService = new UserService();
     }
 
-    public function getPlayerProfile(Request $request,$user_id)
+    public function getPlayerProfile(Request $request,$user_slug)
     {
         try{
-            $responseData = $this->userService->getPlayerProfile($user_id);
+            $responseData = $this->userService->getPlayerProfile($user_slug);
 
             return CommonResponse::getResponse(
                 200,
@@ -37,10 +37,10 @@ class UsersController extends Controller
         }
     }
 
-    public function getCoachProfile(Request $request,$user_id)
+    public function getCoachProfile(Request $request,$user_slug)
     {
         try{
-            $responseData = $this->userService->getCoachProfile($user_id);
+            $responseData = $this->userService->getCoachProfile($user_slug);
 
             return CommonResponse::getResponse(
                 200,
@@ -57,10 +57,10 @@ class UsersController extends Controller
         }
     }
 
-    public function getBusinessManagerProfile(Request $request,$user_id)
+    public function getBusinessManagerProfile(Request $request,$user_slug)
     {
         try{
-            $responseData = $this->userService->getBusinessManagerProfile($user_id);
+            $responseData = $this->userService->getBusinessManagerProfile($user_slug);
 
             return CommonResponse::getResponse(
                 200,
@@ -77,10 +77,10 @@ class UsersController extends Controller
         }
     }
 
-    public function getParentProfile(Request $request,$user_id)
+    public function getParentProfile(Request $request,$user_slug)
     {
         try{
-            $responseData = $this->userService->getParentProfile($user_id);
+            $responseData = $this->userService->getParentProfile($user_slug);
 
             return CommonResponse::getResponse(
                 200,

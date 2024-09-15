@@ -10,6 +10,7 @@ use App\Models\Country;
 use App\Models\Player;
 use App\Models\User;
 use App\Models\UserPhone;
+use App\Traits\GeneralHelpers;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -17,6 +18,8 @@ use App\Models\ModerationRequest;
 
 class UserService
 {
+    use GeneralHelpers;
+
     public function getAllUsers (array $data){
         $per_page_items = array_key_exists("per_page_items",$data)?$data['per_page_items']:0;
         $user_role = array_key_exists("user_role",$data)?$data['user_role']:0;
@@ -28,13 +31,13 @@ class UserService
             ->join('user_roles', 'user_roles.id', '=' ,'users.user_role_id')
             ->join('user_types', 'user_types.id', '=' ,'users.user_type_id')
             ->where('users.id', '!=', auth()->user()->id) //Not included himself/herself
-            ->where('users.user_role_id', '!=', config('app.user_roles.default'))
             ->select(
                 'users.id',
                 'users.first_name',
                 'users.last_name',
                 'users.display_name',
                 'users.email',
+                'users.slug',
                 'user_roles.name as user_role',
                 'user_types.name as user_type',
                 'users.created_at as joined_at',
@@ -83,13 +86,20 @@ class UserService
                 'users.other_names',
                 'users.display_name',
                 'users.email',
+                'users.slug',
+                'users.bio',
+                'users.date_of_birth',
+                'users.gender',
+                'users.nationality_id',
                 'users.is_approved',
+                'users.is_first_login',
                 'user_roles.id as user_role_id',
                 'user_roles.name as user_role',
                 'user_types.id as user_type_id',
                 'user_types.name as user_type',
                 'users.created_at as joined_at',
-                'users.last_logged_at as last_seen_at'
+                'users.email_verified_at',
+                'users.last_logged_at as last_seen_at',
             )
             ->first();
 
@@ -119,6 +129,7 @@ class UserService
                 'last_name' => $data['last_name'],
                 'display_name' => $data['first_name'].' '.$data['last_name'],
                 'email' => $data['email'],
+                'slug' => $this->generateSlug(new User(), $data['first_name'].' '.$data['last_name'], 'slug'),
                 'user_role_id' => $data['user_role'],
                 'user_type_id' => config('app.user_types.free'),
                 'password' => Hash::make($data['password']),

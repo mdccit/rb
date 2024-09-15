@@ -62,7 +62,7 @@ class GoogleAuthController extends Controller
             if ($validator->fails()) {
                 return CommonResponse::getResponse(
                     422,
-                    $validator->errors()->all(),
+                    $validator->errors(),
                     'Input validation failed'
                 );
             }
@@ -92,6 +92,7 @@ class GoogleAuthController extends Controller
                 $responseData = [
                     'token' => $token,
                     'user_role' => $user->getUserRole->short_name,
+                    'user_id' => $user->id,
                 ];
 
                 return CommonResponse::getResponse(
@@ -125,7 +126,7 @@ class GoogleAuthController extends Controller
             if ($validator->fails()) {
                 return CommonResponse::getResponse(
                     422,
-                    $validator->errors()->all(),
+                    $validator->errors(),
                     'Input validation failed'
                 );
             }
@@ -164,6 +165,7 @@ class GoogleAuthController extends Controller
                     'token' => $token,
                     'user_role' => $user->getUserRole->short_name,
                     'user_permission_type' => $user_permission_type,
+                    'user_id' => $user->id,
                 ];
 
                 return CommonResponse::getResponse(
