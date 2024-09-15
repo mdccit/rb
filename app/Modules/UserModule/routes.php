@@ -29,6 +29,7 @@ Route::group(['namespace' => 'App\Modules\UserModule\Controllers','prefix' => 'a
             Route::put('/connections-reject/{id}', 'ConnectionController@connectionReject')->name('connections.connect.reject');
             Route::put('/connections-remove/{id}', 'ConnectionController@connectionRemove')->name('connections.connect.remove');
             Route::get('/connections-list', 'ConnectionController@userinivitationAndConnectedList')->name('connections.connect.connection-list');
+            Route::get('/connections-list-with-compare/{id}', 'ConnectionController@connectionList')->name('connections.connect.connection-list-with-compare');
 
             //conversation
             Route::post('/create-conversation', 'ConversationController@createConversation')->name('user.conversation.create');
