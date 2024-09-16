@@ -48,4 +48,8 @@ class SchoolService
             'school_users_info' => $school_users,
         ];
     }
+
+    public function destroy($id){
+        SchoolUser::connect(config('database.default'))->destroy($id);
+    }
 }
