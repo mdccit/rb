@@ -49,6 +49,14 @@ Route::group(['namespace' => 'App\Modules\PublicModule\Controllers','prefix' => 
                 Route::put('/coaches/update-basic-info/{user_slug}', 'CoachesController@updateBasicInfo')->name('user.coaches.update.basic-info');
                 Route::put('/coaches/update-bio/{user_slug}', 'CoachesController@updateBio')->name('user.coaches.update.bio');
                 Route::put('/coaches/update-other-info/{user_slug}', 'CoachesController@updatePersonalOtherInfo')->name('user.coaches.update.other-info');
+
+                //school team
+                Route::get('/school-team-get/{school_id}', 'SchoolsTeamController@getSchoolTeam')->name('school.team.get');
+                Route::get('/school-team-info/{team_id}', 'SchoolsTeamController@getSchoolTeamInfo')->name('school.team.info');
+                Route::post('/school-team-add', 'SchoolsTeamController@createSchoolTeam')->name('school.team.add');
+                Route::delete('/school-team-delete', 'SchoolsTeamController@destroy')->name('school.team.delete');
+
+
             });
 
             //TODO only authenticated business manager users can be access

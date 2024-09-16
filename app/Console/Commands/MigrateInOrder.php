@@ -99,7 +99,10 @@ class MigrateInOrder extends Command
             '2024_09_03_111301_add_slug_column_to_schools_table.php',
             '2024_09_04_035811_add_slug_column_to_businesses_table.php',
             '2024_09_04_050449_add_preferred_gender_type_column_to_coaches_table.php',
-            '2024_09_06_052537_create_moderation_logs_table.php'
+            '2024_09_06_052537_create_moderation_logs_table.php',
+            '2024_09_15_153755_create_school_teams_table.php',
+            '2024_09_15_153806_create_school_team_users_table.php',
+            
         ];
 
 
