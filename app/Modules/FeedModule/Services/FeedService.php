@@ -23,43 +23,6 @@ class FeedService
     {
 
         try {
-            // Validate the incoming request data
-            $validator = Validator::make($data, [
-                'title' => [
-                    'required_if:type,blog,event',
-                    'nullable',
-                    'string',
-                    'max:255'
-                ],
-                'description' => 'required|string',
-                'publisher_type' => 'required|in:user,school,business',
-                'type' => 'required|in:post,event,blog',
-                // 'school_id' => [
-                //     'nullable',
-                //     'uuid',
-                //     'exists:schools,id',
-                //     'required_if:publisher_type,school',
-                // ],
-                'business_id' => [
-                    'nullable',
-                    'uuid',
-                    'exists:businesses,id',
-                    'required_if:publisher_type,business',
-                ],
-                'has_media' => 'boolean',
-            ]);
-
-            
-
-            if ($validator->fails()) {
-                // Return a validation error response
-                return CommonResponse::getResponse(
-                    422,
-                    $validator->errors()->all(),
-                    'Input validation failed'
-                );
-            }
-
             if(Auth::user()->user_role_id==5){
                 $school_User = SchoolUser::connect(config('database.secondary'))->where('user_id','=',auth()->id())->first();
                 $dataToInsert = [

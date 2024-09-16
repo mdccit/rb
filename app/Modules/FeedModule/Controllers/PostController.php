@@ -5,6 +5,10 @@ namespace App\Modules\FeedModule\Controllers;
 use App\Http\Controllers\Controller;
 use App\Modules\FeedModule\Services\FeedService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+use App\Extra\CommonResponse;
+use App\Services\AzureBlobStorageService;
 
 class PostController extends Controller
 {
@@ -61,16 +65,76 @@ class PostController extends Controller
         return $this->feedService->getPostBySingle($id);
     }
 
-    /**
-     * Store a newly created post.
+    // /**
+    //  * Store a newly created post.
+    //  *
+    //  * @param Request $request
+    //  * @return \Illuminate\Http\JsonResponse
+    //  */
+    // public function store(Request $request)
+    // {
+    //     // Create and return the newly created post
+    //     return $this->feedService->createPost($request->all());
+    // }
+
+
+     /**
+     * Store a newly created post, including image upload.
      *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
     {
-        // Create and return the newly created post
-        return $this->feedService->createPost($request->all());
+        // Validate the request for image upload
+        $validator = Validator::make($request->all(), [
+            'title' => [
+                'required_if:type,blog,event',
+                'nullable',
+                'string',
+                'max:255'
+            ],
+            'description' => 'required|string',
+            'publisher_type' => 'required|in:user,school,business',
+            'type' => 'required|in:post,event,blog',
+            'business_id' => [
+                'nullable',
+                'uuid',
+                'exists:businesses,id',
+                'required_if:publisher_type,business',
+            ],
+            'has_media' => 'boolean',
+            'content' => 'required|string',
+            'image' => 'required|image|mimes:jpg,jpeg,png|max:2048', // Image validation
+        ]);
+
+        if ($validator->fails()) {
+            // Return a validation error response
+            return CommonResponse::getResponse(
+                422,
+                $validator->errors()->all(),
+                'Input validation failed'
+            );
+        }
+// If an image file is uploaded
+if ($request->hasFile('image')) {
+    // Use AzureBlobStorageService to upload the file
+    $azureBlobStorageService = new AzureBlobStorageService();
+    $imageUrl = $azureBlobStorageService->uploadFile($request->file('image'), 'images');
+
+    // Add the image URL to the validated data
+    $validatedData['image_url'] = $imageUrl;
+}
+
+
+        // Call the service to create the post
+        $post = $this->feedService->createPost($request->all());
+
+        // Return the created post and success message
+        return response()->json([
+            'message' => 'Post created successfully!',
+            'post' => $post,
+        ], 201);
     }
 
     /**
