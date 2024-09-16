@@ -13,15 +13,18 @@ use App\Services\AzureBlobStorageService;
 class PostController extends Controller
 {
     protected $feedService;
+    protected $azureBlobStorageService;
+
 
     /**
      * PostController constructor.
      *
      * @param FeedService $feedService
      */
-    public function __construct(FeedService $feedService)
+    public function __construct(FeedService $feedService, AzureBlobStorageService $azureBlobStorageService)
     {
         $this->feedService = $feedService;
+        $this->azureBlobStorageService = $azureBlobStorageService;
     }
 
     /**
@@ -105,7 +108,7 @@ class PostController extends Controller
             ],
             'has_media' => 'boolean',
             'content' => 'required|string',
-            'image' => 'required|image|mimes:jpg,jpeg,png|max:2048', // Image validation
+            'media_files.*' => 'required|mimes:jpg,jpeg,png,mp4|max:51200',
         ]);
 
         if ($validator->fails()) {
@@ -116,16 +119,22 @@ class PostController extends Controller
                 'Input validation failed'
             );
         }
-// If an image file is uploaded
-if ($request->hasFile('image')) {
-    // Use AzureBlobStorageService to upload the file
-    $azureBlobStorageService = new AzureBlobStorageService();
-    $imageUrl = $azureBlobStorageService->uploadFile($request->file('image'), 'images');
 
-    // Add the image URL to the validated data
-    $validatedData['image_url'] = $imageUrl;
-}
+         $uploadedMedia = [];
 
+        // Check if media files are present and handle the upload process
+        if ($request->hasFile('media_files')) {
+            foreach ($request->file('media_files') as $file) {
+                // Determine the media type (image or video)
+                $mediaType = $this->getMediaType($file);
+
+                // Upload the file using the AzureBlobStorageService and store metadata
+                $media = $this->azureBlobStorageService->uploadFileWithMetadata($file, $post->id, 'post', $mediaType);
+
+                // Add the media details to the array for response
+                $uploadedMedia[] = $media;
+            }
+        }
 
         // Call the service to create the post
         $post = $this->feedService->createPost($request->all());
@@ -135,6 +144,31 @@ if ($request->hasFile('image')) {
             'message' => 'Post created successfully!',
             'post' => $post,
         ], 201);
+    }
+
+
+ /**
+     * Determine the media type (image or video) based on the file mime type.
+     *
+     * @param \Illuminate\Http\UploadedFile $file
+     * @return string
+     */
+    private function getMediaType($file)
+    {
+        $mimeType = $file->getMimeType();
+
+        // Check if the file is an image
+        if (strpos($mimeType, 'image') !== false) {
+            return 'image';
+        }
+
+        // Check if the file is a video
+        if (strpos($mimeType, 'video') !== false) {
+            return 'video';
+        }
+
+        // Default media type if not image or video (optional)
+        return 'unknown';
     }
 
     /**

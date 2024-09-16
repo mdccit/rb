@@ -2,7 +2,12 @@
 
 namespace App\Services;
 
+use App\Models\Media;
+use App\Models\MediaInformation;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class AzureBlobStorageService
 {
@@ -13,20 +18,72 @@ class AzureBlobStorageService
 
     public function __construct()
     {
-      $this->accountName = config('filesystems.disks.azure.name');
-      $this->accountKey = config('filesystems.disks.azure.key');
-      $this->container = config('filesystems.disks.azure.container');
-      $this->storageUrl = config('filesystems.disks.azure.url');
+        $this->accountName = config('filesystems.disks.azure.name');
+        $this->accountKey = config('filesystems.disks.azure.key');
+        $this->container = config('filesystems.disks.azure.container');
+        $this->storageUrl = config('filesystems.disks.azure.url');
     }
 
     /**
-     * Upload a file to Azure Blob Storage
+     * Upload a file to Azure Blob Storage and save media information.
      * 
-     * @param $file UploadedFile The file to upload
-     * @param string $path The path in the container where the file will be stored
+     * @param \Illuminate\Http\UploadedFile $file
+     * @param string $entityId
+     * @param string $entityType
+     * @param string $mediaType
+     * @return Media
+     */
+    public function uploadFileWithMetadata($file, $entityId, $entityType, $mediaType)
+    {
+        // Get or create media information
+        $mediaInfo = MediaInformation::firstOrCreate([
+            'storage_provider' => 'azure',
+            'container_name' => $this->container,
+            'blob_name' => 'media', // Path inside the blob storage
+            'media_type' => $mediaType,
+            'base_url' => $this->storageUrl,
+        ]);
+    
+        // Upload the file using the existing uploadFile() method
+        $fileUrl = $this->uploadFile($file, $mediaInfo->blob_name);
+
+        if ($fileUrl) {
+          Log::info("File uploaded successfully to: $fileUrl");
+      } else {
+          Log::error("File upload failed");
+          return;
+      }
+    
+        // Generate a unique file name (optional if not needed)
+        $fileName = uniqid() . '_' . $file->getClientOriginalName();
+    
+        // Save media record in the database
+        $media = Media::create([
+            'id' => (string) Str::uuid(),
+            'media_information_id' => $mediaInfo->id,
+            'entity_id' => $entityId, // The ID of the entity (post, user, etc.)
+            'entity_type' => $entityType, // e.g., post, profile, business, etc.
+            'file_name' => $fileName,
+            'file_url' => $fileUrl, // Full URL of the uploaded file
+        ]);
+
+        if ($media) {
+          Log::info("Media record created successfully for file: $fileName");
+      } else {
+          Log::error("Failed to create media record for file: $fileName");
+      }
+    
+        return $media;
+    }
+    
+    /**
+     * Upload a file to Azure Blob Storage.
+     * 
+     * @param \Illuminate\Http\UploadedFile $file
+     * @param string $path
      * @return string URL of the uploaded file
      */
-    public function uploadFile(\Illuminate\Http\UploadedFile $file, string $path): string
+    public function uploadFile($file, $path)
     {
         $blobName = ltrim($path . '/' . $file->getClientOriginalName(), '/');
         $url = rtrim($this->storageUrl, '/') . '/' . ltrim($this->container, '/') . '/' . $blobName;
@@ -80,5 +137,21 @@ class AzureBlobStorageService
         } else {
             throw new \Exception('Error uploading file to Azure: ' . $response->body());
         }
+    }
+
+    /**
+     * Retrieve media related to a specific entity (e.g., post, user, business).
+     * 
+     * @param string $entityId The ID of the entity (e.g., post ID, user ID).
+     * @param string $entityType The type of entity (e.g., 'post', 'user', 'business').
+     * @return \Illuminate\Database\Eloquent\Collection Media related to the entity
+     */
+    public function getMediaByEntity($entityId, $entityType)
+    {
+        // Retrieve all media related to the entity by entity ID and entity type
+        return Media::with('mediaInformation')
+            ->where('entity_id', $entityId)
+            ->where('entity_type', $entityType)
+            ->get();
     }
 }
