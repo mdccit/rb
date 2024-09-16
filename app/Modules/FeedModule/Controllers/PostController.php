@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use App\Extra\CommonResponse;
 use App\Services\AzureBlobStorageService;
+use Illuminate\Support\Facades\Log;
 
 class PostController extends Controller
 {
@@ -89,7 +90,7 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        // Validate the request for image upload
+        // Validate the request for image and video uploads
         $validator = Validator::make($request->all(), [
             'title' => [
                 'required_if:type,blog,event',
@@ -110,41 +111,47 @@ class PostController extends Controller
             'content' => 'required|string',
             'media_files.*' => 'required|mimes:jpg,jpeg,png,mp4|max:51200',
         ]);
-
+    
         if ($validator->fails()) {
-            // Return a validation error response
-            return CommonResponse::getResponse(
-                422,
-                $validator->errors()->all(),
-                'Input validation failed'
-            );
+            return CommonResponse::getResponse(422, $validator->errors()->all(), 'Input validation failed');
         }
-
-         $uploadedMedia = [];
-
-        // Check if media files are present and handle the upload process
+    
+        // Call the createPost method, which returns a JSON response
+        $postResponse = $this->feedService->createPost($request->all());
+    
+        // Log the response to inspect the actual structure
+         Log::info('Post creation response: ' . $postResponse->getContent());
+    
+        // Decode the response into an array
+        $postData = json_decode($postResponse->getContent(), true);
+        
+        // Check the exact structure of the response and extract the post ID
+        if (!isset($postData['message']['id'])) {
+            return response()->json(['error' => 'Post creation failed. No post ID found.'], 500);
+        }
+    
+        $postId = $postData['message']['id'];
+    
+        // Now handle the media file upload
+        $uploadedMedia = [];
         if ($request->hasFile('media_files')) {
             foreach ($request->file('media_files') as $file) {
                 // Determine the media type (image or video)
                 $mediaType = $this->getMediaType($file);
-
-                // Upload the file using the AzureBlobStorageService and store metadata
-                $media = $this->azureBlobStorageService->uploadFileWithMetadata($file, $post->id, 'post', $mediaType);
-
-                // Add the media details to the array for response
+    
+                // Upload the file and store metadata using the post ID
+                $media = $this->azureBlobStorageService->uploadFileWithMetadata($file, $postId, 'post', $mediaType);
+    
+                // Add the media details to the array
                 $uploadedMedia[] = $media;
             }
         }
-
-        // Call the service to create the post
-        $post = $this->feedService->createPost($request->all());
-
-        // Return the created post and success message
-        return response()->json([
-            'message' => 'Post created successfully!',
-            'post' => $post,
-        ], 201);
+    
+        // Return the post along with uploaded media
+        return $postData;
     }
+
+    
 
 
  /**

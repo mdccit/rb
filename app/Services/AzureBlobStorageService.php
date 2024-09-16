@@ -85,7 +85,7 @@ class AzureBlobStorageService
      */
     public function uploadFile($file, $path)
     {
-        $blobName = ltrim($path . '/' . $file->getClientOriginalName(), '/');
+        $blobName = ltrim($path . '/' . rawurlencode($file->getClientOriginalName()), '/');
         $url = rtrim($this->storageUrl, '/') . '/' . ltrim($this->container, '/') . '/' . $blobName;
 
         // Prepare the request headers
