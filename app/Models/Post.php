@@ -56,6 +56,12 @@ class Post extends Model
         return $this->belongsTo(Business::class, 'business_id');
     }
 
+    public function media()
+{
+    return $this->hasMany(Media::class, 'entity_id', 'id')
+                ->where('entity_type', 'post');
+}
+
     const TYPES = [
         'POST' => 'post',
         'EVENT' => 'event',

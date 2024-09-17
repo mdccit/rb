@@ -23,27 +23,27 @@ class FeedService
     {
 
         try {
-            if(Auth::user()->user_role_id==5){
-                $school_User = SchoolUser::connect(config('database.secondary'))->where('user_id','=',auth()->id())->first();
+            if (Auth::user()->user_role_id == 5) {
+                $school_User = SchoolUser::connect(config('database.secondary'))->where('user_id', '=', auth()->id())->first();
                 $dataToInsert = [
                     'user_id' => Auth::id(),
-                    'school_id' =>  $school_User->school_id,
+                    'school_id' => $school_User->school_id,
                     'business_id' => $data['business_id'] ?? null,
                     'publisher_type' => $data['publisher_type'],
                     'has_media' => $data['has_media'] ?? false,
                     'type' => $data['type'],
-                    'seo_url' =>  Str::random(8),
+                    'seo_url' => Str::random(8),
                     'description' => $data['description'],
                 ];
                 // Conditionally add the title if the type is blog or event
                 if (in_array($data['type'], ['blog', 'event'])) {
                     $dataToInsert['title'] = $data['title'];
                 }
-    
-    
+
+
                 // Create a new Post record using the default database connection
                 $post = Post::connect(config('database.default'))->create($dataToInsert);
-    
+
                 // Generate the SEO URL based on the type
                 if ($data['type'] === 'post') {
                     $seoUrl = $post->id; // Use the post ID as the SEO URL
@@ -51,38 +51,38 @@ class FeedService
                     // Generate a slug from the title
                     $baseSeoUrl = Str::slug($data['title']);
                     $seoUrl = $baseSeoUrl;
-    
+
                     // Check if the SEO URL already exists in the posts table
                     $existingSeoUrlCount = Post::where('seo_url', 'like', "$baseSeoUrl%")->count();
-    
+
                     if ($existingSeoUrlCount > 0) {
                         // If it exists, append a unique suffix
                         $seoUrl = "{$baseSeoUrl}-" . ($existingSeoUrlCount + 1);
                     }
                 }
-    
+
                 // Ensure the SEO URL is unique (handle potential race conditions)
                 while (Post::where('seo_url', $seoUrl)->exists()) {
                     $seoUrl .= '-' . Str::random(8); // Add a random suffix to ensure uniqueness
                 }
-    
+
                 // Update the post with the generated SEO URL
                 $post->update(['seo_url' => $seoUrl]);
-    
+
                 // Return a success response with the created post
                 return CommonResponse::getResponse(
                     200,
                     $post,
                     'Post created successfully'
                 );
-            }else{
+            } else {
                 return CommonResponse::getResponse(
                     422,
                     "Only Coaches can create post",
                     'Invalid User'
                 );
             }
-           
+
 
         } catch (\Exception $e) {
             // Return an error response if something goes wrong
@@ -104,7 +104,7 @@ class FeedService
     {
         try {
             // Build the query using the secondary database connection
-            $query = Post::connect(config('database.secondary'));
+            $query = Post::on(config('database.secondary'))->with('media'); // Eager load media
 
             // If a type is provided, filter the posts by the specified type
             if ($type) {
@@ -114,10 +114,10 @@ class FeedService
             // Sort posts by the specified sort column and order
             $query->orderBy($sortBy, $sortOrder);
 
-            // Execute the query and get the results
+            // Execute the query and get the results, including media
             $posts = $query->get();
 
-            // Return a success response with the retrieved posts
+            // Return a success response with the retrieved posts and their media
             return CommonResponse::getResponse(
                 200,
                 $posts,
@@ -133,6 +133,7 @@ class FeedService
         }
     }
 
+
     /**
      * Retrieve a single post by its ID.
      *
@@ -144,21 +145,21 @@ class FeedService
         try {
             // Find the post by ID using the secondary database connection
             $post = Post::connect(config('database.secondary'))
-                     ->withCount('likes')
-                     ->withCount('comments')
-                     ->with([
-                        'comments' => function ($query) {
-                            $query->with('user'); // Eager load the user relationship for each comment
-                        }
-                    ])
-                     ->with('likes')
-                     ->with('school')
-                     ->with('business')
-                     ->with('user')
-                     ->findOrFail($id);
+                ->withCount('likes')
+                ->withCount('comments')
+                ->with([
+                    'comments' => function ($query) {
+                        $query->with('user'); // Eager load the user relationship for each comment
+                    }
+                ])
+                ->with('likes')
+                ->with('school')
+                ->with('business')
+                ->with('user')
+                ->findOrFail($id);
 
-            
-                
+
+
             // Return a success response with the retrieved post
             return CommonResponse::getResponse(
                 200,
@@ -180,21 +181,21 @@ class FeedService
             $userId = auth()->id();
             // Find the post by ID using the secondary database connection
             $post = Post::connect(config('database.secondary'))
-                     ->withCount('likes')
-                     ->withCount('comments')
-                     ->with([
-                        'comments' => function ($query) {
-                            $query->with('user'); // Eager load the user relationship for each comment
-                        }
-                    ])
-                     ->with('likes')
-                     ->with('school')
-                     ->with('business')
-                     ->with('user')
-                     ->findOrFail($id);
+                ->withCount('likes')
+                ->withCount('comments')
+                ->with([
+                    'comments' => function ($query) {
+                        $query->with('user'); // Eager load the user relationship for each comment
+                    }
+                ])
+                ->with('likes')
+                ->with('school')
+                ->with('business')
+                ->with('user')
+                ->findOrFail($id);
 
             $post->user_has_liked = $post->likes->contains('user_id', $userId);
-                
+
             // Return a success response with the retrieved post
             return CommonResponse::getResponse(
                 200,
@@ -558,6 +559,7 @@ class FeedService
                         $query->where('user_id', $userId);
                     }
                 ])
+                ->with('media.mediaInformation')
                 ->with('school')
                 ->with('business')
                 ->with('user');

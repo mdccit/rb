@@ -20,6 +20,7 @@ class MediaInformation extends Model
         'blob_name',
         'media_type',
         'base_url',
+        'storage_path',
     ];
 
     // Disable auto-incrementing since we're using UUIDs

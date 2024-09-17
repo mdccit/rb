@@ -19,6 +19,7 @@ class CreateMediaInformationTable extends Migration
             $table->string('container_name'); // Azure Blob Storage container name
             $table->string('blob_name'); // Blob directory for media storage
             $table->string('media_type'); // Type of media (post media, profile picture, etc.)
+            $table->string('storage_path')->nullable();
             $table->string('base_url'); // Base URL for blob storage
             $table->timestamps(); // Created and updated timestamps
         });
