@@ -57,7 +57,7 @@ class PostController extends Controller
         return $this->feedService->getPostById($id);
     }
 
-     /**
+    /**
      * Display the specified post.
      *
      * @param int $id
@@ -82,7 +82,7 @@ class PostController extends Controller
     // }
 
 
-     /**
+    /**
      * Store a newly created post, including image upload.
      *
      * @param Request $request
@@ -107,54 +107,60 @@ class PostController extends Controller
                 'exists:businesses,id',
                 'required_if:publisher_type,business',
             ],
-            'has_media' => 'boolean',
-            'content' => 'required|string',
+            'media_files' => 'nullable', 
             'media_files.*' => 'required|mimes:jpg,jpeg,png,mp4|max:51200',
         ]);
-    
+
         if ($validator->fails()) {
             return CommonResponse::getResponse(422, $validator->errors()->all(), 'Input validation failed');
         }
-    
+        // Set `has_media` based on the presence of media files in the request
+        $hasMedia = $request->hasFile('media_files') ? 1 : 0;
+        Log::info('Has media: ' . $hasMedia); // Debugging log
+
+        // Include `has_media` in the request data
+        $postData = array_merge($request->all(), ['has_media' => $hasMedia]);
+
+
         // Call the createPost method, which returns a JSON response
-        $postResponse = $this->feedService->createPost($request->all());
-    
+        $postResponse = $this->feedService->createPost($postData);
+
         // Log the response to inspect the actual structure
-         Log::info('Post creation response: ' . $postResponse->getContent());
-    
+        Log::info('Post creation response: ' . $postResponse->getContent());
+
         // Decode the response into an array
         $postData = json_decode($postResponse->getContent(), true);
-        
+
         // Check the exact structure of the response and extract the post ID
         if (!isset($postData['message']['id'])) {
             return response()->json(['error' => 'Post creation failed. No post ID found.'], 500);
         }
-    
+
         $postId = $postData['message']['id'];
-    
+
         // Now handle the media file upload
         $uploadedMedia = [];
         if ($request->hasFile('media_files')) {
             foreach ($request->file('media_files') as $file) {
                 // Determine the media type (image or video)
                 $mediaType = $this->getMediaType($file);
-    
+
                 // Upload the file and store metadata using the post ID
                 $media = $this->azureBlobStorageService->uploadFileWithMetadata($file, $postId, 'post', $mediaType);
-    
+
                 // Add the media details to the array
                 $uploadedMedia[] = $media;
             }
         }
-    
+
         // Return the post along with uploaded media
         return $postData;
     }
 
-    
 
 
- /**
+
+    /**
      * Determine the media type (image or video) based on the file mime type.
      *
      * @param \Illuminate\Http\UploadedFile $file

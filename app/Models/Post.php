@@ -11,7 +11,7 @@ class Post extends Model
     use HasFactory;
     use HasUuids;
 
-    protected $fillable = ['user_id', 'type', 'title', 'description', 'seo_url','school_id','business_id','publisher_type'];
+    protected $fillable = ['user_id', 'type', 'title', 'description', 'has_media' ,'seo_url','school_id','business_id','publisher_type'];
 
     /**
      * Connect the relevant database
