@@ -37,7 +37,7 @@ class ConnectionService
 
     public function userinivitationAndConnectedList (){
 
-        $invitationList =   ConnectionRequest::connect(config('database.secondary'))
+        $invitation_list =   ConnectionRequest::connect(config('database.secondary'))
                                 ->where('receiver_id', auth()->id())
                                 ->where('connection_status','=','pending')
                                 ->get();
@@ -48,14 +48,14 @@ class ConnectionService
                         ->orWhere('sender_id', auth()->id())
                         ->get();
         return [
-            'invitation_list' => $invitationList,
+            'invitation_list' => $invitation_list,
             'connected_list' => $connected
         ];
     }
 
     public function userConnectionList($user_id){
 
-        $userConnection = ConnectionRequest::connect(config('database.secondary'))
+        $user_connection = ConnectionRequest::connect(config('database.secondary'))
                             ->where('connection_status', 'accepted')
                             ->where(function ($query) use ($user_id) {
                                  $query->where('receiver_id', $user_id)
@@ -63,44 +63,44 @@ class ConnectionService
                             })
                             ->get();
         
-       $receiverUserIds = $userConnection->pluck('receiver_id')->reject(function ($id) use ($user_id) {
+       $receiver_user_ids = $user_connection->pluck('receiver_id')->reject(function ($id) use ($user_id) {
                             return $id == $user_id;
                         });
                             
-        $senderIds = $userConnection->pluck('sender_id')->reject(function ($id) use ($user_id) {
+        $senderIds = $user_connection->pluck('sender_id')->reject(function ($id) use ($user_id) {
                         return $id == $user_id;
                     });
 
-        $userConnectionIds = $receiverUserIds->merge($senderIds)->unique();      
+        $user_connection_ids = $receiver_user_ids->merge($senderIds)->unique();      
 
        
         $connections = [];
      
         if($user_id != auth()->id()){
-           $authUserConnection = ConnectionRequest::connect(config('database.secondary'))
+           $auth_user_connection = ConnectionRequest::connect(config('database.secondary'))
                                    ->where('connection_status', '!=', 'removed')
                                    ->where(function ($query) {
                                        $query->where('receiver_id', auth()->id())
                                         ->orWhere('sender_id', auth()->id());
                                    })
                                    ->get();
-            $authUserId = auth()->id();
-            $receiverIds = $authUserConnection->pluck('receiver_id')->reject(function ($id) use ($authUserId) {
-                return $id == $authUserId;
+            $auth_user_id = auth()->id();
+            $receiver_ids = $auth_user_connection->pluck('receiver_id')->reject(function ($id) use ($auth_user_id) {
+                return $id == $auth_user_id;
             });
             
-            $senderIds = $authUserConnection->pluck('sender_id')->reject(function ($id) use ($authUserId) {
-                return $id == $authUserId;
+            $sender_ids = $auth_user_connection->pluck('sender_id')->reject(function ($id) use ($auth_user_id) {
+                return $id == $auth_user_id;
             });
-            $authUserConnectionIds = $receiverIds->merge($senderIds)->unique();      
+            $auth_user_connection_ids = $receiver_ids->merge($sender_ids)->unique();      
                   
-            foreach( $userConnectionIds as  $userConnectionId){
+            foreach( $user_connection_ids as  $user_connection_id){
                 $user = User::connect(config('database.secondary'))
                             ->join('user_roles', 'user_roles.id', '=' ,'users.user_role_id')
                             ->leftJoin('user_addresses', 'user_addresses.user_id', '=' ,'users.id')
                             ->leftJoin('countries', 'countries.id', '=' ,'user_addresses.country_id')
                             ->leftJoin('players', 'players.user_id', '=', 'users.id')
-                            ->where('users.id', $userConnectionId) 
+                            ->where('users.id', $user_connection_id) 
                             ->select(
                                 'users.id as id',
                                 'users.display_name as name', 
@@ -113,18 +113,18 @@ class ConnectionService
 
                 $user->connection_status ='connect';
 
-                foreach($authUserConnectionIds as $authUserConnectionId){
+                foreach($auth_user_connection_ids as $auth_user_connection_id){
                   
                     
-                    if($userConnectionId == $authUserConnectionId){
+                    if($user_connection_id == $auth_user_connection_id){
                         $connect = ConnectionRequest::connect(config('database.secondary'))
                                    ->where(function ($query) {
                                        $query->where('receiver_id', auth()->id())
                                         ->orWhere('sender_id', auth()->id());
                                    })
-                                    ->where(function ($query) use ($authUserConnectionId)  {
-                                     $query->where('receiver_id', $authUserConnectionId)
-                                       ->orWhere('sender_id', $authUserConnectionId);
+                                    ->where(function ($query) use ($auth_user_connection_id)  {
+                                     $query->where('receiver_id', $auth_user_connection_id)
+                                       ->orWhere('sender_id', $auth_user_connection_id);
                                     })
                                    ->first();
 
@@ -141,13 +141,13 @@ class ConnectionService
            
 
         }else{
-            foreach( $userConnectionIds as  $userConnectionId){
+            foreach( $user_connection_ids as  $user_connection_id){
                 $user = User::connect(config('database.secondary'))
                            ->join('user_roles', 'user_roles.id', '=' ,'users.user_role_id')
                            ->leftJoin('user_addresses', 'user_addresses.user_id', '=' ,'users.id')
                            ->leftJoin('countries', 'countries.id', '=' ,'user_addresses.country_id')
                            ->leftJoin('players', 'players.user_id', '=', 'users.id')
-                           ->where('users.id', $userConnectionId) 
+                           ->where('users.id', $user_connection_id) 
                            ->select(
                                 'users.id as id',
                                 'users.display_name as name', 
@@ -162,9 +162,9 @@ class ConnectionService
                               $query->where('receiver_id', auth()->id())
                                ->orWhere('sender_id', auth()->id());
                           })
-                           ->where(function ($query) use ($userConnectionId)  {
-                            $query->where('receiver_id', $userConnectionId)
-                              ->orWhere('sender_id', $userConnectionId);
+                           ->where(function ($query) use ($user_connection_id)  {
+                            $query->where('receiver_id', $user_connection_id)
+                              ->orWhere('sender_id', $user_connection_id);
                            })
                           ->first();
 
@@ -180,6 +180,40 @@ class ConnectionService
 
 
                        
+        }
+
+        public function checkConnectionType ($user_id){
+            
+            $existing = ConnectionRequest::connect(config('database.secondary'))
+                        ->whereIn('connection_status',['pending','accepted'])
+                        ->where(function ($query) {
+                            $query->where('receiver_id', auth()->id())
+                            ->orWhere('sender_id', auth()->id());
+                        })
+                        ->where(function ($query) use ($user_id)  {
+                            $query->where('receiver_id', $user_id)
+                            ->orWhere('sender_id', $user_id);
+                        })
+                        ->exists();
+            $type =null;
+            if($existing){
+                $type = ConnectionRequest::connect(config('database.secondary'))
+                            ->whereIn('connection_status',['pending','accepted'])
+                            ->where(function ($query) {
+                                $query->where('receiver_id', auth()->id())
+                                ->orWhere('sender_id', auth()->id());
+                            })
+                            ->where(function ($query) use ($user_id)  {
+                                $query->where('receiver_id', $user_id)
+                               ->orWhere('sender_id', $user_id);
+                            })
+                            ->first();
+            }
+
+            return [
+                'connection' => $existing,
+                'type' => $type
+            ];
         }
     }
 

@@ -355,6 +355,31 @@ class ConnectionController extends Controller
         }
     }
 
+    public function checkConnectionType($user_id)
+    {
+        try{
+            
+
+            $responseData = $this->connectionService->checkConnectionType($user_id);
+                
+            return CommonResponse::getResponse(
+                200,
+                'Successfully Fetch Data',
+                'Successfully  Fetch Data',
+                $responseData
+            );
+
+            
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    }
+
+
 
 
     
