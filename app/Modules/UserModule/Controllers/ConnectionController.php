@@ -8,6 +8,7 @@ use App\Modules\UserModule\Services\ConnectionService;
 use Illuminate\Http\Request;
 use App\Models\ConnectionRequest;
 use Illuminate\Support\Facades\Validator;
+use App\Models\User;
 
 class ConnectionController extends Controller
 {
@@ -314,6 +315,71 @@ class ConnectionController extends Controller
             );
         }
     }
+
+    public function connectionList($user_id)
+    {
+        try{
+            $existing = User::connect(config('database.secondary'))
+                            ->where('id',$user_id)
+                            ->exists();
+
+            if($existing){
+
+                $responseData = $this->connectionService->userConnectionList($user_id);
+                
+                return CommonResponse::getResponse(
+                    200,
+                    'Successfully Fetch Data',
+                    'Successfully  Fetch Data',
+                    $responseData
+                );
+                                
+                
+            }else{
+
+                return CommonResponse::getResponse(
+                    422,
+                    'This user is not existing',
+                    'This user is not existing'
+                );
+                               
+            }
+
+            
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    }
+
+    public function checkConnectionType($user_id)
+    {
+        try{
+            
+
+            $responseData = $this->connectionService->checkConnectionType($user_id);
+                
+            return CommonResponse::getResponse(
+                200,
+                'Successfully Fetch Data',
+                'Successfully  Fetch Data',
+                $responseData
+            );
+
+            
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    }
+
+
 
 
     
