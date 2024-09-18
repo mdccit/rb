@@ -188,6 +188,7 @@ class FeedService
                         $query->with('user'); // Eager load the user relationship for each comment
                     }
                 ])
+                ->with(['media.mediaInformation:id,media_type,base_url,storage_path'])
                 ->with('likes')
                 ->with('school')
                 ->with('business')
