@@ -10,6 +10,7 @@ use App\Extra\CommonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use App\Models\SchoolUser;
+use  App\Services\AzureBlobStorageService;
 
 class FeedService
 {
@@ -541,12 +542,12 @@ class FeedService
         }
     }
 
-
     public function getAllPostsLoggedUser($type = null, $sortBy = 'created_at', $sortOrder = 'desc')
     {
         try {
             $userId = Auth::id();
-
+            $azureBlobStorageService = app()->make(AzureBlobStorageService::class); // Make an instance of the AzureBlobStorageService
+    
             $query = Post::connect(config('database.secondary'))
                 ->withCount('likes')
                 ->withCount('comments')
@@ -560,35 +561,42 @@ class FeedService
                         $query->where('user_id', $userId);
                     }
                 ])
-                ->with(['media.mediaInformation:storage_path'])
                 ->with('school')
                 ->with('business')
                 ->with('user');
-
+    
             // If a type is provided, filter the posts by the specified type
             if ($type) {
                 $query->where('type', $type);
             }
-
+    
             // Sort posts by the specified sort column and order
             $query->orderBy($sortBy, $sortOrder);
-
+    
             // Execute the query and get the results
-            $posts = $query->get()->map(function ($post) use ($userId) {
+            $posts = $query->get()->map(function ($post) use ($userId, $azureBlobStorageService) {
                 // Add the user's like status to each post
                 $post->user_has_liked = $post->likes->contains('user_id', $userId);
-                // Remove the likes relationship as we only needed it for checking the user's like status
-                unset($post->likes);
+                unset($post->likes); // Remove the likes relationship
+    
+                // Conditionally call getMediaByEntity if has_media is 1
+                if ($post->has_media === 1) {
+                    $mediaItems = $azureBlobStorageService->getMediaByEntity($post->id, 'post'); // Assuming entity_type is 'post'
+                    $post->media = $mediaItems; // Attach media items to the post
+                } else {
+                    $post->media = null; // Set media to null if no media
+                }
+    
                 return $post;
             });
-
+    
             // Return a success response with the retrieved posts and their interactions
             return CommonResponse::getResponse(
                 200,
                 $posts,
                 'Posts for loggedin user retrieved successfully'
             );
-
+    
         } catch (\Exception $e) {
             // Return an error response if something goes wrong
             return CommonResponse::getResponse(
@@ -598,5 +606,7 @@ class FeedService
             );
         }
     }
+    
+    
 
 }

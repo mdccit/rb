@@ -40,8 +40,12 @@ class Media extends Model
     }
 
     public function getFullUrlAttribute()
-    {
-        // Use the media information to build the full URL
-        return $this->mediaInformation->storage_path . '/' . $this->entity_id . '/' . $this->file_name;
-    }
+{
+    // Fetch storage URL and container dynamically from config
+    $storageUrl = config('filesystems.disks.azure.url');
+    $container = config('filesystems.disks.azure.container');
+    
+    // Use the media information to build the full URL
+    return rtrim($storageUrl, '/') .  $this->mediaInformation->storage_path . '/' . $this->entity_id . '/' . $this->file_name;
+}
 }

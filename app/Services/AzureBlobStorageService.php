@@ -156,10 +156,10 @@ class AzureBlobStorageService
                 $container = config('filesystems.disks.azure.container');
                 
                 // Construct the full URL
-                $media->full_url = rtrim($storageUrl, '/') . '/' . ltrim($container, '/') . '/' . ltrim($media->mediaInformation->storage_path, '/') . '/' . $media->entity_id . '/' . $media->file_name;
+                $media->file_url = rtrim($storageUrl, '/') . '/' . ltrim($container, '/') . '/' . ltrim($media->mediaInformation->storage_path, '/') .  $media->entity_id . '/' . $media->file_name;
             } else {
                 \Log::error("Media information not found for media ID: {$media->id}");
-                $media->full_url = null; // Handle case where mediaInformation is not available
+                $media->file_url = null; // Handle case where mediaInformation is not available
             }
         });
     
