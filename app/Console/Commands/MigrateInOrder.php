@@ -8,6 +8,7 @@ use Database\Seeders\CurrencySeeder;
 use Database\Seeders\DivisionSeeder;
 use Database\Seeders\NationalitySeeder;
 use Database\Seeders\PlayerBudgetSeeder;
+use Database\Seeders\SportSeeder;
 use Database\Seeders\UserRoleSeeder;
 use Database\Seeders\UserSeeder;
 use Database\Seeders\UserTypeSeeder;
@@ -105,6 +106,9 @@ class MigrateInOrder extends Command
             '2024_09_06_052537_create_moderation_logs_table.php',
             '2024_09_15_153755_create_school_teams_table.php',
             '2024_09_15_153806_create_school_team_users_table.php',
+            '2024_09_19_100207_create_sports_table.php',
+            '2024_09_19_100453_add_new_sport_id_column_to_players_table.php',
+            '2024_09_19_103015_add_new_sport_id_column_to_coaches_table.php',
 
         ];
 
@@ -130,6 +134,7 @@ class MigrateInOrder extends Command
         $this->call(DivisionSeeder::class);
 
         $this->call(UserSeeder::class);
+        $this->call(SportSeeder::class);
 
         //Passport Config
         //Create personal client for 'RecruitedProV2'
