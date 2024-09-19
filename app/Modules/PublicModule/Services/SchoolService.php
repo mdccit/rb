@@ -52,6 +52,10 @@ class SchoolService
         ];
     }
 
+    public function destroy($id){
+        SchoolUser::connect(config('database.default'))->destroy($id);
+    }
+
     public function updateBasicInfo (array $data, $school_slug){
         $school = School::connect(config('database.default'))
             ->where('slug', $school_slug)
