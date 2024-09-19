@@ -33,19 +33,18 @@ class SchoolTeamService
 
         $team = SchoolTeam::connect(config('database.secondary'))
                  ->join('schools','schools.id','=','school_teams.school_id')
-                 ->where('id',$team_id)
+                 ->where('school_teams.id','=',$team_id)
                  ->select(
-                    'school_teams.name',
+                    'school_teams.id as id',
+                    'school_teams.name as team',
                     'school_teams.school_id',
                     'schools.name'
                   )
                   ->first();
-        $team_users = SchoolTeam::connect(config('database.secondary'))
-                    ->join('users','users.id','=','school_team_users.user_id')
-                    ->leftJoin('players','users.id','=','school_team_users.player_id')
-                    ->leftJoin('coaches','users.id','=','school_team_users.coache_id')
-                    ->where('team_id',$team_id)
-                    ->get();
+
+        $team_users = SchoolTeamUser::connect(config('database.secondary'))
+                      ->where('school_team_users.team_id',$team_id)
+                      ->get();
 
         return [
                 'team_info' => $team,
@@ -59,16 +58,17 @@ class SchoolTeamService
         $team = SchoolTeam::connect(config('database.default'))
                     ->create([
                         'name' => $data['name'],
-                        'school_id' => $data['schoolId'],
+                        'school_id' => $data['school_id'],
                     ]);
+
         foreach( $data['team_user'] as $team_user){
             SchoolTeamUser::connect(config('database.default'))
                 ->create([
                     'team_id' => $team->id,
-                    'user_id' => $team_user->userId,
-                    'status'  => $team_user->status,
-                    'player_id' => $team_user->playerId ?? null,
-                    'coache_id' => $team_user->playerId ?? null
+                    'user_id' => $team_user['user_id'],
+                    'status'  => $team_user['status'],
+                    'player_id' => $team_user['player_id'] ?? null,
+                    'coache_id' => $team_user['coache_id'] ?? null
                 ]);
         }
     }

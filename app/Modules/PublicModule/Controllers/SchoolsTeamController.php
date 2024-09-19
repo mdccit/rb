@@ -64,7 +64,7 @@ class SchoolsTeamController extends Controller
             
             if($existing){
 
-                $responseData = $this->schoolTeamService->getSchoolTeam($team_id);
+                $responseData = $this->schoolTeamService->getSchoolTeam($school_id);
 
                 return CommonResponse::getResponse(
                     200,
@@ -113,9 +113,9 @@ class SchoolsTeamController extends Controller
                 );
             }
           
-
+            
             $responseData = $this->schoolTeamService->createSchoolTeam($request->all());
-
+            
             return CommonResponse::getResponse(
                 200,
                 'Successfully fetched',

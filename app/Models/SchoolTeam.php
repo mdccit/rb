@@ -27,7 +27,7 @@ class SchoolTeam extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'shool_id',
+        'school_id',
         'name'
     ];
 
