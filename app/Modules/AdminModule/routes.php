@@ -81,6 +81,8 @@ Route::group(['namespace' => 'App\Modules\AdminModule\Controllers','prefix' => '
                 Route::delete('/morderation-delete/{id}', 'ModerationRequestController@delete')->name('admin.morderation.delete');
                 Route::get('/morderation-comment-get-all/{id}', 'ModerationCommentController@getAll')->name('admin.morderation-comment.get-all');
                 Route::post('/morderation-comment-create', 'ModerationCommentController@store')->name('admin.morderation-comment.store');
+                Route::put('/morderation-approve/{id}', 'ModerationRequestController@userApprove')->name('admin.morderation.approve');
+                Route::get('/morderation-log/{id}', 'ModerationRequestController@getAllModerationLog')->name('admin.morderation.log');
 
             });
 

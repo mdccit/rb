@@ -17,6 +17,21 @@ Route::group(['namespace' => 'App\Modules\UserModule\Controllers','prefix' => 'a
             //resource
             Route::get('/resource', 'ResourceController@index')->name('user.resources.index');
 
+            Route::get('/players/{user_id}', 'UsersController@getPlayerProfile')->name('user.players.view');
+            Route::get('/coaches/{user_id}', 'UsersController@getCoachProfile')->name('user.coaches.view');
+            Route::get('/business-managers/{user_id}', 'UsersController@getBusinessManagerProfile')->name('user.business-managers.view');
+            Route::get('/parents/{user_id}', 'UsersController@getParentProfile')->name('user.parents.view');
+            
+            //connections
+            Route::post('/connections-request', 'ConnectionController@requestConnection')->name('connections.connect.request');
+            Route::put('/connections-accept/{id}', 'ConnectionController@connectionAccept')->name('connections.connect.accept');
+            Route::put('/connections-cancelle/{id}', 'ConnectionController@connectionCancell')->name('connections.connect.cancelle');
+            Route::put('/connections-reject/{id}', 'ConnectionController@connectionReject')->name('connections.connect.reject');
+            Route::put('/connections-remove/{id}', 'ConnectionController@connectionRemove')->name('connections.connect.remove');
+            Route::get('/connections-list', 'ConnectionController@userinivitationAndConnectedList')->name('connections.connect.connection-list');
+            Route::get('/connections-list-with-compare/{id}', 'ConnectionController@connectionList')->name('connections.connect.connection-list-with-compare');
+            Route::get('/connections-check/{id}', 'ConnectionController@checkConnectionType')->name('connections.connect.check');
+
             //conversation
             Route::post('/create-conversation', 'ConversationController@createConversation')->name('user.conversation.create');
             Route::put('/delete-conversation/{id}', 'ConversationController@deleteConversation')->name('user.conversation.delete');
@@ -27,11 +42,17 @@ Route::group(['namespace' => 'App\Modules\UserModule\Controllers','prefix' => 'a
              Route::get('/get-message/{id}', 'ChatController@getMessages')->name('chat.message.get');
              Route::get('/get-message-unread-count', 'ChatController@unreadMessageCount')->name('chat.message.unread-count');
 
+            //search
+            Route::get('/search', 'SearchController@search')->name('user.search.search');
+            Route::get('/recent-search', 'SearchController@getRecentSearch')->name('user.search.recent');
+            Route::post('/save-search', 'SearchController@saveSearch')->name('user.search.save');
+            Route::get('/get-save-search', 'SearchController@getSaveSearch')->name('user.search.get');
+            Route::delete('/delete-search/{id}', 'SearchController@deleteSaveSearch')->name('user.search.delete');
+
             //TODO only authenticated default users can be access
             Route::middleware('auth.is_default')->group(function () {
+   
                 
-                //Chat api
-
 
             });
 

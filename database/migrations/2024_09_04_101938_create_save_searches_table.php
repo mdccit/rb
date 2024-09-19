@@ -11,9 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('businesses', function (Blueprint $table) {
-//            $table->string('slug')->unique()->default(\Illuminate\Support\Facades\DB::raw('(UUID())'))->after('bio');
-            $table->string('slug')->unique()->after('bio');
+        Schema::create('save_searches', function (Blueprint $table) {
+            $table->id();
+            $table->foreignUuid('user_id')->constrained()->onDelete('cascade');
+            $table->string('name');
+            $table->json('search_data')->nullable();
+            $table->timestamps();
         });
     }
 
@@ -22,8 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('businesses', function (Blueprint $table) {
-            $table->dropColumn('slug');
-        });
+        Schema::dropIfExists('save_searches');
     }
 };
