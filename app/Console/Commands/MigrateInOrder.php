@@ -105,6 +105,7 @@ class MigrateInOrder extends Command
             '2024_09_06_052537_create_moderation_logs_table.php',
             '2024_09_15_153755_create_school_teams_table.php',
             '2024_09_15_153806_create_school_team_users_table.php',
+            '2024_09_19_080511_change_player_coache_ids_in_school_team_users_table.php'
 
         ];
 
