@@ -15,12 +15,8 @@ class MediaInformation extends Model
 
     // Specify which attributes can be mass-assigned
     protected $fillable = [
-        'storage_provider',
-        'container_name',
         'blob_name',
-        'media_type',
-        'base_url',
-        'storage_path',
+        'storage_path'
     ];
 
     // Disable auto-incrementing since we're using UUIDs

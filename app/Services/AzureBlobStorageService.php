@@ -35,53 +35,39 @@ class AzureBlobStorageService
      */
     public function uploadFileWithMetadata($file, $entityId, $entityType, $mediaType)
     {
-        // Define default storage paths for different entity types
-        $storagePaths = [
-            'post' => 'post/',
-            'player' => 'player/',
-            'event' => 'event/',
-            'blog' => 'blog/',
-            'school' => 'school/',
-            'business' => 'business/'
-        ];
-    
-        // Set the base blob name and storage path without entityId
-        $blobName = isset($storagePaths[$entityType]) ? $storagePaths[$entityType] : 'general/';
-        $storagePath = $blobName; // Base path without entityId
-    
+        // Retrieve the storage path from MediaInformation based on the entityType
+        $mediaInfo = MediaInformation::where('blob_name', $entityType)->first();
+
+        if (!$mediaInfo) {
+            throw new \Exception("No storage path defined for entity type: $entityType");
+        }
+
+        // Set the base blob name and storage path from the media information
+        $blobName = $mediaInfo->blob_name;
+        $storagePath = $mediaInfo->storage_path;
+
         // Generate the full file path (including entityId) for actual file storage
-        $fileStoragePath = $blobName . $entityId;  // This is the actual file storage path
-    
-        // Get or create media information with the base storage path
-        $mediaInfo = MediaInformation::firstOrCreate([
-            'storage_provider' => 'azure',
-            'container_name' => $this->container,
-            'blob_name' => $blobName,  // Base path without entityId
-            'media_type' => $mediaType,
-            'base_url' => $this->storageUrl,
-        ], [
-            'storage_path' => $storagePath  // Store the base storage path in storage_path
-        ]);
-    
+        $fileStoragePath = $storagePath . $entityId;
+
         // Generate a random 20-character file name with the original file extension
         $fileName = Str::random(20) . '.' . $file->getClientOriginalExtension();
-    
+
         // Upload the file using the full path generated above
         $fileUrl = $this->uploadFile($file, "{$fileStoragePath}/{$fileName}");
-    
+
         // Save media record in the database
         $media = Media::create([
             'id' => (string) Str::uuid(),
             'media_information_id' => $mediaInfo->id,
             'entity_id' => $entityId,  // The ID of the entity (post, user, etc.)
+            'media_type' => $mediaType,
             'entity_type' => $entityType,  // e.g., post, profile, business, etc.
             'file_name' => $fileName,
-            'file_url' => $fileUrl,  // Full URL of the uploaded file
         ]);
-    
+
         return $media;
     }
-    
+
 
     /**
      * Upload a file to Azure Blob Storage.
@@ -94,20 +80,20 @@ class AzureBlobStorageService
     {
         // Remove any extra slashes from the path and construct the full blob name
         $blobName = ltrim($path, '/'); // Make sure there's no leading slash in the path
-        $url = rtrim($this->storageUrl, '/') .'/'.  ltrim($this->container, '/') . '/' . $blobName;
-    
+        $url = rtrim($this->storageUrl, '/') . '/' . ltrim($this->container, '/') . '/' . $blobName;
+
         // Prepare the request headers
         $date = gmdate('D, d M Y H:i:s T', time());
         $contentLength = $file->getSize();
         $mimeType = $file->getMimeType();
-    
+
         // Get file contents (binary data)
         $fileContents = file_get_contents($file->getRealPath());
-    
+
         // Construct the canonical headers and canonical resource
         $canonicalHeaders = "x-ms-blob-type:BlockBlob\nx-ms-date:{$date}\nx-ms-version:2019-12-12";
         $canonicalResource = "/{$this->accountName}/{$this->container}/{$blobName}";
-    
+
         // Construct the string to sign
         $stringToSign = "PUT\n" .
             "\n" .    // Content-Encoding (empty)
@@ -123,12 +109,12 @@ class AzureBlobStorageService
             "\n" .    // Range (empty)
             "{$canonicalHeaders}\n" . // CanonicalizedHeaders
             "{$canonicalResource}";   // CanonicalizedResource
-    
+
         // Generate the signature
         $signature = base64_encode(hash_hmac('sha256', $stringToSign, base64_decode($this->accountKey), true));
-    
+
         $authorizationHeader = "SharedKey {$this->accountName}:{$signature}";
-    
+
         // Make the HTTP request to Azure Storage using `withBody()` to send raw file contents
         $response = Http::withHeaders([
             'Authorization' => $authorizationHeader,
@@ -139,14 +125,14 @@ class AzureBlobStorageService
             'Content-Length' => $contentLength,
         ])->withBody($fileContents, $mimeType)  // Explicitly send raw binary data
             ->put($url);
-    
+
         if ($response->successful()) {
             return $url; // Return the URL of the uploaded file without any trailing slash
         } else {
             throw new \Exception('Error uploading file to Azure: ' . $response->body());
         }
     }
-    
+
 
     /**
      * Retrieve media related to a specific entity (e.g., post, user, business).
@@ -157,10 +143,28 @@ class AzureBlobStorageService
      */
     public function getMediaByEntity($entityId, $entityType)
     {
-        // Retrieve all media related to the entity by entity ID and entity type
-        return Media::with('mediaInformation')
+        // Retrieve all media related to the entity by entity ID and entity type, eager-load the mediaInformation relationship
+        $mediaItems = Media::with('mediaInformation')
             ->where('entity_id', $entityId)
             ->where('entity_type', $entityType)
             ->get();
+    
+        // Check if the media information is available and build the full URL dynamically
+        $mediaItems->each(function ($media) {
+            if ($media->mediaInformation) {  // Check if mediaInformation is available
+                $storageUrl = config('filesystems.disks.azure.url');
+                $container = config('filesystems.disks.azure.container');
+                
+                // Construct the full URL
+                $media->full_url = rtrim($storageUrl, '/') . '/' . ltrim($container, '/') . '/' . ltrim($media->mediaInformation->storage_path, '/') . '/' . $media->entity_id . '/' . $media->file_name;
+            } else {
+                \Log::error("Media information not found for media ID: {$media->id}");
+                $media->full_url = null; // Handle case where mediaInformation is not available
+            }
+        });
+    
+        return $mediaItems;
     }
+    
+
 }

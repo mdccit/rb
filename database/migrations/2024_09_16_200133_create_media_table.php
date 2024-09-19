@@ -16,10 +16,10 @@ class CreateMediaTable extends Migration
         Schema::create('media', function (Blueprint $table) {
             $table->uuid('id')->primary(); // UUID for unique identification
             $table->uuid('media_information_id'); // Foreign key referencing media_information table
+            $table->string('media_type');
             $table->uuid('entity_id'); // Foreign key to the entity (post, school, business, etc.)
             $table->string('entity_type'); // Type of the entity (post, school, business, user)
             $table->string('file_name'); // Name of the uploaded file
-            $table->string('file_url'); // URL of the file in Azure Blob Storage
             $table->timestamps(); // Created and updated timestamps
 
             // Foreign key constraint for media_information_id

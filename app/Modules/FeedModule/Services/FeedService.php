@@ -560,7 +560,7 @@ class FeedService
                         $query->where('user_id', $userId);
                     }
                 ])
-                ->with(['media.mediaInformation:id,media_type,base_url,storage_path'])
+                ->with(['media.mediaInformation:storage_path'])
                 ->with('school')
                 ->with('business')
                 ->with('user');

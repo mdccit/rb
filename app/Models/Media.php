@@ -18,6 +18,7 @@ class Media extends Model
         'media_information_id',
         'entity_id',
         'entity_type',
+        'media_type',
         'file_name',
         'file_url',
     ];
@@ -36,5 +37,11 @@ class Media extends Model
     public function mediaInformation()
     {
         return $this->belongsTo(MediaInformation::class, 'media_information_id', 'id');
+    }
+
+    public function getFullUrlAttribute()
+    {
+        // Use the media information to build the full URL
+        return $this->mediaInformation->storage_path . '/' . $this->entity_id . '/' . $this->file_name;
     }
 }
