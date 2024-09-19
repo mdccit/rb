@@ -23,7 +23,8 @@ class ModerationRequestService
                         'is_closed',
                         'closed_at',
                         'closed_by',
-                );
+                )
+                ->orderBy('created_at', 'DESC');
         
         
         $dataSet = array();
