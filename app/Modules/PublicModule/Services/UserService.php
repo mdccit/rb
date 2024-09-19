@@ -81,19 +81,23 @@ class UserService
             switch ($user->user_role_id) {
                 case config('app.user_roles.player'):
                     $profile_info = Player::connect(config('database.secondary'))
-                        ->where('user_id', $user->id)
+                        ->join('sports', 'sports.id', '=' ,'players.sport_id')
+                        ->where('players.user_id', $user->id)
                         ->select(
-                            'has_parent',
-                            'graduation_month_year',
-                            'gpa',
-                            'height',
-                            'weight',
-                            'other_data'
+                            'players.has_parent',
+                            'players.graduation_month_year',
+                            'players.gpa',
+                            'players.height',
+                            'players.weight',
+                            'players.other_data',
+                            'sports.id as sport_id',
+                            'sports.name as sport_name'
                         )
                         ->first();
                     break;
                 case config('app.user_roles.coach'):
                     $profile_info = Coach::connect(config('database.secondary'))
+                        ->join('sports', 'sports.id', '=' ,'coaches.sport_id')
                         ->join('schools', 'schools.id', '=' ,'coaches.school_id')
                         ->where('coaches.user_id', $user->id)
                         ->select(
@@ -108,7 +112,9 @@ class UserService
                             'schools.genders_recruiting as school_genders_recruiting',
                             'schools.conference_id as school_conference_id',
                             'schools.division_id as school_division_id',
-                            'schools.other_data as school_other_data'
+                            'schools.other_data as school_other_data',
+                            'sports.id as sport_id',
+                            'sports.name as sport_name'
                         )
                         ->first();
                     break;
@@ -142,6 +148,7 @@ class UserService
                             ->join('users', 'users.id', '=' ,'players.user_id')
                             ->join('user_roles', 'user_roles.id', '=' ,'users.user_role_id')
                             ->join('user_types', 'user_types.id', '=' ,'users.user_type_id')
+                            ->join('sports', 'sports.id', '=' ,'players.sport_id')
                             ->where('players.has_parent', true)
                             ->where('players.player_parent_id', $profile_info->id)
                             ->select(
@@ -173,6 +180,8 @@ class UserService
                                 'users.created_at as joined_at',
                                 'users.email_verified_at',
                                 'users.last_logged_at as last_seen_at',
+                                'sports.id as sport_id',
+                                'sports.name as sport_name'
                             )
                             ->get();
                     }
@@ -257,14 +266,17 @@ class UserService
                 ->first();
 
             $player = Player::connect(config('database.secondary'))
-                ->where('user_id', $user->id)
+                ->join('sports', 'sports.id', '=' ,'players.sport_id')
+                ->where('players.user_id', $user->id)
                 ->select(
-                    'has_parent',
-                    'graduation_month_year',
-                    'gpa',
-                    'height',
-                    'weight',
-                    'other_data'
+                    'players.has_parent',
+                    'players.graduation_month_year',
+                    'players.gpa',
+                    'players.height',
+                    'players.weight',
+                    'players.other_data',
+                    'sports.id as sport_id',
+                    'sports.name as sport_name'
                 )
                 ->first();
         }
@@ -343,6 +355,7 @@ class UserService
                 ->first();
 
             $coach = Coach::connect(config('database.secondary'))
+                ->join('sports', 'sports.id', '=' ,'coaches.sport_id')
                 ->join('schools', 'schools.id', '=' ,'coaches.school_id')
                 ->where('coaches.user_id', $user->id)
                 ->select(
@@ -357,7 +370,9 @@ class UserService
                     'schools.genders_recruiting as school_genders_recruiting',
                     'schools.conference_id as school_conference_id',
                     'schools.division_id as school_division_id',
-                    'schools.other_data as school_other_data'
+                    'schools.other_data as school_other_data',
+                    'sports.id as sport_id',
+                    'sports.name as sport_name'
                 )
                 ->first();
         }
@@ -538,6 +553,7 @@ class UserService
                     ->join('users', 'users.id', '=' ,'players.user_id')
                     ->join('user_roles', 'user_roles.id', '=' ,'users.user_role_id')
                     ->join('user_types', 'user_types.id', '=' ,'users.user_type_id')
+                    ->join('sports', 'sports.id', '=' ,'players.sport_id')
                     ->where('players.has_parent', true)
                     ->where('players.player_parent_id', $parent->id)
                     ->select(
@@ -569,6 +585,8 @@ class UserService
                         'users.created_at as joined_at',
                         'users.email_verified_at',
                         'users.last_logged_at as last_seen_at',
+                        'sports.id as sport_id',
+                        'sports.name as sport_name'
                     )
                     ->get();
             }
