@@ -8,6 +8,7 @@ Route::group(['namespace' => 'App\Modules\PublicModule\Controllers','prefix' => 
     Route::prefix('public')->group(function () {
 
         //TODO whatever not need to authenticate
+        Route::get('/users/{user_slug}', 'UsersController@getUserProfile')->name('user.users.view');
         Route::get('/players/{user_slug}', 'UsersController@getPlayerProfile')->name('user.players.view');
         Route::get('/coaches/{user_slug}', 'UsersController@getCoachProfile')->name('user.coaches.view');
         Route::get('/business-managers/{user_slug}', 'UsersController@getBusinessManagerProfile')->name('user.business-managers.view');
