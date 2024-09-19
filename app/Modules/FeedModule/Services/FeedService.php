@@ -182,19 +182,19 @@ class FeedService
             $userId = auth()->id();
             // Find the post by ID using the secondary database connection
             $post = Post::connect(config('database.secondary'))
-                ->withCount('likes')
-                ->withCount('comments')
-                ->with([
-                    'comments' => function ($query) {
-                        $query->with('user'); // Eager load the user relationship for each comment
-                    }
-                ])
-                ->with(['media.mediaInformation:id,media_type,base_url,storage_path'])
-                ->with('likes')
-                ->with('school')
-                ->with('business')
-                ->with('user')
-                ->findOrFail($id);
+                     ->withCount('likes')
+                     ->withCount('comments')
+                     ->with([
+                        'comments' => function ($query) {
+                            $query->with('user')
+                                  ->orderBy('created_at', 'DESC');  // Eager load the user relationship for each comment
+                        }
+                    ])
+                     ->with('likes')
+                     ->with('school')
+                     ->with('business')
+                     ->with('user')
+                     ->findOrFail($id);
 
             $post->user_has_liked = $post->likes->contains('user_id', $userId);
 
@@ -553,7 +553,8 @@ class FeedService
                 ->withCount('comments')
                 ->with([
                     'comments' => function ($query) {
-                        $query->with('user'); // Eager load the user relationship for each comment
+                        $query->with('user')
+                              ->orderBy('created_at', 'DESC');  // Eager load the user relationship for each comment
                     }
                 ])
                 ->with([

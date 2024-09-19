@@ -4,6 +4,8 @@ namespace App\Modules\PublicModule\Controllers;
 
 use App\Extra\CommonResponse;
 use App\Http\Controllers\Controller;
+use App\Models\School;
+use App\Models\SchoolUser;
 use App\Modules\PublicModule\Services\SchoolService;
 use Illuminate\Http\Request;
 
