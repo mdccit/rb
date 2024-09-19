@@ -221,7 +221,8 @@ class FeedService
                      ->withCount('comments')
                      ->with([
                         'comments' => function ($query) {
-                            $query->with('user'); // Eager load the user relationship for each comment
+                            $query->with('user')
+                                  ->orderBy('created_at', 'DESC');  // Eager load the user relationship for each comment
                         }
                     ])
                      ->with('likes')
@@ -587,7 +588,8 @@ class FeedService
                 ->withCount('comments')
                 ->with([
                     'comments' => function ($query) {
-                        $query->with('user'); // Eager load the user relationship for each comment
+                        $query->with('user')
+                              ->orderBy('created_at', 'DESC');  // Eager load the user relationship for each comment
                     }
                 ])
                 ->with([
