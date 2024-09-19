@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Coach extends Model
+class Sport extends Model
 {
     use HasFactory;
     use HasUuids;
@@ -27,12 +27,6 @@ class Coach extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'user_id',
-        'school_id',
-        'sport_id',
-        'position',
-        'type',
-        'status',
-        'preferred_gender_type'
+        'name',
     ];
 }
