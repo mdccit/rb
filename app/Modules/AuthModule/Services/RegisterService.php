@@ -10,6 +10,7 @@ use App\Models\Country;
 use App\Models\Player;
 use App\Models\PlayerBudget;
 use App\Models\PlayerParent;
+use App\Models\Sport;
 use App\Models\User;
 use App\Models\UserPhone;
 use App\Traits\GeneralHelpers;
@@ -58,9 +59,12 @@ class RegisterService
             ];
             $graduation_month_year = Carbon::createFromFormat('Y-m', $data['graduation_month_year']);
 
+            $sport = Sport::connect(config('database.secondary'))->first();
+
             Player::connect(config('database.default'))
                 ->create([
                     'user_id' => $user->id,
+                    'sport_id' => $sport->id,
                     'player_budget_id' => $data['player_budget'],
                     'graduation_month_year' => $graduation_month_year,
                     'gpa' => $data['gpa'],
@@ -96,9 +100,12 @@ class RegisterService
         $coach = Coach::connect(config('database.secondary'))
             ->where('user_id', $user->id)->first();
         if(!$coach){
+            $sport = Sport::connect(config('database.secondary'))->first();
+
             Coach::connect(config('database.default'))
                 ->create([
                     'user_id' => $user->id,
+                    'sport_id' => $sport->id,
                 ]);
         }
     }
@@ -212,9 +219,12 @@ class RegisterService
             ];
             $graduation_month_year = Carbon::createFromFormat('Y-m', $data['player_graduation_month_year']);
 
+            $sport = Sport::connect(config('database.secondary'))->first();
+
             Player::connect(config('database.default'))
                 ->create([
                     'user_id' => $player_user->id,
+                    'sport_id' => $sport->id,
                     'player_budget_id' => $data['player_budget'],
                     'player_parent_id' => $player_parent->id,
                     'has_parent' => true,
