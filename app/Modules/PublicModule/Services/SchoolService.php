@@ -6,6 +6,7 @@ namespace App\Modules\PublicModule\Services;
 
 use App\Models\School;
 use App\Models\SchoolUser;
+use App\Models\User;
 
 class SchoolService
 {
@@ -21,6 +22,8 @@ class SchoolService
                 'is_approved',
                 'gov_id',
                 'gov_sync_settings',
+                'conference_id',
+                'division_id',
                 'url',
                 'genders_recruiting',
                 'created_at as joined_at',
@@ -47,5 +50,116 @@ class SchoolService
             'school_info' => $school,
             'school_users_info' => $school_users,
         ];
+    }
+
+    public function updateBasicInfo (array $data, $school_slug){
+        $school = School::connect(config('database.default'))
+            ->where('slug', $school_slug)
+            ->first();
+        if($school) {
+            $school->update([
+                'name' => $data['name'],
+            ]);
+        }
+    }
+
+    public function updateBio (array $data, $school_slug){
+        $school = School::connect(config('database.default'))
+            ->where('slug', $school_slug)
+            ->first();
+        if($school) {
+            $school->update([
+                'bio' => $data['bio'],
+            ]);
+        }
+    }
+
+    public function addNewAcademic (array $data, $school_slug){
+        $this ->getOtherData($school_slug);
+
+        $school = School::connect(config('database.default'))
+            ->where('slug', $school_slug)
+            ->first();
+        if($school) {
+            $academics = array();
+            if (array_key_exists("academics",$school['other_data'])){
+                $academics = $school['other_data']['academics'];
+            }
+            array_push($academics,$data['academic']);
+            $school->update([
+                'other_data->academics' => $academics,
+            ]);
+        }
+    }
+
+    public function removeAcademic (array $data, $school_slug){
+        $this ->getOtherData($school_slug);
+
+        $school = School::connect(config('database.default'))
+            ->where('slug', $school_slug)
+            ->first();
+        if($school) {
+            if (array_key_exists("academics",$school['other_data'])){
+                $academics = $school['other_data']['academics'];
+                $updated_academics = array_diff($academics,[$data['academic']]);
+                $school->update([
+                    'other_data->academics' => $updated_academics,
+                ]);
+            }
+        }
+    }
+
+    public function updateTennisInfo (array $data, $school_slug){
+        $school = School::connect(config('database.default'))
+            ->where('slug', $school_slug)
+            ->first();
+        if($school) {
+            $this ->getOtherData($school_slug);
+            $school->update([
+                'conference_id' => $data['conference'],
+                'division_id' => $data['division'],
+                'other_data->average_utr' => $data['average_utr'],
+            ]);
+        }
+    }
+
+    public function updateStatusInfo (array $data, $school_slug){
+        $school = School::connect(config('database.default'))
+            ->where('slug', $school_slug)
+            ->first();
+        if($school) {
+            $this ->getOtherData($school_slug);
+            $school->update([
+                'other_data->tuition_in_of_state' => $data['tuition_in_of_state'],
+                'other_data->tuition_out_of_state' => $data['tuition_out_of_state'],
+                'other_data->cost_of_attendance' => $data['cost_of_attendance'],
+                'other_data->graduation_rate' => $data['graduation_rate'],
+            ]);
+        }
+    }
+
+    private function getOtherData($school_slug){
+        $school = School::connect(config('database.default'))
+            ->where('slug', $school_slug)
+            ->whereNull('other_data')
+            ->first();
+        if($school){
+            $other_data = [
+                'teams_count' => 0,
+                'total_staff' => 0,
+                'admin_staff' => 0,
+                'non_admin_staff' => 0,
+                'academics' => null,
+                'average_utr' => 0,
+                'tuition_in_of_state' => 0,
+                'tuition_out_of_state' => 0,
+                'cost_of_attendance' => 0,
+                'graduation_rate' => 0,
+            ];
+
+            $school->update([
+                'other_data' => $other_data,
+            ]);
+        }
     }
 }

@@ -48,6 +48,7 @@ class AuthController extends Controller
             $responseData = [
                 'token' => $token,
                 'user_role' => $user->getUserRole->short_name,
+                'user_id' => $user->id,
             ];
 
             return CommonResponse::getResponse(
@@ -108,6 +109,7 @@ class AuthController extends Controller
                         'token' => $token,
                         'user_role' => $user->getUserRole->short_name,
                         'user_permission_type' => $user_permission_type,
+                        'user_id' => $user->id,
                     ];
 
                     return CommonResponse::getResponse(

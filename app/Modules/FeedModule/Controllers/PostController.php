@@ -49,6 +49,18 @@ class PostController extends Controller
         return $this->feedService->getPostById($id);
     }
 
+     /**
+     * Display the specified post.
+     *
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function showSinglePost($id)
+    {
+        // Retrieve and return a specific post by ID
+        return $this->feedService->getPostBySingle($id);
+    }
+
     /**
      * Store a newly created post.
      *
