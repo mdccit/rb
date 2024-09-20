@@ -54,6 +54,7 @@ class SearchService
                 'users.first_name',
                 'users.last_name',
                 'users.display_name',
+                'users.slug as slug',
                 'users.email',
                 'users.slug',
                 'user_roles.name as user_role',
@@ -193,7 +194,6 @@ class SearchService
                     'name' => $search_key
                ]);
        }
-        
         return [
             'users' => $dataSet,
             'school' =>  $schoolDataSet 
