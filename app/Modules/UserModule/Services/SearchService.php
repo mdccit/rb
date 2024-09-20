@@ -55,6 +55,7 @@ class SearchService
                 'users.last_name',
                 'users.display_name',
                 'users.email',
+                'users.slug',
                 'user_roles.name as user_role',
                 'user_types.name as user_type',
                 'users.created_at as joined_at',
