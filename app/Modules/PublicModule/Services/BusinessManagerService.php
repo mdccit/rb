@@ -37,23 +37,30 @@ class BusinessManagerService
         }
     }
 
-    public function updatePersonalOtherInfo (array $data, $user_slug){
+    public function updateContactInfo (array $data, $user_slug){
         $user = User::connect(config('database.default'))
             ->where('slug', $user_slug)
             ->first();
         if($user) {
             $user->update([
                 'country_id' => $data['country'],
-                'nationality_id' => $data['nationality'],
-                'gender' => $data['gender'],
-                'date_of_birth' => $data['date_of_birth'],
             ]);
 
-            BusinessManager::connect(config('database.default'))
-                ->where('user_id', $user->id)
-                ->update([
-                    'position' => $data['position'],
-                ]);
+            $user_email = User::connect(config('database.default'))
+                ->where('email', $data['email'])
+                ->where('id','!=', $user->id)
+                ->first();
+            if(!$user_email){
+                if($user->email != $data['email']){
+                    $user->update([
+                        'email' => $data['email'],
+                        'email_verified_at' => null,
+                    ]);
+
+                    //Send mail verification
+                    $user->sendEmailVerificationNotification();
+                }
+            }
 
             //User phone
             $user_phone = UserPhone::connect(config('database.default'))
@@ -102,6 +109,26 @@ class BusinessManagerService
                     'postal_code' => $data['postal_code'],
                 ]);
             }
+
+        }
+    }
+
+    public function updatePersonalOtherInfo (array $data, $user_slug){
+        $user = User::connect(config('database.default'))
+            ->where('slug', $user_slug)
+            ->first();
+        if($user) {
+            $user->update([
+                'nationality_id' => $data['nationality'],
+                'gender' => $data['gender'],
+                'date_of_birth' => $data['date_of_birth'],
+            ]);
+
+            BusinessManager::connect(config('database.default'))
+                ->where('user_id', $user->id)
+                ->update([
+                    'position' => $data['position'],
+                ]);
 
         }
     }
