@@ -273,4 +273,8 @@ return [
         'senior'=>"Senior & 5th year",
     ],
 
+    'sports' => [
+        'tennis'=> "Tennis",
+    ],
+
 ];
