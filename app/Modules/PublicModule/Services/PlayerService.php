@@ -38,33 +38,30 @@ class PlayerService
         }
     }
 
-    public function updatePersonalOtherInfo (array $data, $user_slug){
+    public function updateContactInfo (array $data, $user_slug){
         $user = User::connect(config('database.default'))
             ->where('slug', $user_slug)
             ->first();
         if($user) {
             $user->update([
                 'country_id' => $data['country'],
-                'nationality_id' => $data['nationality'],
-                'gender' => $data['gender'],
-                'date_of_birth' => $data['date_of_birth'],
             ]);
 
-            $height = $data['height_in_cm']?$data['height_cm']:(($data['height_ft']*12)+$data['height_in'])*2.54;
-            $weight = $data['weight_in_kg']?$data['weight_kg']:$data['weight_lb']*0.4535;
-            $graduation_month_year = Carbon::createFromFormat('Y-m', $data['graduation_month_year']);
+            $user_email = User::connect(config('database.default'))
+                ->where('email', $data['email'])
+                ->where('id','!=', $user->id)
+                ->first();
+            if(!$user_email){
+                if($user->email != $data['email']){
+                    $user->update([
+                        'email' => $data['email'],
+                        'email_verified_at' => null,
+                    ]);
 
-            $this ->getOtherData($user->id);
-
-            Player::connect(config('database.default'))
-                ->where('user_id', $user->id)
-                ->update([
-                    'graduation_month_year' => $graduation_month_year,
-                    'height' => $height,
-                    'weight' => $weight,
-                    'other_data->handedness' => $data['handedness'],
-                    'other_data->preferred_surface' => $data['preferred_surface'],
-                ]);
+                    //Send mail verification
+                    $user->sendEmailVerificationNotification();
+                }
+            }
 
             //User phone
             $user_phone = UserPhone::connect(config('database.default'))
@@ -114,6 +111,35 @@ class PlayerService
                 ]);
             }
 
+        }
+    }
+
+    public function updatePersonalOtherInfo (array $data, $user_slug){
+        $user = User::connect(config('database.default'))
+            ->where('slug', $user_slug)
+            ->first();
+        if($user) {
+            $user->update([
+                'nationality_id' => $data['nationality'],
+                'gender' => $data['gender'],
+                'date_of_birth' => $data['date_of_birth'],
+            ]);
+
+            $height = $data['height_in_cm']?$data['height_cm']:(($data['height_ft']*12)+$data['height_in'])*2.54;
+            $weight = $data['weight_in_kg']?$data['weight_kg']:$data['weight_lb']*0.4535;
+            $graduation_month_year = Carbon::createFromFormat('Y-m', $data['graduation_month_year']);
+
+            $this ->getOtherData($user->id);
+
+            Player::connect(config('database.default'))
+                ->where('user_id', $user->id)
+                ->update([
+                    'graduation_month_year' => $graduation_month_year,
+                    'height' => $height,
+                    'weight' => $weight,
+                    'other_data->handedness' => $data['handedness'],
+                    'other_data->preferred_surface' => $data['preferred_surface'],
+                ]);
         }
     }
 

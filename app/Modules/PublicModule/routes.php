@@ -40,6 +40,7 @@ Route::group(['namespace' => 'App\Modules\PublicModule\Controllers','prefix' => 
             Route::middleware('auth.is_player')->group(function () {
                 Route::put('/players/update-basic-info/{user_slug}', 'PlayersController@updateBasicInfo')->name('user.players.update.basic-info');
                 Route::put('/players/update-bio/{user_slug}', 'PlayersController@updateBio')->name('user.players.update.bio');
+                Route::put('/players/update-contact-info/{user_slug}', 'PlayersController@updateContactInfo')->name('user.players.update.contact-info');
                 Route::put('/players/update-other-info/{user_slug}', 'PlayersController@updatePersonalOtherInfo')->name('user.players.update.other-info');
                 Route::put('/players/update-budget/{user_slug}', 'PlayersController@updateBudget')->name('user.players.update.budget');
                 Route::put('/players/update-core-values/{user_slug}', 'PlayersController@updateCoreValues')->name('user.players.update.core-values');
@@ -49,6 +50,7 @@ Route::group(['namespace' => 'App\Modules\PublicModule\Controllers','prefix' => 
             Route::middleware('auth.is_coach')->group(function () {
                 Route::put('/coaches/update-basic-info/{user_slug}', 'CoachesController@updateBasicInfo')->name('user.coaches.update.basic-info');
                 Route::put('/coaches/update-bio/{user_slug}', 'CoachesController@updateBio')->name('user.coaches.update.bio');
+                Route::put('/coaches/update-contact-info/{user_slug}', 'CoachesController@updateContactInfo')->name('user.coaches.update.contact-info');
                 Route::put('/coaches/update-other-info/{user_slug}', 'CoachesController@updatePersonalOtherInfo')->name('user.coaches.update.other-info');
 
                 //school team
@@ -73,6 +75,7 @@ Route::group(['namespace' => 'App\Modules\PublicModule\Controllers','prefix' => 
             Route::middleware('auth.is_business_manager')->group(function () {
                 Route::put('/business-managers/update-basic-info/{user_slug}', 'BusinessManagersController@updateBasicInfo')->name('user.business-managers.update.basic-info');
                 Route::put('/business-managers/update-bio/{user_slug}', 'BusinessManagersController@updateBio')->name('user.business-managers.update.bio');
+                Route::put('/business-managers/update-contact-info/{user_slug}', 'BusinessManagersController@updateContactInfo')->name('user.business-managers.update.contact-info');
                 Route::put('/business-managers/update-other-info/{user_slug}', 'BusinessManagersController@updatePersonalOtherInfo')->name('user.business-managers.update.other-info');
 
                 Route::put('/businesses/update-basic-info/{business_slug}', 'BusinessesController@updateBasicInfo')->name('user.businesses.update.basic-info');
@@ -83,6 +86,7 @@ Route::group(['namespace' => 'App\Modules\PublicModule\Controllers','prefix' => 
             Route::middleware('auth.is_parent')->group(function () {
                 Route::put('/parents/update-basic-info/{user_slug}', 'ParentsController@updateBasicInfo')->name('user.parents.update.basic-info');
                 Route::put('/parents/update-bio/{user_slug}', 'ParentsController@updateBio')->name('user.parents.update.bio');
+                Route::put('/parents/update-contact-info/{user_slug}', 'ParentsController@updateContactInfo')->name('user.parents.update.contact-info');
                 Route::put('/parents/update-other-info/{user_slug}', 'ParentsController@updatePersonalOtherInfo')->name('user.parents.update.other-info');
             });
         });

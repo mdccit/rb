@@ -107,7 +107,7 @@ class PlayersController extends Controller
         }
     }
 
-    public function updatePersonalOtherInfo(Request $request,$user_slug)
+    public function updateContactInfo(Request $request,$user_slug)
     {
         try{
             $validator = Validator::make($request->all(), [
@@ -122,6 +122,49 @@ class PlayersController extends Controller
                 'phone_number' => 'required|string|max:15',
                 'phone_code_country' => 'required|numeric',
 
+                'email' => 'required|unique:users,email,'.auth()->id(),
+            ]);
+            if ($validator->fails())
+            {
+                return CommonResponse::getResponse(
+                    422,
+                    $validator->errors(),
+                    'Input validation failed'
+                );
+            }
+
+            $user = User::connect(config('database.secondary'))
+                ->where('slug', $user_slug)
+                ->where('id', auth()->id())
+                ->first();
+            if(!$user) {
+                return CommonResponse::getResponse(
+                    401,
+                    'You can not update another user',
+                    'You can not update another user'
+                );
+            }
+
+            $this->playerService->updateContactInfo($request->all(),$user_slug);
+
+            return CommonResponse::getResponse(
+                200,
+                'Successfully Updated',
+                'Successfully Updated'
+            );
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    }
+
+    public function updatePersonalOtherInfo(Request $request,$user_slug)
+    {
+        try{
+            $validator = Validator::make($request->all(), [
                 'nationality' => 'required|numeric',
                 'gender' => 'required|string|in:male,female,other',
                 'date_of_birth' => 'required|date',
