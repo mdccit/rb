@@ -30,6 +30,7 @@ class Player extends Model
         'user_id',
         'player_parent_id',
         'player_budget_id',
+        'sport_id',
         'has_parent',
         'graduation_month_year',
         'gpa',
