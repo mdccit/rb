@@ -204,6 +204,7 @@ class UserService
         $user = User::connect(config('database.secondary'))
             ->join('user_roles', 'user_roles.id', '=' ,'users.user_role_id')
             ->join('user_types', 'user_types.id', '=' ,'users.user_type_id')
+            ->join('nationalities', 'nationalities.id', '=' ,'users.nationality_id')
             ->where('users.slug', $user_slug)
             ->where('users.user_role_id', config('app.user_roles.player'))
             ->select(
@@ -218,6 +219,7 @@ class UserService
                 'users.date_of_birth',
                 'users.gender',
                 'users.nationality_id',
+                'nationalities.name as nationality',
                 'users.is_approved',
                 'users.is_first_login',
                 'user_roles.id as user_role_id',
