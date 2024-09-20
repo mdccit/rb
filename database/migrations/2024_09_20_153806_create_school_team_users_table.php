@@ -18,8 +18,8 @@ return new class extends Migration
             $table->unique(['team_id', 'user_id']);
             $table->string('role')->default('member'); 
             $table->enum('status', ['player', 'coache '])->default('player');
-            $table->foreignId('player_id')->nullable()->constrained()->onDelete('cascade');
-            $table->foreignId('coache_id')->nullable()->constrained()->onDelete('cascade');
+            $table->foreignUuid('player_id')->nullable()->constrained()->onDelete('cascade');
+            $table->foreignUuid('coache_id')->nullable()->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }
