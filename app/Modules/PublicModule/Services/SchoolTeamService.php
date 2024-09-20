@@ -16,11 +16,12 @@ class SchoolTeamService
                  ->join('schools','schools.id','=','school_teams.school_id')
                  ->where('school_id',$school_id)
                  ->select(
-                    'school_teams.name',
+                    'school_teams.id as team_id',
+                    'school_teams.name as team_name',
                     'school_teams.school_id',
-                    'schools.name'
+                    'schools.name as school_name'
                   )
-                  ->first();
+                  ->get();
        
 
         return [

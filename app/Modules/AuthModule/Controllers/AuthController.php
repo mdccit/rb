@@ -49,6 +49,7 @@ class AuthController extends Controller
                 'token' => $token,
                 'user_role' => $user->getUserRole->short_name,
                 'user_id' => $user->id,
+                'user_slug' => $user->slug,
                 'user_name' => $user->display_name,
 
             ];
@@ -112,6 +113,7 @@ class AuthController extends Controller
                         'user_role' => $user->getUserRole->short_name,
                         'user_permission_type' => $user_permission_type,
                         'user_id' => $user->id,
+                        'user_slug' => $user->slug,
                         'user_name' => $user->display_name,
                     ];
 

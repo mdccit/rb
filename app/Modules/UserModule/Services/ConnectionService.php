@@ -95,7 +95,7 @@ class ConnectionService
             $auth_user_connection_ids = $receiver_ids->merge($sender_ids)->unique();      
                   
             foreach( $user_connection_ids as  $user_connection_id){
-                $user = User::connect(config('database.secondary'))
+                $query = User::connect(config('database.secondary'))
                             ->join('user_roles', 'user_roles.id', '=' ,'users.user_role_id')
                             ->leftJoin('user_addresses', 'user_addresses.user_id', '=' ,'users.id')
                             ->leftJoin('countries', 'countries.id', '=' ,'user_addresses.country_id')
@@ -108,9 +108,14 @@ class ConnectionService
                                 'user_addresses.city as city',
                                 'countries.name as country',
                                 'players.other_data as other_data'
-                            )
-                            ->first();
+                            );
+            
+                if ($query->count() > 0){
+                    $query->leftJoin('sports', 'sports.id', '=', 'players.sport_id')
+                           ->addSelect('sports.name as sport_name');
+                }
 
+                $user =  $query->first();
                 $user->connection_status ='connect';
 
                 foreach($auth_user_connection_ids as $auth_user_connection_id){
@@ -142,7 +147,7 @@ class ConnectionService
 
         }else{
             foreach( $user_connection_ids as  $user_connection_id){
-                $user = User::connect(config('database.secondary'))
+                $query = User::connect(config('database.secondary'))
                            ->join('user_roles', 'user_roles.id', '=' ,'users.user_role_id')
                            ->leftJoin('user_addresses', 'user_addresses.user_id', '=' ,'users.id')
                            ->leftJoin('countries', 'countries.id', '=' ,'user_addresses.country_id')
@@ -155,8 +160,14 @@ class ConnectionService
                                 'user_addresses.city as city',
                                 'countries.name as country',
                                 'players.other_data as other_data'
-                           )
-                          ->first();
+                           );
+                if ($query->count() > 0){
+                    $query->leftJoin('sports', 'sports.id', '=', 'players.sport_id')
+                          ->addSelect('sports.name as sport_name');
+                }
+        
+                $user =  $query->first();
+                
                 $connect = ConnectionRequest::connect(config('database.secondary'))
                           ->where(function ($query) {
                               $query->where('receiver_id', auth()->id())
