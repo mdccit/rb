@@ -55,7 +55,7 @@ Route::group(['namespace' => 'App\Modules\PublicModule\Controllers','prefix' => 
                 Route::get('/school-team-get/{school_id}', 'SchoolsTeamController@getSchoolTeam')->name('school.team.get');
                 Route::get('/school-team-info/{team_id}', 'SchoolsTeamController@getSchoolTeamInfo')->name('school.team.info');
                 Route::post('/school-team-add', 'SchoolsTeamController@createSchoolTeam')->name('school.team.add');
-                Route::delete('/school-team-delete', 'SchoolsTeamController@destroy')->name('school.team.delete');
+                Route::delete('/school-team-delete/{id}', 'SchoolsTeamController@destroy')->name('school.team.delete');
                 
                 //school user delete
                 Route::delete('/schools-user-delete/{id}', 'SchoolsController@destroy')->name('user.schools.user-delete');
