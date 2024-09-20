@@ -11,7 +11,7 @@ class Post extends Model
     use HasFactory;
     use HasUuids;
 
-    protected $fillable = ['user_id', 'type', 'title', 'description', 'seo_url','school_id','business_id','publisher_type'];
+    protected $fillable = ['user_id', 'type', 'title', 'description', 'has_media' ,'seo_url','school_id','business_id','publisher_type'];
 
     /**
      * Connect the relevant database
@@ -55,6 +55,12 @@ class Post extends Model
     {
         return $this->belongsTo(Business::class, 'business_id');
     }
+
+    public function media()
+{
+    return $this->hasMany(Media::class, 'entity_id', 'id')
+                ->where('entity_type', 'post');
+}
 
     const TYPES = [
         'POST' => 'post',

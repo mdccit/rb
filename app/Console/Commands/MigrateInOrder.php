@@ -12,6 +12,7 @@ use Database\Seeders\SportSeeder;
 use Database\Seeders\UserRoleSeeder;
 use Database\Seeders\UserSeeder;
 use Database\Seeders\UserTypeSeeder;
+use Database\Seeders\MediaInformationSeeder;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
@@ -108,6 +109,8 @@ class MigrateInOrder extends Command
             '2024_09_19_100207_create_sports_table.php',
             '2024_09_19_100453_add_new_sport_id_column_to_players_table.php',
             '2024_09_19_103015_add_new_sport_id_column_to_coaches_table.php',
+            '2024_09_16_200041_create_media_information_table',
+            '2024_09_16_200133_create_media_table',
 
         ];
 
@@ -134,6 +137,7 @@ class MigrateInOrder extends Command
 
         $this->call(UserSeeder::class);
         $this->call(SportSeeder::class);
+        $this->call(MediaInformationSeeder::class);
 
         //Passport Config
         //Create personal client for 'RecruitedProV2'
