@@ -8,6 +8,7 @@ use App\Models\BusinessManager;
 use App\Models\Coach;
 use App\Models\Country;
 use App\Models\Player;
+use App\Models\Sport;
 use App\Models\User;
 use App\Models\UserPhone;
 use App\Traits\GeneralHelpers;
@@ -167,6 +168,8 @@ class UserService
             $user->sendEmailVerificationNotification();
         }
 
+        $sport = Sport::connect(config('database.secondary'))->first();
+
         //Player
         if($data['user_role'] == config('app.user_roles.player')){
             $player = Player::connect(config('database.secondary'))
@@ -175,6 +178,7 @@ class UserService
                 Player::connect(config('database.default'))
                     ->create([
                         'user_id' => $user->id,
+                        'sport_id' => $sport->id,
                     ]);
             }
         }
@@ -187,6 +191,7 @@ class UserService
                 Coach::connect(config('database.default'))
                     ->create([
                         'user_id' => $user->id,
+                        'sport_id' => $sport->id,
                     ]);
             }
         }
