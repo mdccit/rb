@@ -5,14 +5,27 @@ namespace App\Modules\PublicModule\Services;
 
 
 use App\Models\Country;
+use App\Models\MediaInformation;
 use App\Models\Player;
 use App\Models\User;
 use App\Models\UserAddress;
 use App\Models\UserPhone;
+use App\Services\AzureBlobStorageService;
+use App\Traits\GeneralHelpers;
 use Carbon\Carbon;
 
 class PlayerService
 {
+    use GeneralHelpers;
+
+    private $azureBlobStorageService;
+
+    function __construct()
+    {
+        //Init service
+        $this->azureBlobStorageService = new AzureBlobStorageService();
+    }
+
     public function updateBasicInfo (array $data, $user_slug){
         $user = User::connect(config('database.default'))
             ->where('slug', $user_slug)
@@ -36,6 +49,91 @@ class PlayerService
                 'bio' => $data['bio'],
             ]);
         }
+    }
+
+    public function uploadProfilePicture ($file, $user_slug){
+        $user = User::connect(config('database.default'))
+            ->where('slug', $user_slug)
+            ->first();
+        $data = [
+            'file_url' => ''
+        ];
+        if($user) {
+            $mediaType = $this->getMediaType($file);
+            $media = $this->azureBlobStorageService->uploadFileWithMetadata($file, $user->id, 'user_profile_picture', $mediaType);
+            if($media){
+                //$data = $this->azureBlobStorageService->getMediaByEntity($user->id, 'user_profile_picture');
+                $mediaInformation = MediaInformation::connect(config('database.secondary'))->find($media->media_information_id);
+                //URL = base_url / container_name / storage_path / entity_id (user_id) / file_name
+                $url = config('app.azure_storage_url').
+                    config('app.azure_storage_container').
+                    '/'.
+                    $mediaInformation->storage_path.
+                    $user->id.
+                    '/'.
+                    $media->file_name;
+                $data = [
+                    'file_url' => $url
+                ];
+            }
+        }
+        return $data;
+    }
+
+    public function uploadCoverPicture ($file, $user_slug){
+        $user = User::connect(config('database.default'))
+            ->where('slug', $user_slug)
+            ->first();
+        $data = [
+            'file_url' => ''
+        ];
+        if($user) {
+            $mediaType = $this->getMediaType($file);
+            $media = $this->azureBlobStorageService->uploadFileWithMetadata($file, $user->id, 'user_profile_cover', $mediaType);
+            if($media){
+                //$data = $this->azureBlobStorageService->getMediaByEntity($user->id, 'user_profile_cover');
+                $mediaInformation = MediaInformation::connect(config('database.secondary'))->find($media->media_information_id);
+                //URL = base_url / container_name / storage_path / entity_id (user_id) / file_name
+                $url = config('app.azure_storage_url').
+                    config('app.azure_storage_container').
+                    '/'.
+                    $mediaInformation->storage_path.
+                    $user->id.
+                    '/'.
+                    $media->file_name;
+                $data = [
+                    'file_url' => $url
+                ];
+            }
+        }
+        return $data;
+    }
+
+    public function uploadMedia ($files, $user_slug){
+        $user = User::connect(config('database.default'))
+            ->where('slug', $user_slug)
+            ->first();
+        $urlArray = array();
+        if($user) {
+            foreach ($files as $file){
+                $mediaType = $this->getMediaType($file);
+                $media = $this->azureBlobStorageService->uploadFileWithMetadata($file, $user->id, 'user_profile_media', $mediaType);
+                if($media){
+                    //$data = $this->azureBlobStorageService->getMediaByEntity($user->id, 'user_profile_cover');
+                    $mediaInformation = MediaInformation::connect(config('database.secondary'))->find($media->media_information_id);
+                    //URL = base_url / container_name / storage_path / entity_id (user_id) / file_name
+                    $url = config('app.azure_storage_url').
+                        config('app.azure_storage_container').
+                        '/'.
+                        $mediaInformation->storage_path.
+                        $user->id.
+                        '/'.
+                        $media->file_name;
+                    array_push($urlArray,$url);
+                }
+            }
+        }
+        return $urlArray;
     }
 
     public function updateContactInfo (array $data, $user_slug){

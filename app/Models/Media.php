@@ -10,6 +10,16 @@ class Media extends Model
 {
     use HasFactory, HasUuids;
 
+    /**
+     * Connect the relevant database
+     *
+     */
+    public static function connect($connection =null)
+    {
+        $connection = $connection ?:config('database.default');
+        return (new static)->setConnection($connection);
+    }
+
     // Specify the table name if it doesn't follow Laravel's naming convention
     protected $table = 'media';
 
