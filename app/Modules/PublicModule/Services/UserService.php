@@ -6,6 +6,7 @@ namespace App\Modules\PublicModule\Services;
 
 use App\Models\BusinessManager;
 use App\Models\Coach;
+use App\Models\Media;
 use App\Models\Player;
 use App\Models\PlayerParent;
 use App\Models\User;
@@ -45,6 +46,11 @@ class UserService
 
         $user_phone = null;
         $user_address = null;
+        $media_info = [
+            'profile_picture_url' => null,
+            'cover_picture_url' => null,
+            'media_urls' => array(),
+        ];
         $profile_info = null;
         $children_info = array();
         if($user) {
@@ -77,6 +83,83 @@ class UserService
                     'countries.name as country'
                 )
                 ->first();
+
+            $profile_picture_url = null;
+            $media = Media::connect(config('database.secondary'))
+                ->join('media_information', 'media_information.id', '=', 'media.media_information_id')
+                ->where('media.entity_id', $user->id)
+                ->where('media.entity_type', 'user_profile_picture')
+                ->select(
+                    'media.file_name',
+                    'media_information.storage_path',
+                )
+                ->orderBy('media.created_at', 'desc')
+                ->first();
+            if($media){
+                $profile_picture_url = config('app.azure_storage_url').
+                    config('app.azure_storage_container').
+                    '/'.
+                    $media->storage_path.
+                    $user->id.
+                    '/'.
+                    $media->file_name;
+            }
+
+            $cover_picture_url = null;
+            $media = Media::connect(config('database.secondary'))
+                ->join('media_information', 'media_information.id', '=', 'media.media_information_id')
+                ->where('media.entity_id', $user->id)
+                ->where('media.entity_type', 'user_profile_cover')
+                ->select(
+                    'media.file_name',
+                    'media_information.storage_path',
+                )
+                ->orderBy('media.created_at', 'desc')
+                ->first();
+            if($media){
+                $cover_picture_url = config('app.azure_storage_url').
+                    config('app.azure_storage_container').
+                    '/'.
+                    $media->storage_path.
+                    $user->id.
+                    '/'.
+                    $media->file_name;
+            }
+
+            $media_urls = array();
+            $media_list = Media::connect(config('database.secondary'))
+                ->join('media_information', 'media_information.id', '=', 'media.media_information_id')
+                ->where('media.entity_id', $user->id)
+                ->where('media.entity_type', 'user_profile_media')
+                ->select(
+                    'media.media_type',
+                    'media.file_name',
+                    'media_information.storage_path',
+                )
+                ->orderBy('media.created_at', 'desc')
+                ->get();
+            if($media_list){
+                foreach ($media_list as $media){
+                    $url = config('app.azure_storage_url').
+                        config('app.azure_storage_container').
+                        '/'.
+                        $media->storage_path.
+                        $user->id.
+                        '/'.
+                        $media->file_name;
+                    $data = [
+                        'url' => $url,
+                        'media_type' => $media->media_type
+                    ];
+                    array_push($media_urls,$data);
+                }
+            }
+
+            $media_info = [
+                'profile_picture_url' => $profile_picture_url,
+                'cover_picture_url' => $cover_picture_url,
+                'media_urls' => $media_urls,
+            ];
 
             switch ($user->user_role_id) {
                 case config('app.user_roles.player'):
@@ -195,6 +278,7 @@ class UserService
             'user_basic_info' => $user,
             'user_phone_info' => $user_phone,
             'user_address_info' => $user_address,
+            'media_info' => $media_info,
             'profile_info' => $profile_info,
             'children_info' => $children_info,
         ];
