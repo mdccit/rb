@@ -3,26 +3,17 @@
 namespace Database\Seeders;
 
 use App\Models\MediaInformation;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-class MediaInformationSeeder extends Seeder
+class MediaInfoSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-              // Define the storage paths for various entities
         $storagePaths = [
-            'post' => 'post/',
-            'player' => 'player/',
-            'event' => 'event/',
-            'blog' => 'blog/',
-            'school' => 'school/',
-            'business' => 'business/',
-            'user' => 'user/',
-            'user_profile_picture' => 'user/profile/picture/',
-            'user_profile_cover' => 'user/profile/cover/',
             'user_profile_media' => 'user/profile/media/',
 
             'school_profile_picture' => 'school/profile/picture/',

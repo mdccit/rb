@@ -36,4 +36,22 @@ trait GeneralHelpers
         // If the slug is unique, return it
         return $slug;
     }
+
+    public function getMediaType($file)
+    {
+        $mimeType = $file->getMimeType();
+
+        // Check if the file is an image
+        if (strpos($mimeType, 'image') !== false) {
+            return 'image';
+        }
+
+        // Check if the file is a video
+        if (strpos($mimeType, 'video') !== false) {
+            return 'video';
+        }
+
+        // Default media type if not image or video (optional)
+        return 'unknown';
+    }
 }
