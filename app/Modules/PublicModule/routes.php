@@ -44,6 +44,10 @@ Route::group(['namespace' => 'App\Modules\PublicModule\Controllers','prefix' => 
                 Route::put('/players/update-other-info/{user_slug}', 'PlayersController@updatePersonalOtherInfo')->name('user.players.update.other-info');
                 Route::put('/players/update-budget/{user_slug}', 'PlayersController@updateBudget')->name('user.players.update.budget');
                 Route::put('/players/update-core-values/{user_slug}', 'PlayersController@updateCoreValues')->name('user.players.update.core-values');
+
+                Route::post('/players/upload-profile-picture/{user_slug}', 'PlayersController@uploadProfilePicture')->name('user.players.upload.profile-picture');
+                Route::post('/players/upload-cover-picture/{user_slug}', 'PlayersController@uploadCoverPicture')->name('user.players.upload.cover-picture');
+                Route::post('/players/upload-media/{user_slug}', 'PlayersController@uploadMedia')->name('user.players.upload.media');
             });
 
             //TODO only authenticated coach users can be access
