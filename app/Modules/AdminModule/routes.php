@@ -83,6 +83,7 @@ Route::group(['namespace' => 'App\Modules\AdminModule\Controllers','prefix' => '
                 Route::post('/morderation-comment-create', 'ModerationCommentController@store')->name('admin.morderation-comment.store');
                 Route::put('/morderation-approve/{id}', 'ModerationRequestController@userApprove')->name('admin.morderation.approve');
                 Route::get('/morderation-log/{id}', 'ModerationRequestController@getAllModerationLog')->name('admin.morderation.log');
+                Route::get('/morderation-open-count', 'ModerationRequestController@getAllModerationOpenCount')->name('admin.morderation.open-count');
 
             });
 
