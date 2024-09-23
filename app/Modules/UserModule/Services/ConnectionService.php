@@ -134,6 +134,7 @@ class ConnectionService
                                    ->first();
 
                          $user->connection_status = $connect->connection_status;
+                         $user->connection_id = $connect->id;
                     }
 
                     
@@ -180,6 +181,8 @@ class ConnectionService
                           ->first();
 
                 $user->connection_status = $connect->connection_status;
+                $user->connection_id = $connect->id;
+
                 $connections[] = $user;
             }
         }
