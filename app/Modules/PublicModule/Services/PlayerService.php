@@ -143,7 +143,7 @@ class PlayerService
     }
 
     public function removeMedia ($media_id){
-        $media = Media::connect(config('database.secondary'))
+        $media = Media::connect(config('database.default'))
             ->join('media_information', 'media_information.id', '=', 'media.media_information_id')
             ->where('media.id', $media_id)
             ->where('media.entity_id', auth()->id())
