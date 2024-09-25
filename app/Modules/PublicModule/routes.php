@@ -48,6 +48,7 @@ Route::group(['namespace' => 'App\Modules\PublicModule\Controllers','prefix' => 
                 Route::post('/players/upload-profile-picture/{user_slug}', 'PlayersController@uploadProfilePicture')->name('user.players.upload.profile-picture');
                 Route::post('/players/upload-cover-picture/{user_slug}', 'PlayersController@uploadCoverPicture')->name('user.players.upload.cover-picture');
                 Route::post('/players/upload-media/{user_slug}', 'PlayersController@uploadMedia')->name('user.players.upload.media');
+                Route::delete('/players/remove-media/{media_id}', 'PlayersController@removeMedia')->name('user.players.remove.media');
             });
 
             //TODO only authenticated coach users can be access
