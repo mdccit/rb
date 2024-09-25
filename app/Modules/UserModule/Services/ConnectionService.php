@@ -103,6 +103,7 @@ class ConnectionService
                             ->where('users.id', $user_connection_id) 
                             ->select(
                                 'users.id as id',
+                                'users.slug as 	slug',
                                 'users.display_name as name', 
                                 'user_roles.name as role',
                                 'user_addresses.city as city',
@@ -156,6 +157,7 @@ class ConnectionService
                            ->where('users.id', $user_connection_id) 
                            ->select(
                                 'users.id as id',
+                                'users.slug as 	slug',
                                 'users.display_name as name', 
                                 'user_roles.name as role',
                                 'user_addresses.city as city',

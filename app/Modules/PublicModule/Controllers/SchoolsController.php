@@ -9,6 +9,7 @@ use App\Models\SchoolUser;
 use App\Modules\PublicModule\Services\SchoolService;
 use Illuminate\Http\Request;
 
+
 class SchoolsController extends Controller
 {
     private $schoolService;
@@ -38,4 +39,37 @@ class SchoolsController extends Controller
             );
         }
     }
+    
+    public function destroy($user_team_id){
+        try{
+           
+            $existing = SchoolUser::connect(config('database.secondary'))
+                            ->where('id',$user_team_id)
+                            ->exists();
+            
+            if($existing){
+
+                $this->schoolService->destroy($user_team_id);
+
+                return CommonResponse::getResponse(
+                    200,
+                    'Successfully School User Deleted',
+                    'Successfully School User Deleted'           
+                );
+            }else{
+                return CommonResponse::getResponse(
+                    422,
+                    'This School User is not existing',
+                    'This School User is not existing'
+                );
+            }
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    }
+    
 }
