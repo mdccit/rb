@@ -107,6 +107,157 @@ class CoachesController extends Controller
         }
     }
 
+    public function uploadProfilePicture(Request $request,$user_slug)
+    {
+        try{
+            $validator = Validator::make($request->all(), [
+                'file.*' => 'required|mimes:jpg,jpeg,png|max:51200',
+            ]);
+            if ($validator->fails())
+            {
+                return CommonResponse::getResponse(
+                    422,
+                    $validator->errors(),
+                    'Input validation failed'
+                );
+            }
+
+            $user = User::connect(config('database.secondary'))
+                ->where('slug', $user_slug)
+                ->where('id', auth()->id())
+                ->first();
+            if(!$user) {
+                return CommonResponse::getResponse(
+                    401,
+                    'You can not update another user',
+                    'You can not update another user'
+                );
+            }
+
+            $responseData = $this->coachService->uploadProfilePicture($request->file('file'),$user_slug);
+
+            return CommonResponse::getResponse(
+                200,
+                'Successfully Uploaded',
+                'Successfully Uploaded',
+                $responseData
+            );
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    }
+
+    public function uploadCoverPicture(Request $request,$user_slug)
+    {
+        try{
+            $validator = Validator::make($request->all(), [
+                'file.*' => 'required|mimes:jpg,jpeg,png|max:51200',
+            ]);
+            if ($validator->fails())
+            {
+                return CommonResponse::getResponse(
+                    422,
+                    $validator->errors(),
+                    'Input validation failed'
+                );
+            }
+
+            $user = User::connect(config('database.secondary'))
+                ->where('slug', $user_slug)
+                ->where('id', auth()->id())
+                ->first();
+            if(!$user) {
+                return CommonResponse::getResponse(
+                    401,
+                    'You can not update another user',
+                    'You can not update another user'
+                );
+            }
+
+            $responseData = $this->coachService->uploadCoverPicture($request->file('file'),$user_slug);
+
+            return CommonResponse::getResponse(
+                200,
+                'Successfully Uploaded',
+                'Successfully Uploaded',
+                $responseData
+            );
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    }
+
+    public function uploadMedia(Request $request,$user_slug)
+    {
+        try{
+            $validator = Validator::make($request->all(), [
+                'files.*' => 'required|mimes:jpg,jpeg,png,mp4|max:51200',
+            ]);
+            if ($validator->fails())
+            {
+                return CommonResponse::getResponse(
+                    422,
+                    $validator->errors(),
+                    'Input validation failed'
+                );
+            }
+
+            $user = User::connect(config('database.secondary'))
+                ->where('slug', $user_slug)
+                ->where('id', auth()->id())
+                ->first();
+            if(!$user) {
+                return CommonResponse::getResponse(
+                    401,
+                    'You can not update another user',
+                    'You can not update another user'
+                );
+            }
+
+            $responseData = $this->coachService->uploadMedia($request->file('files'),$user_slug);
+
+            return CommonResponse::getResponse(
+                200,
+                'Successfully Uploaded',
+                'Successfully Uploaded',
+                $responseData
+            );
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    }
+
+    public function removeMedia($media_id)
+    {
+        try{
+            $this->coachService->removeMedia($media_id);
+
+            return CommonResponse::getResponse(
+                200,
+                'Successfully Removed Media',
+                'Successfully Removed Media',
+            );
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    }
+
     public function updateContactInfo(Request $request,$user_slug)
     {
         try{
