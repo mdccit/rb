@@ -58,6 +58,11 @@ Route::group(['namespace' => 'App\Modules\PublicModule\Controllers','prefix' => 
                 Route::put('/coaches/update-contact-info/{user_slug}', 'CoachesController@updateContactInfo')->name('user.coaches.update.contact-info');
                 Route::put('/coaches/update-other-info/{user_slug}', 'CoachesController@updatePersonalOtherInfo')->name('user.coaches.update.other-info');
 
+                Route::post('/coaches/upload-profile-picture/{user_slug}', 'CoachesController@uploadProfilePicture')->name('user.coaches.upload.profile-picture');
+                Route::post('/coaches/upload-cover-picture/{user_slug}', 'CoachesController@uploadCoverPicture')->name('user.coaches.upload.cover-picture');
+                Route::post('/coaches/upload-media/{user_slug}', 'CoachesController@uploadMedia')->name('user.coaches.upload.media');
+                Route::delete('/coaches/remove-media/{media_id}', 'CoachesController@removeMedia')->name('user.coaches.remove.media');
+
                 //school team
                 Route::get('/school-team-get/{school_id}', 'SchoolsTeamController@getSchoolTeam')->name('school.team.get');
                 Route::get('/school-team-info/{team_id}', 'SchoolsTeamController@getSchoolTeamInfo')->name('school.team.info');
