@@ -12,9 +12,12 @@ use App\Models\PlayerParent;
 use App\Models\User;
 use App\Models\UserAddress;
 use App\Models\UserPhone;
+use App\Traits\AzureBlobStorage;
 
 class UserService
 {
+    use AzureBlobStorage;
+
     public function getUserProfile ($user_slug){
         $user = User::connect(config('database.secondary'))
             ->join('user_roles', 'user_roles.id', '=' ,'users.user_role_id')
@@ -84,94 +87,9 @@ class UserService
                 )
                 ->first();
 
-            $profile_picture = null;
-            $media = Media::connect(config('database.secondary'))
-                ->join('media_information', 'media_information.id', '=', 'media.media_information_id')
-                ->where('media.entity_id', $user->id)
-                ->where('media.entity_type', 'user_profile_picture')
-                ->select(
-                    'media.id',
-                    'media.media_type',
-                    'media.file_name',
-                    'media_information.storage_path',
-                )
-                ->orderBy('media.created_at', 'desc')
-                ->first();
-            if($media){
-                $url = config('app.azure_storage_url').
-                    config('app.azure_storage_container').
-                    '/'.
-                    $media->storage_path.
-                    $user->id.
-                    '/'.
-                    $media->file_name;
-
-                $profile_picture =[
-                    'media_id' => $media->id,
-                    'url' => $url,
-                    'media_type' => $media->media_type
-                ];
-            }
-
-            $cover_picture = null;
-            $media = Media::connect(config('database.secondary'))
-                ->join('media_information', 'media_information.id', '=', 'media.media_information_id')
-                ->where('media.entity_id', $user->id)
-                ->where('media.entity_type', 'user_profile_cover')
-                ->select(
-                    'media.id',
-                    'media.media_type',
-                    'media.file_name',
-                    'media_information.storage_path',
-                )
-                ->orderBy('media.created_at', 'desc')
-                ->first();
-            if($media){
-                $url = config('app.azure_storage_url').
-                    config('app.azure_storage_container').
-                    '/'.
-                    $media->storage_path.
-                    $user->id.
-                    '/'.
-                    $media->file_name;
-
-                $cover_picture =[
-                    'media_id' => $media->id,
-                    'url' => $url,
-                    'media_type' => $media->media_type
-                ];
-            }
-
-            $media_urls = array();
-            $media_list = Media::connect(config('database.secondary'))
-                ->join('media_information', 'media_information.id', '=', 'media.media_information_id')
-                ->where('media.entity_id', $user->id)
-                ->where('media.entity_type', 'user_profile_media')
-                ->select(
-                    'media.id',
-                    'media.media_type',
-                    'media.file_name',
-                    'media_information.storage_path',
-                )
-                ->orderBy('media.created_at', 'desc')
-                ->get();
-            if($media_list){
-                foreach ($media_list as $media){
-                    $url = config('app.azure_storage_url').
-                        config('app.azure_storage_container').
-                        '/'.
-                        $media->storage_path.
-                        $user->id.
-                        '/'.
-                        $media->file_name;
-                    $data = [
-                        'media_id' => $media->id,
-                        'url' => $url,
-                        'media_type' => $media->media_type
-                    ];
-                    array_push($media_urls,$data);
-                }
-            }
+            $profile_picture = $this->getSingleFileByEntityId($user->id,'user_profile_picture');
+            $cover_picture = $this->getSingleFileByEntityId($user->id,'user_profile_cover');
+            $media_urls = $this->getMultipleFilesByEntityId($user->id,'user_profile_media');
 
             $media_info = [
                 'profile_picture' => $profile_picture,
@@ -374,94 +292,9 @@ class UserService
                 )
                 ->first();
 
-            $profile_picture = null;
-            $media = Media::connect(config('database.secondary'))
-                ->join('media_information', 'media_information.id', '=', 'media.media_information_id')
-                ->where('media.entity_id', $user->id)
-                ->where('media.entity_type', 'user_profile_picture')
-                ->select(
-                    'media.id',
-                    'media.media_type',
-                    'media.file_name',
-                    'media_information.storage_path',
-                )
-                ->orderBy('media.created_at', 'desc')
-                ->first();
-            if($media){
-                $url = config('app.azure_storage_url').
-                    config('app.azure_storage_container').
-                    '/'.
-                    $media->storage_path.
-                    $user->id.
-                    '/'.
-                    $media->file_name;
-
-                $profile_picture =[
-                    'media_id' => $media->id,
-                    'url' => $url,
-                    'media_type' => $media->media_type
-                ];
-            }
-
-            $cover_picture = null;
-            $media = Media::connect(config('database.secondary'))
-                ->join('media_information', 'media_information.id', '=', 'media.media_information_id')
-                ->where('media.entity_id', $user->id)
-                ->where('media.entity_type', 'user_profile_cover')
-                ->select(
-                    'media.id',
-                    'media.media_type',
-                    'media.file_name',
-                    'media_information.storage_path',
-                )
-                ->orderBy('media.created_at', 'desc')
-                ->first();
-            if($media){
-                $url = config('app.azure_storage_url').
-                    config('app.azure_storage_container').
-                    '/'.
-                    $media->storage_path.
-                    $user->id.
-                    '/'.
-                    $media->file_name;
-
-                $cover_picture =[
-                    'media_id' => $media->id,
-                    'url' => $url,
-                    'media_type' => $media->media_type
-                ];
-            }
-
-            $media_urls = array();
-            $media_list = Media::connect(config('database.secondary'))
-                ->join('media_information', 'media_information.id', '=', 'media.media_information_id')
-                ->where('media.entity_id', $user->id)
-                ->where('media.entity_type', 'user_profile_media')
-                ->select(
-                    'media.id',
-                    'media.media_type',
-                    'media.file_name',
-                    'media_information.storage_path',
-                )
-                ->orderBy('media.created_at', 'desc')
-                ->get();
-            if($media_list){
-                foreach ($media_list as $media){
-                    $url = config('app.azure_storage_url').
-                        config('app.azure_storage_container').
-                        '/'.
-                        $media->storage_path.
-                        $user->id.
-                        '/'.
-                        $media->file_name;
-                    $data = [
-                        'media_id' => $media->id,
-                        'url' => $url,
-                        'media_type' => $media->media_type
-                    ];
-                    array_push($media_urls,$data);
-                }
-            }
+            $profile_picture = $this->getSingleFileByEntityId($user->id,'user_profile_picture');
+            $cover_picture = $this->getSingleFileByEntityId($user->id,'user_profile_cover');
+            $media_urls = $this->getMultipleFilesByEntityId($user->id,'user_profile_media');
 
             $media_info = [
                 'profile_picture' => $profile_picture,
@@ -564,94 +397,9 @@ class UserService
                 )
                 ->first();
 
-            $profile_picture = null;
-            $media = Media::connect(config('database.secondary'))
-                ->join('media_information', 'media_information.id', '=', 'media.media_information_id')
-                ->where('media.entity_id', $user->id)
-                ->where('media.entity_type', 'user_profile_picture')
-                ->select(
-                    'media.id',
-                    'media.media_type',
-                    'media.file_name',
-                    'media_information.storage_path',
-                )
-                ->orderBy('media.created_at', 'desc')
-                ->first();
-            if($media){
-                $url = config('app.azure_storage_url').
-                    config('app.azure_storage_container').
-                    '/'.
-                    $media->storage_path.
-                    $user->id.
-                    '/'.
-                    $media->file_name;
-
-                $profile_picture =[
-                    'media_id' => $media->id,
-                    'url' => $url,
-                    'media_type' => $media->media_type
-                ];
-            }
-
-            $cover_picture = null;
-            $media = Media::connect(config('database.secondary'))
-                ->join('media_information', 'media_information.id', '=', 'media.media_information_id')
-                ->where('media.entity_id', $user->id)
-                ->where('media.entity_type', 'user_profile_cover')
-                ->select(
-                    'media.id',
-                    'media.media_type',
-                    'media.file_name',
-                    'media_information.storage_path',
-                )
-                ->orderBy('media.created_at', 'desc')
-                ->first();
-            if($media){
-                $url = config('app.azure_storage_url').
-                    config('app.azure_storage_container').
-                    '/'.
-                    $media->storage_path.
-                    $user->id.
-                    '/'.
-                    $media->file_name;
-
-                $cover_picture =[
-                    'media_id' => $media->id,
-                    'url' => $url,
-                    'media_type' => $media->media_type
-                ];
-            }
-
-            $media_urls = array();
-            $media_list = Media::connect(config('database.secondary'))
-                ->join('media_information', 'media_information.id', '=', 'media.media_information_id')
-                ->where('media.entity_id', $user->id)
-                ->where('media.entity_type', 'user_profile_media')
-                ->select(
-                    'media.id',
-                    'media.media_type',
-                    'media.file_name',
-                    'media_information.storage_path',
-                )
-                ->orderBy('media.created_at', 'desc')
-                ->get();
-            if($media_list){
-                foreach ($media_list as $media){
-                    $url = config('app.azure_storage_url').
-                        config('app.azure_storage_container').
-                        '/'.
-                        $media->storage_path.
-                        $user->id.
-                        '/'.
-                        $media->file_name;
-                    $data = [
-                        'media_id' => $media->id,
-                        'url' => $url,
-                        'media_type' => $media->media_type
-                    ];
-                    array_push($media_urls,$data);
-                }
-            }
+            $profile_picture = $this->getSingleFileByEntityId($user->id,'user_profile_picture');
+            $cover_picture = $this->getSingleFileByEntityId($user->id,'user_profile_cover');
+            $media_urls = $this->getMultipleFilesByEntityId($user->id,'user_profile_media');
 
             $media_info = [
                 'profile_picture' => $profile_picture,
