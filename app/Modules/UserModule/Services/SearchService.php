@@ -10,6 +10,8 @@ use App\Models\User;
 use App\Models\School;
 use App\Models\RecentSearch;
 use App\Models\SaveSearch;
+use App\Models\ConnectionRequest;
+
 class SearchService
 {
     public function search (array $data){
@@ -39,22 +41,24 @@ class SearchService
         $type =array_key_exists("type",$data)?$data['type']:null;
 
         $dataSet= [];
-
         if($type != 'school'){
             $query = User::connect(config('database.secondary'))
             ->join('user_roles', 'user_roles.id', '=' ,'users.user_role_id')
             ->join('user_types', 'user_types.id', '=' ,'users.user_type_id')
             ->leftJoin('players','players.user_id','=','users.id')
             ->leftJoin('user_addresses','user_addresses.user_id','=','users.id')
-            ->where('users.id', '!=', auth()->user()->id) //Not included himself/herself
+            ->leftJoin('countries','countries.id','=','user_addresses.country_id')
+            ->where('users.id', '!=', auth()->user()->id) 
             ->where('users.user_role_id', '!=', config('app.user_roles.default'))
             ->where('users.user_role_id', '!=', config('app.user_roles.admin'))
             ->select(
                 'users.id',
+                'users.id as userId',
                 'users.first_name',
                 'users.last_name',
                 'users.display_name',
                 'users.slug as slug',
+                'users.bio as bio',
                 'users.email',
                 'users.slug',
                 'user_roles.name as user_role',
@@ -62,7 +66,8 @@ class SearchService
                 'users.created_at as joined_at',
                 'users.last_logged_at as last_seen_at',
                 'players.*',
-                'user_addresses.*'
+                'user_addresses.*',
+                'countries.name as country'
             );
 
             if($user_role != 0){
@@ -71,6 +76,15 @@ class SearchService
 
             if ($search_key != null) {
                 $query->where('users.display_name', 'LIKE', '%' . $search_key . '%');
+            }
+
+            if($city != null){
+                $query->where('user_addresses.city', 'LIKE', '%' . $city . '%');
+
+            }
+            if($state != null){
+                $query->where('user_addresses.state_province', 'LIKE', '%' . $state . '%');
+
             }
 
             if($country_id != null){
@@ -95,51 +109,44 @@ class SearchService
 
             if($utr_min != null){
                 $query->whereRaw(
-                    'JSON_EXTRACT(players.other_data, "$.utr") >= ?',
+                    'CAST(JSON_UNQUOTE(JSON_EXTRACT(players.other_data, "$.utr")) AS DECIMAL(10, 2)) >= ?',
                     [$utr_min]
                 );
            }
 
             if($utr_max != null){
                 $query->whereRaw(
-                    'JSON_EXTRACT(players.other_data, "$.utr") <= ?',
+                    'CAST(JSON_UNQUOTE(JSON_EXTRACT(players.other_data, "$.utr")) AS DECIMAL(10, 2)) <= ?',
                     [$utr_max]
                 );
             }
 
             if($wtn_min != null){
                 $query->whereRaw(
-                    'JSON_EXTRACT(players.other_data, "$.wtn_score_manual") >= ?',
+                    'CAST(JSON_UNQUOTE(JSON_EXTRACT(players.other_data, "$.wtn_score_manual")) AS DECIMAL(10, 2)) >= ?',
                     [$wtn_min]
                 );
             }
 
             if($wtn_max != null){
                 $query->whereRaw(
-                    'JSON_EXTRACT(players.other_data, "$.wtn_score_manual") <= ?',
+                    'CAST(JSON_UNQUOTE(JSON_EXTRACT(players.other_data, "$.wtn_score_manual")) AS DECIMAL(10, 2)) <= ?',
                     [$wtn_max]
                 );
             }
 
             if($atp_ranking != null){
-                $query->whereRaw(
-                    'JSON_EXTRACT(players.other_data, "$.atp_ranking") = ?',
-                    [$atp_ranking]
-                );
+                $query->whereJsonContains('players.other_data->atp_ranking', $atp_ranking);
+
             }
 
             if($itf_ranking != null){
-                $query->whereRaw(
-                    'JSON_EXTRACT(players.other_data, "$.itf_ranking") = ?',
-                    [$itf_ranking]
-                );
+                $query->whereJsonContains('players.other_data->itf_ranking', $itf_ranking);
+               
             }
 
             if($national_ranking != null){
-                $query->whereRaw(
-                    'JSON_EXTRACT(players.other_data, "$.national_ranking") = ?',
-                    [$national_ranking]
-                );
+                $query->whereJsonContains('players.other_data->national_ranking', $$national_ranking);
             }
 
     
@@ -194,9 +201,20 @@ class SearchService
                     'name' => $search_key
                ]);
        }
+       $authId = auth()->id(); 
+       $connectionList = ConnectionRequest::connect(config('database.secondary'))
+                        ->where(function ($query) {
+                             $query->where('sender_id', auth()->id())
+                             ->orWhere('receiver_id', auth()->id());
+                          })
+
+                        ->whereIn('connection_status', ['accepted', 'pending'])
+                        ->select(DB::raw("IF(sender_id = '$authId', receiver_id, sender_id) as user_id"), 'connection_status','id')
+                        ->get();
         return [
             'users' => $dataSet,
-            'school' =>  $schoolDataSet 
+            'school' =>  $schoolDataSet,
+            'connections' => $connectionList 
         ];
 
     }
