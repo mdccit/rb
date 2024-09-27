@@ -13,6 +13,11 @@ use Illuminate\Support\Str;
 trait AzureBlobStorage
 {
     /**
+     * Support Reference : https://github.com/matthewbdaly/laravel-azure-storage
+     */
+
+
+    /**
      * Upload Single File.
      *
      * @param File $file The file object need to upload.
