@@ -10,8 +10,12 @@ use App\Models\User;
 use App\Models\School;
 use App\Models\RecentSearch;
 use App\Models\SaveSearch;
+use App\Traits\AzureBlobStorage;
+
 class SearchService
 {
+    use AzureBlobStorage;
+
     public function search (array $data){
         $per_page_items = array_key_exists("per_page_items",$data)?$data['per_page_items']:0;
         $user_role = array_key_exists("user_role",$data)?$data['user_role']:0;
@@ -144,6 +148,11 @@ class SearchService
 
     
             $dataSet = $query->get();
+
+            foreach( $dataSet as $key=> $data){
+                $profile_picture = $this->getSingleFileByEntityId($data->user_id,'user_profile_picture');
+                $dataSet[$key]['profile_picture'] =$profile_picture;
+            }
         }
 
         $schoolDataSet =[];
