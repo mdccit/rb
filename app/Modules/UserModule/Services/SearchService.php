@@ -10,10 +10,14 @@ use App\Models\User;
 use App\Models\School;
 use App\Models\RecentSearch;
 use App\Models\SaveSearch;
+use App\Traits\AzureBlobStorage;
+
 use App\Models\ConnectionRequest;
 use DB;
 class SearchService
 {
+    use AzureBlobStorage;
+
     public function search (array $data){
         $per_page_items = array_key_exists("per_page_items",$data)?$data['per_page_items']:0;
         $user_role = array_key_exists("user_role",$data)?$data['user_role']:0;
@@ -48,7 +52,7 @@ class SearchService
             ->leftJoin('players','players.user_id','=','users.id')
             ->leftJoin('user_addresses','user_addresses.user_id','=','users.id')
             ->leftJoin('countries','countries.id','=','user_addresses.country_id')
-            ->where('users.id', '!=', auth()->user()->id) 
+            ->where('users.id', '!=', auth()->user()->id)
             ->where('users.user_role_id', '!=', config('app.user_roles.default'))
             ->where('users.user_role_id', '!=', config('app.user_roles.admin'))
             ->select(
@@ -76,15 +80,6 @@ class SearchService
 
             if ($search_key != null) {
                 $query->where('users.display_name', 'LIKE', '%' . $search_key . '%');
-            }
-
-            if($city != null){
-                $query->where('user_addresses.city', 'LIKE', '%' . $city . '%');
-
-            }
-            if($state != null){
-                $query->where('user_addresses.state_province', 'LIKE', '%' . $state . '%');
-
             }
 
             if($country_id != null){
@@ -142,7 +137,7 @@ class SearchService
 
             if($itf_ranking != null){
                 $query->whereJsonContains('players.other_data->itf_ranking', $itf_ranking);
-               
+
             }
 
             if($national_ranking != null){
@@ -151,6 +146,11 @@ class SearchService
 
     
             $dataSet = $query->get();
+
+            foreach( $dataSet as $key=> $data){
+                $profile_picture = $this->getSingleFileByEntityId($data->user_id,'user_profile_picture');
+                $dataSet[$key]['profile_picture'] =$profile_picture;
+            }
         }
 
         $schoolDataSet =[];
@@ -201,7 +201,7 @@ class SearchService
                     'name' => $search_key
                ]);
        }
-       $authId = auth()->id(); 
+       $authId = auth()->id();
        $connectionList = ConnectionRequest::connect(config('database.secondary'))
                         ->where(function ($query) {
                              $query->where('sender_id', auth()->id())
@@ -214,7 +214,7 @@ class SearchService
         return [
             'users' => $dataSet,
             'school' =>  $schoolDataSet,
-            'connections' => $connectionList 
+            'connections' => $connectionList
         ];
 
     }
