@@ -11,21 +11,12 @@ use App\Models\Player;
 use App\Models\User;
 use App\Models\UserAddress;
 use App\Models\UserPhone;
-use App\Services\AzureBlobStorageService;
-use App\Traits\GeneralHelpers;
+use App\Traits\AzureBlobStorage;
 use Carbon\Carbon;
 
 class PlayerService
 {
-    use GeneralHelpers;
-
-    private $azureBlobStorageService;
-
-    function __construct()
-    {
-        //Init service
-        $this->azureBlobStorageService = new AzureBlobStorageService();
-    }
+    use AzureBlobStorage;
 
     public function updateBasicInfo (array $data, $user_slug){
         $user = User::connect(config('database.default'))
@@ -58,25 +49,7 @@ class PlayerService
             ->first();
         $data = null;
         if($user) {
-            $mediaType = $this->getMediaType($file);
-            $media = $this->azureBlobStorageService->uploadFileWithMetadata($file, $user->id, 'user_profile_picture', $mediaType);
-            if($media){
-                //$data = $this->azureBlobStorageService->getMediaByEntity($user->id, 'user_profile_picture');
-                $mediaInformation = MediaInformation::connect(config('database.secondary'))->find($media->media_information_id);
-                //URL = base_url / container_name / storage_path / entity_id (user_id) / file_name
-                $url = config('app.azure_storage_url').
-                    config('app.azure_storage_container').
-                    '/'.
-                    $mediaInformation->storage_path.
-                    $user->id.
-                    '/'.
-                    $media->file_name;
-                $data = [
-                    'media_id' => $media->id,
-                    'url' => $url,
-                    'media_type' => $media->media_type
-                ];
-            }
+            $data = $this->uploadSingleFile($file, $user->id, 'user_profile_picture');
         }
         return $data;
     }
@@ -87,25 +60,7 @@ class PlayerService
             ->first();
         $data = null;
         if($user) {
-            $mediaType = $this->getMediaType($file);
-            $media = $this->azureBlobStorageService->uploadFileWithMetadata($file, $user->id, 'user_profile_cover', $mediaType);
-            if($media){
-                //$data = $this->azureBlobStorageService->getMediaByEntity($user->id, 'user_profile_cover');
-                $mediaInformation = MediaInformation::connect(config('database.secondary'))->find($media->media_information_id);
-                //URL = base_url / container_name / storage_path / entity_id (user_id) / file_name
-                $url = config('app.azure_storage_url').
-                    config('app.azure_storage_container').
-                    '/'.
-                    $mediaInformation->storage_path.
-                    $user->id.
-                    '/'.
-                    $media->file_name;
-                $data = [
-                    'media_id' => $media->id,
-                    'url' => $url,
-                    'media_type' => $media->media_type
-                ];
-            }
+            $data = $this->uploadSingleFile($file, $user->id, 'user_profile_cover');
         }
         return $data;
     }
@@ -114,49 +69,15 @@ class PlayerService
         $user = User::connect(config('database.default'))
             ->where('slug', $user_slug)
             ->first();
-        $urlArray = array();
+        $dataArray = array();
         if($user) {
-            foreach ($files as $file){
-                $mediaType = $this->getMediaType($file);
-                $media = $this->azureBlobStorageService->uploadFileWithMetadata($file, $user->id, 'user_profile_media', $mediaType);
-                if($media){
-                    //$data = $this->azureBlobStorageService->getMediaByEntity($user->id, 'user_profile_cover');
-                    $mediaInformation = MediaInformation::connect(config('database.secondary'))->find($media->media_information_id);
-                    //URL = base_url / container_name / storage_path / entity_id (user_id) / file_name
-                    $url = config('app.azure_storage_url').
-                        config('app.azure_storage_container').
-                        '/'.
-                        $mediaInformation->storage_path.
-                        $user->id.
-                        '/'.
-                        $media->file_name;
-                    $data = [
-                        'media_id' => $media->id,
-                        'url' => $url,
-                        'media_type' => $media->media_type
-                    ];
-                    array_push($urlArray,$data);
-                }
-            }
+            $dataArray = $this->uploadMultipleFiles($files, $user->id, 'user_profile_media');
         }
-        return $urlArray;
+        return $dataArray;
     }
 
     public function removeMedia ($media_id){
-        $media = Media::connect(config('database.default'))
-            ->join('media_information', 'media_information.id', '=', 'media.media_information_id')
-            ->where('media.id', $media_id)
-            ->where('media.entity_id', auth()->id())
-            ->select(
-                'media.id',
-                'media.media_type',
-                'media.file_name',
-                'media_information.storage_path',
-                )
-            ->first();
-        if($media) {
-            $media->delete();
-        }
+        return $this->removeFile($media_id);
     }
 
     public function updateContactInfo (array $data, $user_slug){
