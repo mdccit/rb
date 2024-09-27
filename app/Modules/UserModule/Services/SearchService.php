@@ -11,7 +11,7 @@ use App\Models\School;
 use App\Models\RecentSearch;
 use App\Models\SaveSearch;
 use App\Models\ConnectionRequest;
-
+use DB;
 class SearchService
 {
     public function search (array $data){
