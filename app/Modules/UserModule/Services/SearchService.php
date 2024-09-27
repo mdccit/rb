@@ -148,7 +148,7 @@ class SearchService
             $dataSet = $query->get();
 
             foreach( $dataSet as $key=> $data){
-                $profile_picture = $this->getSingleFileByEntityId($data->user_id,'user_profile_picture');
+                $profile_picture = $this->getSingleFileByEntityId($data->userId,'user_profile_picture');
                 $dataSet[$key]['profile_picture'] =$profile_picture;
             }
         }
