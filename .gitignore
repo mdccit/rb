@@ -20,3 +20,4 @@ yarn-error.log
 .ssh/
 setup.sh
 .rnd
+composer.lock
