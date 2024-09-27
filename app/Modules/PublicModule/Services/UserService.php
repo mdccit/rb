@@ -122,6 +122,7 @@ class UserService
                         ->select(
                             'coaches.id as coach_id',
                             'schools.id as school_id',
+                            'schools.slug as school_slug',
                             'coaches.position',
                             'coaches.type',
                             'coaches.status',
@@ -414,6 +415,7 @@ class UserService
                 ->select(
                     'coaches.id as coach_id',
                     'schools.id as school_id',
+                    'schools.slug as school_slug',
                     'coaches.position',
                     'coaches.type',
                     'coaches.status',
