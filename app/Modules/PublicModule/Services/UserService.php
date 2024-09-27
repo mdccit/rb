@@ -84,46 +84,62 @@ class UserService
                 )
                 ->first();
 
-            $profile_picture_url = null;
+            $profile_picture = null;
             $media = Media::connect(config('database.secondary'))
                 ->join('media_information', 'media_information.id', '=', 'media.media_information_id')
                 ->where('media.entity_id', $user->id)
                 ->where('media.entity_type', 'user_profile_picture')
                 ->select(
+                    'media.id',
+                    'media.media_type',
                     'media.file_name',
                     'media_information.storage_path',
                 )
                 ->orderBy('media.created_at', 'desc')
                 ->first();
             if($media){
-                $profile_picture_url = config('app.azure_storage_url').
+                $url = config('app.azure_storage_url').
                     config('app.azure_storage_container').
                     '/'.
                     $media->storage_path.
                     $user->id.
                     '/'.
                     $media->file_name;
+
+                $profile_picture =[
+                    'media_id' => $media->id,
+                    'url' => $url,
+                    'media_type' => $media->media_type
+                ];
             }
 
-            $cover_picture_url = null;
+            $cover_picture = null;
             $media = Media::connect(config('database.secondary'))
                 ->join('media_information', 'media_information.id', '=', 'media.media_information_id')
                 ->where('media.entity_id', $user->id)
                 ->where('media.entity_type', 'user_profile_cover')
                 ->select(
+                    'media.id',
+                    'media.media_type',
                     'media.file_name',
                     'media_information.storage_path',
                 )
                 ->orderBy('media.created_at', 'desc')
                 ->first();
             if($media){
-                $cover_picture_url = config('app.azure_storage_url').
+                $url = config('app.azure_storage_url').
                     config('app.azure_storage_container').
                     '/'.
                     $media->storage_path.
                     $user->id.
                     '/'.
                     $media->file_name;
+
+                $cover_picture =[
+                    'media_id' => $media->id,
+                    'url' => $url,
+                    'media_type' => $media->media_type
+                ];
             }
 
             $media_urls = array();
@@ -132,6 +148,7 @@ class UserService
                 ->where('media.entity_id', $user->id)
                 ->where('media.entity_type', 'user_profile_media')
                 ->select(
+                    'media.id',
                     'media.media_type',
                     'media.file_name',
                     'media_information.storage_path',
@@ -148,6 +165,7 @@ class UserService
                         '/'.
                         $media->file_name;
                     $data = [
+                        'media_id' => $media->id,
                         'url' => $url,
                         'media_type' => $media->media_type
                     ];
@@ -156,8 +174,8 @@ class UserService
             }
 
             $media_info = [
-                'profile_picture_url' => $profile_picture_url,
-                'cover_picture_url' => $cover_picture_url,
+                'profile_picture' => $profile_picture,
+                'cover_picture' => $cover_picture,
                 'media_urls' => $media_urls,
             ];
 
@@ -318,6 +336,11 @@ class UserService
 
         $user_phone = null;
         $user_address = null;
+        $media_info = [
+            'profile_picture_url' => null,
+            'cover_picture_url' => null,
+            'media_urls' => array(),
+        ];
         $player = null;
 
         if($user){
@@ -351,6 +374,101 @@ class UserService
                 )
                 ->first();
 
+            $profile_picture = null;
+            $media = Media::connect(config('database.secondary'))
+                ->join('media_information', 'media_information.id', '=', 'media.media_information_id')
+                ->where('media.entity_id', $user->id)
+                ->where('media.entity_type', 'user_profile_picture')
+                ->select(
+                    'media.id',
+                    'media.media_type',
+                    'media.file_name',
+                    'media_information.storage_path',
+                )
+                ->orderBy('media.created_at', 'desc')
+                ->first();
+            if($media){
+                $url = config('app.azure_storage_url').
+                    config('app.azure_storage_container').
+                    '/'.
+                    $media->storage_path.
+                    $user->id.
+                    '/'.
+                    $media->file_name;
+
+                $profile_picture =[
+                    'media_id' => $media->id,
+                    'url' => $url,
+                    'media_type' => $media->media_type
+                ];
+            }
+
+            $cover_picture = null;
+            $media = Media::connect(config('database.secondary'))
+                ->join('media_information', 'media_information.id', '=', 'media.media_information_id')
+                ->where('media.entity_id', $user->id)
+                ->where('media.entity_type', 'user_profile_cover')
+                ->select(
+                    'media.id',
+                    'media.media_type',
+                    'media.file_name',
+                    'media_information.storage_path',
+                )
+                ->orderBy('media.created_at', 'desc')
+                ->first();
+            if($media){
+                $url = config('app.azure_storage_url').
+                    config('app.azure_storage_container').
+                    '/'.
+                    $media->storage_path.
+                    $user->id.
+                    '/'.
+                    $media->file_name;
+
+                $cover_picture =[
+                    'media_id' => $media->id,
+                    'url' => $url,
+                    'media_type' => $media->media_type
+                ];
+            }
+
+            $media_urls = array();
+            $media_list = Media::connect(config('database.secondary'))
+                ->join('media_information', 'media_information.id', '=', 'media.media_information_id')
+                ->where('media.entity_id', $user->id)
+                ->where('media.entity_type', 'user_profile_media')
+                ->select(
+                    'media.id',
+                    'media.media_type',
+                    'media.file_name',
+                    'media_information.storage_path',
+                )
+                ->orderBy('media.created_at', 'desc')
+                ->get();
+            if($media_list){
+                foreach ($media_list as $media){
+                    $url = config('app.azure_storage_url').
+                        config('app.azure_storage_container').
+                        '/'.
+                        $media->storage_path.
+                        $user->id.
+                        '/'.
+                        $media->file_name;
+                    $data = [
+                        'media_id' => $media->id,
+                        'url' => $url,
+                        'media_type' => $media->media_type
+                    ];
+                    array_push($media_urls,$data);
+                }
+            }
+
+            $media_info = [
+                'profile_picture' => $profile_picture,
+                'cover_picture' => $cover_picture,
+                'media_urls' => $media_urls,
+            ];
+
             $player = Player::connect(config('database.secondary'))
                 ->join('sports', 'sports.id', '=' ,'players.sport_id')
                 ->where('players.user_id', $user->id)
@@ -371,6 +489,7 @@ class UserService
             'user_basic_info' => $user,
             'user_phone_info' => $user_phone,
             'user_address_info' => $user_address,
+            'media_info' => $media_info,
             'player_info' => $player,
         ];
     }
@@ -407,6 +526,11 @@ class UserService
 
         $user_phone = null;
         $user_address = null;
+        $media_info = [
+            'profile_picture_url' => null,
+            'cover_picture_url' => null,
+            'media_urls' => array(),
+        ];
         $coach = null;
 
         if($user){
@@ -440,6 +564,101 @@ class UserService
                 )
                 ->first();
 
+            $profile_picture = null;
+            $media = Media::connect(config('database.secondary'))
+                ->join('media_information', 'media_information.id', '=', 'media.media_information_id')
+                ->where('media.entity_id', $user->id)
+                ->where('media.entity_type', 'user_profile_picture')
+                ->select(
+                    'media.id',
+                    'media.media_type',
+                    'media.file_name',
+                    'media_information.storage_path',
+                )
+                ->orderBy('media.created_at', 'desc')
+                ->first();
+            if($media){
+                $url = config('app.azure_storage_url').
+                    config('app.azure_storage_container').
+                    '/'.
+                    $media->storage_path.
+                    $user->id.
+                    '/'.
+                    $media->file_name;
+
+                $profile_picture =[
+                    'media_id' => $media->id,
+                    'url' => $url,
+                    'media_type' => $media->media_type
+                ];
+            }
+
+            $cover_picture = null;
+            $media = Media::connect(config('database.secondary'))
+                ->join('media_information', 'media_information.id', '=', 'media.media_information_id')
+                ->where('media.entity_id', $user->id)
+                ->where('media.entity_type', 'user_profile_cover')
+                ->select(
+                    'media.id',
+                    'media.media_type',
+                    'media.file_name',
+                    'media_information.storage_path',
+                )
+                ->orderBy('media.created_at', 'desc')
+                ->first();
+            if($media){
+                $url = config('app.azure_storage_url').
+                    config('app.azure_storage_container').
+                    '/'.
+                    $media->storage_path.
+                    $user->id.
+                    '/'.
+                    $media->file_name;
+
+                $cover_picture =[
+                    'media_id' => $media->id,
+                    'url' => $url,
+                    'media_type' => $media->media_type
+                ];
+            }
+
+            $media_urls = array();
+            $media_list = Media::connect(config('database.secondary'))
+                ->join('media_information', 'media_information.id', '=', 'media.media_information_id')
+                ->where('media.entity_id', $user->id)
+                ->where('media.entity_type', 'user_profile_media')
+                ->select(
+                    'media.id',
+                    'media.media_type',
+                    'media.file_name',
+                    'media_information.storage_path',
+                )
+                ->orderBy('media.created_at', 'desc')
+                ->get();
+            if($media_list){
+                foreach ($media_list as $media){
+                    $url = config('app.azure_storage_url').
+                        config('app.azure_storage_container').
+                        '/'.
+                        $media->storage_path.
+                        $user->id.
+                        '/'.
+                        $media->file_name;
+                    $data = [
+                        'media_id' => $media->id,
+                        'url' => $url,
+                        'media_type' => $media->media_type
+                    ];
+                    array_push($media_urls,$data);
+                }
+            }
+
+            $media_info = [
+                'profile_picture' => $profile_picture,
+                'cover_picture' => $cover_picture,
+                'media_urls' => $media_urls,
+            ];
+
             $coach = Coach::connect(config('database.secondary'))
                 ->join('sports', 'sports.id', '=' ,'coaches.sport_id')
                 ->join('schools', 'schools.id', '=' ,'coaches.school_id')
@@ -467,6 +686,7 @@ class UserService
             'user_basic_info' => $user,
             'user_phone_info' => $user_phone,
             'user_address_info' => $user_address,
+            'media_info' => $media_info,
             'coach_info' => $coach,
         ];
     }

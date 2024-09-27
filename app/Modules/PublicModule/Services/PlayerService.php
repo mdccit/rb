@@ -5,6 +5,7 @@ namespace App\Modules\PublicModule\Services;
 
 
 use App\Models\Country;
+use App\Models\Media;
 use App\Models\MediaInformation;
 use App\Models\Player;
 use App\Models\User;
@@ -55,9 +56,7 @@ class PlayerService
         $user = User::connect(config('database.default'))
             ->where('slug', $user_slug)
             ->first();
-        $data = [
-            'file_url' => ''
-        ];
+        $data = null;
         if($user) {
             $mediaType = $this->getMediaType($file);
             $media = $this->azureBlobStorageService->uploadFileWithMetadata($file, $user->id, 'user_profile_picture', $mediaType);
@@ -73,7 +72,9 @@ class PlayerService
                     '/'.
                     $media->file_name;
                 $data = [
-                    'file_url' => $url
+                    'media_id' => $media->id,
+                    'url' => $url,
+                    'media_type' => $media->media_type
                 ];
             }
         }
@@ -84,9 +85,7 @@ class PlayerService
         $user = User::connect(config('database.default'))
             ->where('slug', $user_slug)
             ->first();
-        $data = [
-            'file_url' => ''
-        ];
+        $data = null;
         if($user) {
             $mediaType = $this->getMediaType($file);
             $media = $this->azureBlobStorageService->uploadFileWithMetadata($file, $user->id, 'user_profile_cover', $mediaType);
@@ -102,7 +101,9 @@ class PlayerService
                     '/'.
                     $media->file_name;
                 $data = [
-                    'file_url' => $url
+                    'media_id' => $media->id,
+                    'url' => $url,
+                    'media_type' => $media->media_type
                 ];
             }
         }
@@ -129,11 +130,33 @@ class PlayerService
                         $user->id.
                         '/'.
                         $media->file_name;
-                    array_push($urlArray,$url);
+                    $data = [
+                        'media_id' => $media->id,
+                        'url' => $url,
+                        'media_type' => $media->media_type
+                    ];
+                    array_push($urlArray,$data);
                 }
             }
         }
         return $urlArray;
+    }
+
+    public function removeMedia ($media_id){
+        $media = Media::connect(config('database.default'))
+            ->join('media_information', 'media_information.id', '=', 'media.media_information_id')
+            ->where('media.id', $media_id)
+            ->where('media.entity_id', auth()->id())
+            ->select(
+                'media.id',
+                'media.media_type',
+                'media.file_name',
+                'media_information.storage_path',
+                )
+            ->first();
+        if($media) {
+            $media->delete();
+        }
     }
 
     public function updateContactInfo (array $data, $user_slug){
