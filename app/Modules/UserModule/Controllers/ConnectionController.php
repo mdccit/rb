@@ -355,12 +355,17 @@ class ConnectionController extends Controller
         }
     }
 
-    public function checkConnectionType($user_id)
+    public function checkConnectionType($user_slug)
     {
         try{
-            
 
-            $responseData = $this->connectionService->checkConnectionType($user_id);
+            $user = User::connect(config('database.secondary'))
+                            ->where('slug',$user_slug)
+                            ->first();
+
+
+
+            $responseData = $this->connectionService->checkConnectionType($user->id);
                 
             return CommonResponse::getResponse(
                 200,
