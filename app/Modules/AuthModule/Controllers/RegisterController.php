@@ -52,8 +52,8 @@ class RegisterController extends Controller
 
             return CommonResponse::getResponse(
                 200,
-                'Successfully Updated',
-                'Successfully Updated'
+                'Your account has been successfully updated',
+                'Your account has been successfully updated'
             );
         }catch (\Exception $e){
             return CommonResponse::getResponse(
