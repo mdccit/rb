@@ -74,7 +74,7 @@ class UsersController extends Controller
                 'password' => 'required|string|min:6',
                 'user_role' => 'required|numeric',
                 'phone_code_country' => 'required|numeric',
-                'phone_number' => 'required|string|max:15|unique:user_phones',
+                'phone_number' => 'required|string|max:15',
             ]);
             if ($validator->fails())
             {
