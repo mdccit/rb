@@ -5,14 +5,19 @@ namespace App\Modules\PublicModule\Services;
 
 
 use App\Models\Country;
+use App\Models\Media;
+use App\Models\MediaInformation;
 use App\Models\Player;
 use App\Models\User;
 use App\Models\UserAddress;
 use App\Models\UserPhone;
+use App\Traits\AzureBlobStorage;
 use Carbon\Carbon;
 
 class PlayerService
 {
+    use AzureBlobStorage;
+
     public function updateBasicInfo (array $data, $user_slug){
         $user = User::connect(config('database.default'))
             ->where('slug', $user_slug)
@@ -36,6 +41,43 @@ class PlayerService
                 'bio' => $data['bio'],
             ]);
         }
+    }
+
+    public function uploadProfilePicture ($file, $user_slug){
+        $user = User::connect(config('database.default'))
+            ->where('slug', $user_slug)
+            ->first();
+        $data = null;
+        if($user) {
+            $data = $this->uploadSingleFile($file, $user->id, 'user_profile_picture');
+        }
+        return $data;
+    }
+
+    public function uploadCoverPicture ($file, $user_slug){
+        $user = User::connect(config('database.default'))
+            ->where('slug', $user_slug)
+            ->first();
+        $data = null;
+        if($user) {
+            $data = $this->uploadSingleFile($file, $user->id, 'user_profile_cover');
+        }
+        return $data;
+    }
+
+    public function uploadMedia ($files, $user_slug){
+        $user = User::connect(config('database.default'))
+            ->where('slug', $user_slug)
+            ->first();
+        $dataArray = array();
+        if($user) {
+            $dataArray = $this->uploadMultipleFiles($files, $user->id, 'user_profile_media');
+        }
+        return $dataArray;
+    }
+
+    public function removeMedia ($media_id){
+        return $this->removeFile($media_id);
     }
 
     public function updateContactInfo (array $data, $user_slug){

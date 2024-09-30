@@ -6,14 +6,18 @@ namespace App\Modules\PublicModule\Services;
 
 use App\Models\BusinessManager;
 use App\Models\Coach;
+use App\Models\Media;
 use App\Models\Player;
 use App\Models\PlayerParent;
 use App\Models\User;
 use App\Models\UserAddress;
 use App\Models\UserPhone;
+use App\Traits\AzureBlobStorage;
 
 class UserService
 {
+    use AzureBlobStorage;
+
     public function getUserProfile ($user_slug){
         $user = User::connect(config('database.secondary'))
             ->join('user_roles', 'user_roles.id', '=' ,'users.user_role_id')
@@ -45,6 +49,11 @@ class UserService
 
         $user_phone = null;
         $user_address = null;
+        $media_info = [
+            'profile_picture_url' => null,
+            'cover_picture_url' => null,
+            'media_urls' => array(),
+        ];
         $profile_info = null;
         $children_info = array();
         if($user) {
@@ -78,6 +87,16 @@ class UserService
                 )
                 ->first();
 
+            $profile_picture = $this->getSingleFileByEntityId($user->id,'user_profile_picture');
+            $cover_picture = $this->getSingleFileByEntityId($user->id,'user_profile_cover');
+            $media_urls = $this->getMultipleFilesByEntityId($user->id,'user_profile_media');
+
+            $media_info = [
+                'profile_picture' => $profile_picture,
+                'cover_picture' => $cover_picture,
+                'media_urls' => $media_urls,
+            ];
+
             switch ($user->user_role_id) {
                 case config('app.user_roles.player'):
                     $profile_info = Player::connect(config('database.secondary'))
@@ -103,6 +122,7 @@ class UserService
                         ->select(
                             'coaches.id as coach_id',
                             'schools.id as school_id',
+                            'schools.slug as school_slug',
                             'coaches.position',
                             'coaches.type',
                             'coaches.status',
@@ -195,6 +215,7 @@ class UserService
             'user_basic_info' => $user,
             'user_phone_info' => $user_phone,
             'user_address_info' => $user_address,
+            'media_info' => $media_info,
             'profile_info' => $profile_info,
             'children_info' => $children_info,
         ];
@@ -204,6 +225,7 @@ class UserService
         $user = User::connect(config('database.secondary'))
             ->join('user_roles', 'user_roles.id', '=' ,'users.user_role_id')
             ->join('user_types', 'user_types.id', '=' ,'users.user_type_id')
+            ->join('nationalities', 'nationalities.id', '=' ,'users.nationality_id')
             ->where('users.slug', $user_slug)
             ->where('users.user_role_id', config('app.user_roles.player'))
             ->select(
@@ -218,6 +240,7 @@ class UserService
                 'users.date_of_birth',
                 'users.gender',
                 'users.nationality_id',
+                'nationalities.name as nationality',
                 'users.is_approved',
                 'users.is_first_login',
                 'user_roles.id as user_role_id',
@@ -232,6 +255,11 @@ class UserService
 
         $user_phone = null;
         $user_address = null;
+        $media_info = [
+            'profile_picture_url' => null,
+            'cover_picture_url' => null,
+            'media_urls' => array(),
+        ];
         $player = null;
 
         if($user){
@@ -265,6 +293,16 @@ class UserService
                 )
                 ->first();
 
+            $profile_picture = $this->getSingleFileByEntityId($user->id,'user_profile_picture');
+            $cover_picture = $this->getSingleFileByEntityId($user->id,'user_profile_cover');
+            $media_urls = $this->getMultipleFilesByEntityId($user->id,'user_profile_media');
+
+            $media_info = [
+                'profile_picture' => $profile_picture,
+                'cover_picture' => $cover_picture,
+                'media_urls' => $media_urls,
+            ];
+
             $player = Player::connect(config('database.secondary'))
                 ->join('sports', 'sports.id', '=' ,'players.sport_id')
                 ->where('players.user_id', $user->id)
@@ -285,6 +323,7 @@ class UserService
             'user_basic_info' => $user,
             'user_phone_info' => $user_phone,
             'user_address_info' => $user_address,
+            'media_info' => $media_info,
             'player_info' => $player,
         ];
     }
@@ -321,6 +360,11 @@ class UserService
 
         $user_phone = null;
         $user_address = null;
+        $media_info = [
+            'profile_picture_url' => null,
+            'cover_picture_url' => null,
+            'media_urls' => array(),
+        ];
         $coach = null;
 
         if($user){
@@ -354,6 +398,16 @@ class UserService
                 )
                 ->first();
 
+            $profile_picture = $this->getSingleFileByEntityId($user->id,'user_profile_picture');
+            $cover_picture = $this->getSingleFileByEntityId($user->id,'user_profile_cover');
+            $media_urls = $this->getMultipleFilesByEntityId($user->id,'user_profile_media');
+
+            $media_info = [
+                'profile_picture' => $profile_picture,
+                'cover_picture' => $cover_picture,
+                'media_urls' => $media_urls,
+            ];
+
             $coach = Coach::connect(config('database.secondary'))
                 ->join('sports', 'sports.id', '=' ,'coaches.sport_id')
                 ->join('schools', 'schools.id', '=' ,'coaches.school_id')
@@ -361,6 +415,7 @@ class UserService
                 ->select(
                     'coaches.id as coach_id',
                     'schools.id as school_id',
+                    'schools.slug as school_slug',
                     'coaches.position',
                     'coaches.type',
                     'coaches.status',
@@ -381,6 +436,7 @@ class UserService
             'user_basic_info' => $user,
             'user_phone_info' => $user_phone,
             'user_address_info' => $user_address,
+            'media_info' => $media_info,
             'coach_info' => $coach,
         ];
     }

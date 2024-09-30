@@ -61,8 +61,15 @@ return [
             'key'       => env('AZURE_STORAGE_ACCOUNT_KEY'),
             'container' => env('AZURE_STORAGE_CONTAINER_NAME'),
             'url'       => env('AZURE_STORAGE_URL'),
-            'prefix'    => null, 
-        ],     
+            'prefix'    => null,
+            'connection_string' => null,
+            'endpoint'  => env('AZURE_STORAGE_ENDPOINT'),
+            'retry'     => [
+                'tries' => 3,                   // number of retries, default: 3
+                'interval' => 500,              // wait interval in ms, default: 1000ms
+                'increase' => 'exponential'     // how to increase the wait interval, options: linear, exponential, default: linear
+            ]
+        ],
     ],
 
     /*
