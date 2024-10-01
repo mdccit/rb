@@ -46,15 +46,15 @@ class ForgotPasswordController extends Controller
 
                 return CommonResponse::getResponse(
                     200,
-                    'Password reset request was recorded',
-                    'Password reset request was recorded',
+                    'Password reset code has been sent to your email',
+                    'Password reset code has been sent to your email',
                     $responseData
                 );
             } else {
                 return CommonResponse::getResponse(
                     422,
-                    'User does not exist',
-                    'User does not exist'
+                    'No account associated with this email address',
+                    'No account associated with this email address'
                 );
             }
         }catch (\Exception $e){
@@ -71,8 +71,12 @@ class ForgotPasswordController extends Controller
         try{
             $validator = Validator::make($request->all(), [
                 'recovery_code' => 'required|numeric',
-                'password' => 'required|string|min:6|confirmed',
-            ]);
+                'password' => 'required|string|min:6',
+                'password_confirmation' => 'required|string|min:6|same:password',
+            ],
+                [
+                    'password_confirmation.same' => 'Password confirmation doesn\'t match',
+                ]);
             if ($validator->fails()) {
                 return CommonResponse::getResponse(
                     422,
@@ -92,8 +96,8 @@ class ForgotPasswordController extends Controller
 
                         return CommonResponse::getResponse(
                             200,
-                            'Successfully reset of user password',
-                            'Successfully reset of your password'
+                            'Your password has been successfully reset',
+                            'Your password has been successfully reset'
                         );
                     } else {
                         return CommonResponse::getResponse(
