@@ -88,6 +88,11 @@ Route::group(['namespace' => 'App\Modules\PublicModule\Controllers','prefix' => 
                 Route::put('/business-managers/update-contact-info/{user_slug}', 'BusinessManagersController@updateContactInfo')->name('user.business-managers.update.contact-info');
                 Route::put('/business-managers/update-other-info/{user_slug}', 'BusinessManagersController@updatePersonalOtherInfo')->name('user.business-managers.update.other-info');
 
+                Route::post('/business-managers/upload-profile-picture/{user_slug}', 'BusinessManagersController@uploadProfilePicture')->name('user.business-managers.upload.profile-picture');
+                Route::post('/business-managers/upload-cover-picture/{user_slug}', 'BusinessManagersController@uploadCoverPicture')->name('user.business-managers.upload.cover-picture');
+                Route::post('/business-managers/upload-media/{user_slug}', 'BusinessManagersController@uploadMedia')->name('user.business-managers.upload.media');
+                Route::delete('/business-managers/remove-media/{media_id}', 'BusinessManagersController@removeMedia')->name('user.business-managers.remove.media');
+
                 Route::put('/businesses/update-basic-info/{business_slug}', 'BusinessesController@updateBasicInfo')->name('user.businesses.update.basic-info');
                 Route::put('/businesses/update-bio/{business_slug}', 'BusinessesController@updateBio')->name('user.businesses.update.bio');
             });
@@ -98,6 +103,11 @@ Route::group(['namespace' => 'App\Modules\PublicModule\Controllers','prefix' => 
                 Route::put('/parents/update-bio/{user_slug}', 'ParentsController@updateBio')->name('user.parents.update.bio');
                 Route::put('/parents/update-contact-info/{user_slug}', 'ParentsController@updateContactInfo')->name('user.parents.update.contact-info');
                 Route::put('/parents/update-other-info/{user_slug}', 'ParentsController@updatePersonalOtherInfo')->name('user.parents.update.other-info');
+
+                Route::post('/parents/upload-profile-picture/{user_slug}', 'ParentsController@uploadProfilePicture')->name('user.parents.upload.profile-picture');
+                Route::post('/parents/upload-cover-picture/{user_slug}', 'ParentsController@uploadCoverPicture')->name('user.parents.upload.cover-picture');
+                Route::post('/parents/upload-media/{user_slug}', 'ParentsController@uploadMedia')->name('user.parents.upload.media');
+                Route::delete('/parents/remove-media/{media_id}', 'ParentsController@removeMedia')->name('user.parents.remove.media');
             });
         });
 
