@@ -473,6 +473,11 @@ class UserService
 
         $user_phone = null;
         $user_address = null;
+        $media_info = [
+            'profile_picture_url' => null,
+            'cover_picture_url' => null,
+            'media_urls' => array(),
+        ];
         $business_manager = null;
 
         if($user){
@@ -506,6 +511,16 @@ class UserService
                 )
                 ->first();
 
+            $profile_picture = $this->getSingleFileByEntityId($user->id,'user_profile_picture');
+            $cover_picture = $this->getSingleFileByEntityId($user->id,'user_profile_cover');
+            $media_urls = $this->getMultipleFilesByEntityId($user->id,'user_profile_media');
+
+            $media_info = [
+                'profile_picture' => $profile_picture,
+                'cover_picture' => $cover_picture,
+                'media_urls' => $media_urls,
+            ];
+
             $business_manager = BusinessManager::connect(config('database.secondary'))
                 ->join('businesses', 'businesses.id', '=' ,'business_managers.business_id')
                 ->where('business_managers.user_id', $user->id)
@@ -526,6 +541,7 @@ class UserService
             'user_basic_info' => $user,
             'user_phone_info' => $user_phone,
             'user_address_info' => $user_address,
+            'media_info' => $media_info,
             'business_manager_info' => $business_manager,
         ];
     }
@@ -562,6 +578,11 @@ class UserService
 
         $user_phone = null;
         $user_address = null;
+        $media_info = [
+            'profile_picture_url' => null,
+            'cover_picture_url' => null,
+            'media_urls' => array(),
+        ];
         $parent = null;
         $childs = array();
 
@@ -595,6 +616,16 @@ class UserService
                     'countries.name as country'
                 )
                 ->first();
+
+            $profile_picture = $this->getSingleFileByEntityId($user->id,'user_profile_picture');
+            $cover_picture = $this->getSingleFileByEntityId($user->id,'user_profile_cover');
+            $media_urls = $this->getMultipleFilesByEntityId($user->id,'user_profile_media');
+
+            $media_info = [
+                'profile_picture' => $profile_picture,
+                'cover_picture' => $cover_picture,
+                'media_urls' => $media_urls,
+            ];
 
             $parent = PlayerParent::connect(config('database.secondary'))
                 ->where('user_id', $user->id)
@@ -652,6 +683,7 @@ class UserService
             'user_basic_info' => $user,
             'user_phone_info' => $user_phone,
             'user_address_info' => $user_address,
+            'media_info' => $media_info,
             'parent_info' => $parent,
             'child_info' => $childs,
         ];

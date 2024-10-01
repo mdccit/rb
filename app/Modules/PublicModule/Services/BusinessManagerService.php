@@ -9,9 +9,12 @@ use App\Models\Country;
 use App\Models\User;
 use App\Models\UserAddress;
 use App\Models\UserPhone;
+use App\Traits\AzureBlobStorage;
 
 class BusinessManagerService
 {
+    use AzureBlobStorage;
+
     public function updateBasicInfo (array $data, $user_slug){
         $user = User::connect(config('database.default'))
             ->where('slug', $user_slug)
@@ -131,5 +134,42 @@ class BusinessManagerService
                 ]);
 
         }
+    }
+
+    public function uploadProfilePicture ($file, $user_slug){
+        $user = User::connect(config('database.default'))
+            ->where('slug', $user_slug)
+            ->first();
+        $data = null;
+        if($user) {
+            $data = $this->uploadSingleFile($file, $user->id, 'user_profile_picture');
+        }
+        return $data;
+    }
+
+    public function uploadCoverPicture ($file, $user_slug){
+        $user = User::connect(config('database.default'))
+            ->where('slug', $user_slug)
+            ->first();
+        $data = null;
+        if($user) {
+            $data = $this->uploadSingleFile($file, $user->id, 'user_profile_cover');
+        }
+        return $data;
+    }
+
+    public function uploadMedia ($files, $user_slug){
+        $user = User::connect(config('database.default'))
+            ->where('slug', $user_slug)
+            ->first();
+        $dataArray = array();
+        if($user) {
+            $dataArray = $this->uploadMultipleFiles($files, $user->id, 'user_profile_media');
+        }
+        return $dataArray;
+    }
+
+    public function removeMedia ($media_id){
+        return $this->removeFile($media_id);
     }
 }
