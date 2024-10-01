@@ -575,11 +575,26 @@ class FeedService
             $query->orderBy($sortBy, $sortOrder);
     
             // Execute the query and get the results
-            $posts = $query->get()->map(function ($post) use ($userId, $azureBlobStorageService) {
+            // $posts = $query->get()->map(function ($post) use ($userId, $azureBlobStorageService) {
+            //     // Add the user's like status to each post
+            //     $post->user_has_liked = $post->likes->contains('user_id', $userId);
+            //     unset($post->likes); // Remove the likes relationship
+    
+            //     // Conditionally call getMediaByEntity if has_media is 1
+            //     if ($post->has_media === 1) {
+            //         $mediaItems = $azureBlobStorageService->getMediaByEntity($post->id, 'post'); // Assuming entity_type is 'post'
+            //         $post->media = $mediaItems; // Attach media items to the post
+            //     } else {
+            //         $post->media = null; // Set media to null if no media
+            //     }
+    
+            //     return $post;
+            // });
+            $posts = $query->paginate(2)->through(function ($post) use ($userId, $azureBlobStorageService) {
                 // Add the user's like status to each post
                 $post->user_has_liked = $post->likes->contains('user_id', $userId);
                 unset($post->likes); // Remove the likes relationship
-    
+            
                 // Conditionally call getMediaByEntity if has_media is 1
                 if ($post->has_media === 1) {
                     $mediaItems = $azureBlobStorageService->getMediaByEntity($post->id, 'post'); // Assuming entity_type is 'post'
@@ -587,7 +602,7 @@ class FeedService
                 } else {
                     $post->media = null; // Set media to null if no media
                 }
-    
+            
                 return $post;
             });
     
