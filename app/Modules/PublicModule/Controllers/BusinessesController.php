@@ -59,7 +59,7 @@ class BusinessesController extends Controller
                 ->where('businesses.slug', $business_slug)
                 ->where('business_managers.user_id', auth()->id())
                 ->select(
-                    'business_managers.type as management_type',
+                    'business_managers.type as user_permission_type',
                 )
                 ->first();
             if(!$business_user) {
@@ -69,7 +69,7 @@ class BusinessesController extends Controller
                     'You can not update business without having permission'
                 );
             }else{
-                if($business_user->management_type != config('app.management_type.editor')){
+                if($business_user->user_permission_type != config('app.user_permission_type.editor')){
                     return CommonResponse::getResponse(
                         401,
                         'You have not permission to edit this business information',
@@ -114,7 +114,7 @@ class BusinessesController extends Controller
                 ->where('businesses.slug', $business_slug)
                 ->where('business_managers.user_id', auth()->id())
                 ->select(
-                    'business_managers.type as management_type',
+                    'business_managers.type as user_permission_type',
                 )
                 ->first();
             if(!$business_user) {
@@ -124,7 +124,7 @@ class BusinessesController extends Controller
                     'You can not update business without having permission'
                 );
             }else{
-                if($business_user->management_type != config('app.management_type.editor')){
+                if($business_user->user_permission_type != config('app.user_permission_type.editor')){
                     return CommonResponse::getResponse(
                         401,
                         'You have not permission to edit this business information',
@@ -169,7 +169,7 @@ class BusinessesController extends Controller
                 ->where('businesses.slug', $business_slug)
                 ->where('business_managers.user_id', auth()->id())
                 ->select(
-                    'business_managers.type as management_type',
+                    'business_managers.type as user_permission_type',
                 )
                 ->first();
             if(!$business_user) {
@@ -179,7 +179,7 @@ class BusinessesController extends Controller
                     'You can not update business without having permission'
                 );
             }else{
-                if($business_user->management_type != config('app.management_type.editor')){
+                if($business_user->user_permission_type != config('app.user_permission_type.editor')){
                     return CommonResponse::getResponse(
                         401,
                         'You have not permission to edit this business information',
@@ -225,7 +225,7 @@ class BusinessesController extends Controller
                 ->where('businesses.slug', $business_slug)
                 ->where('business_managers.user_id', auth()->id())
                 ->select(
-                    'business_managers.type as management_type',
+                    'business_managers.type as user_permission_type',
                 )
                 ->first();
             if(!$business_user) {
@@ -235,7 +235,7 @@ class BusinessesController extends Controller
                     'You can not update business without having permission'
                 );
             }else{
-                if($business_user->management_type != config('app.management_type.editor')){
+                if($business_user->user_permission_type != config('app.user_permission_type.editor')){
                     return CommonResponse::getResponse(
                         401,
                         'You have not permission to edit this business information',
@@ -281,7 +281,7 @@ class BusinessesController extends Controller
                 ->where('businesses.slug', $business_slug)
                 ->where('business_managers.user_id', auth()->id())
                 ->select(
-                    'business_managers.type as management_type',
+                    'business_managers.type as user_permission_type',
                 )
                 ->first();
             if(!$business_user) {
@@ -291,7 +291,7 @@ class BusinessesController extends Controller
                     'You can not update business without having permission'
                 );
             }else{
-                if($business_user->management_type != config('app.management_type.editor')){
+                if($business_user->user_permission_type != config('app.user_permission_type.editor')){
                     return CommonResponse::getResponse(
                         401,
                         'You have not permission to edit this business information',
@@ -325,7 +325,7 @@ class BusinessesController extends Controller
                 ->where('businesses.slug', $business_slug)
                 ->where('business_managers.user_id', auth()->id())
                 ->select(
-                    'business_managers.type as management_type',
+                    'business_managers.type as user_permission_type',
                 )
                 ->first();
             if(!$business_user) {
@@ -335,7 +335,7 @@ class BusinessesController extends Controller
                     'You can not update business without having permission'
                 );
             }else{
-                if($business_user->management_type != config('app.management_type.editor')){
+                if($business_user->user_permission_type != config('app.user_permission_type.editor')){
                     return CommonResponse::getResponse(
                         401,
                         'You have not permission to edit this business information',

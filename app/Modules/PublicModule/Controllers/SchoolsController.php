@@ -63,7 +63,7 @@ class SchoolsController extends Controller
                 ->where('schools.slug', $school_slug)
                 ->where('coaches.user_id', auth()->id())
                 ->select(
-                    'coaches.type as management_type',
+                    'coaches.type as user_permission_type',
                 )
                 ->first();
             if(!$school_user) {
@@ -73,7 +73,7 @@ class SchoolsController extends Controller
                     'You can not update school without having permission'
                 );
             }else{
-                if($school_user->management_type != config('app.management_type.editor')){
+                if($school_user->user_permission_type != config('app.user_permission_type.editor')){
                     return CommonResponse::getResponse(
                         401,
                         'You have not permission to edit this school information',
@@ -118,7 +118,7 @@ class SchoolsController extends Controller
                 ->where('schools.slug', $school_slug)
                 ->where('coaches.user_id', auth()->id())
                 ->select(
-                    'coaches.type as management_type',
+                    'coaches.type as user_permission_type',
                 )
                 ->first();
             if(!$school_user) {
@@ -128,7 +128,7 @@ class SchoolsController extends Controller
                     'You can not update school without having permission'
                 );
             }else{
-                if($school_user->management_type != config('app.management_type.editor')){
+                if($school_user->user_permission_type != config('app.user_permission_type.editor')){
                     return CommonResponse::getResponse(
                         401,
                         'You have not permission to edit this school information',
@@ -173,7 +173,7 @@ class SchoolsController extends Controller
                 ->where('schools.slug', $school_slug)
                 ->where('coaches.user_id', auth()->id())
                 ->select(
-                    'coaches.type as management_type',
+                    'coaches.type as user_permission_type',
                 )
                 ->first();
             if(!$school_user) {
@@ -183,7 +183,7 @@ class SchoolsController extends Controller
                     'You can not update school without having permission'
                 );
             }else{
-                if($school_user->management_type != config('app.management_type.editor')){
+                if($school_user->user_permission_type != config('app.user_permission_type.editor')){
                     return CommonResponse::getResponse(
                         401,
                         'You have not permission to edit this school information',
@@ -228,7 +228,7 @@ class SchoolsController extends Controller
                 ->where('schools.slug', $school_slug)
                 ->where('coaches.user_id', auth()->id())
                 ->select(
-                    'coaches.type as management_type',
+                    'coaches.type as user_permission_type',
                 )
                 ->first();
             if(!$school_user) {
@@ -238,7 +238,7 @@ class SchoolsController extends Controller
                     'You can not update school without having permission'
                 );
             }else{
-                if($school_user->management_type != config('app.management_type.editor')){
+                if($school_user->user_permission_type != config('app.user_permission_type.editor')){
                     return CommonResponse::getResponse(
                         401,
                         'You have not permission to edit this school information',
@@ -285,7 +285,7 @@ class SchoolsController extends Controller
                 ->where('schools.slug', $school_slug)
                 ->where('coaches.user_id', auth()->id())
                 ->select(
-                    'coaches.type as management_type',
+                    'coaches.type as user_permission_type',
                 )
                 ->first();
             if(!$school_user) {
@@ -295,7 +295,7 @@ class SchoolsController extends Controller
                     'You can not update school without having permission'
                 );
             }else{
-                if($school_user->management_type != config('app.management_type.editor')){
+                if($school_user->user_permission_type != config('app.user_permission_type.editor')){
                     return CommonResponse::getResponse(
                         401,
                         'You have not permission to edit this school information',
@@ -343,7 +343,7 @@ class SchoolsController extends Controller
                 ->where('schools.slug', $school_slug)
                 ->where('coaches.user_id', auth()->id())
                 ->select(
-                    'coaches.type as management_type',
+                    'coaches.type as user_permission_type',
                 )
                 ->first();
             if(!$school_user) {
@@ -353,7 +353,7 @@ class SchoolsController extends Controller
                     'You can not update school without having permission'
                 );
             }else{
-                if($school_user->management_type != config('app.management_type.editor')){
+                if($school_user->user_permission_type != config('app.user_permission_type.editor')){
                     return CommonResponse::getResponse(
                         401,
                         'You have not permission to edit this school information',
@@ -398,7 +398,7 @@ class SchoolsController extends Controller
                 ->where('schools.slug', $school_slug)
                 ->where('coaches.user_id', auth()->id())
                 ->select(
-                    'coaches.type as management_type',
+                    'coaches.type as user_permission_type',
                 )
                 ->first();
             if(!$school_user) {
@@ -408,7 +408,7 @@ class SchoolsController extends Controller
                     'You can not update school without having permission'
                 );
             }else{
-                if($school_user->management_type != config('app.management_type.editor')){
+                if($school_user->user_permission_type != config('app.user_permission_type.editor')){
                     return CommonResponse::getResponse(
                         401,
                         'You have not permission to edit this school information',
@@ -454,7 +454,7 @@ class SchoolsController extends Controller
                 ->where('schools.slug', $school_slug)
                 ->where('coaches.user_id', auth()->id())
                 ->select(
-                    'coaches.type as management_type',
+                    'coaches.type as user_permission_type',
                 )
                 ->first();
             if(!$school_user) {
@@ -464,7 +464,7 @@ class SchoolsController extends Controller
                     'You can not update school without having permission'
                 );
             }else{
-                if($school_user->management_type != config('app.management_type.editor')){
+                if($school_user->user_permission_type != config('app.user_permission_type.editor')){
                     return CommonResponse::getResponse(
                         401,
                         'You have not permission to edit this school information',
@@ -510,7 +510,7 @@ class SchoolsController extends Controller
                 ->where('schools.slug', $school_slug)
                 ->where('coaches.user_id', auth()->id())
                 ->select(
-                    'coaches.type as management_type',
+                    'coaches.type as user_permission_type',
                 )
                 ->first();
             if(!$school_user) {
@@ -520,7 +520,7 @@ class SchoolsController extends Controller
                     'You can not update school without having permission'
                 );
             }else{
-                if($school_user->management_type != config('app.management_type.editor')){
+                if($school_user->user_permission_type != config('app.user_permission_type.editor')){
                     return CommonResponse::getResponse(
                         401,
                         'You have not permission to edit this school information',
@@ -554,7 +554,7 @@ class SchoolsController extends Controller
                 ->where('schools.slug', $school_slug)
                 ->where('coaches.user_id', auth()->id())
                 ->select(
-                    'coaches.type as management_type',
+                    'coaches.type as user_permission_type',
                 )
                 ->first();
             if(!$school_user) {
@@ -564,7 +564,7 @@ class SchoolsController extends Controller
                     'You can not update school without having permission'
                 );
             }else{
-                if($school_user->management_type != config('app.management_type.editor')){
+                if($school_user->user_permission_type != config('app.user_permission_type.editor')){
                     return CommonResponse::getResponse(
                         401,
                         'You have not permission to edit this school information',

@@ -273,7 +273,7 @@ return [
         'premium'=>3,
     ],
 
-    'management_type' => [
+    'user_permission_type' => [
         'none'=>'none',
         'viewer'=>'viewer',
         'editor'=>'editor',

@@ -10,6 +10,7 @@ use App\Models\School;
 use App\Models\SchoolUser;
 use App\Models\User;
 use App\Traits\AzureBlobStorage;
+use Illuminate\Support\Facades\DB;
 
 class SchoolService
 {
@@ -37,7 +38,6 @@ class SchoolService
             ->first();
 
         $school_users = array();
-        $coach_users = array();
         $media_info = [
             'profile_picture_url' => null,
             'cover_picture_url' => null,
@@ -55,21 +55,9 @@ class SchoolService
                     'users.first_name',
                     'users.last_name',
                     'users.slug',
-                    'user_roles.name as user_role'
+                    'user_roles.name as user_role',
                 )
-                ->get();
-
-            $coach_users = Coach::connect(config('database.secondary'))
-                ->join('users', 'users.id', '=' ,'coaches.user_id')
-                ->where('coaches.school_id', $school->id)
-                ->select(
-                    'coaches.id',
-                    'users.id as user_id',
-                    'users.first_name',
-                    'users.last_name',
-                    'users.slug',
-                    'coaches.type as management_type'
-                )
+                ->addSelect(DB::raw('IF((SELECT type FROM coaches WHERE user_id = users.id ) IS NULL,"viewer",(SELECT type FROM coaches WHERE user_id = users.id )) as user_permission_type'))
                 ->get();
 
             $profile_picture = $this->getSingleFileByEntityId($school->id,'school_profile_picture');
@@ -86,7 +74,6 @@ class SchoolService
         return [
             'school_info' => $school,
             'school_users_info' => $school_users,
-            'coach_users_info' => $coach_users,
             'media_info' => $media_info,
         ];
     }
