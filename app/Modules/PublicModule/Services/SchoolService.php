@@ -34,15 +34,27 @@ class SchoolService
         $school_users = SchoolUser::connect(config('database.secondary'))
             ->join('users', 'users.id', '=' ,'school_users.user_id')
             ->join('user_roles', 'user_roles.id', '=' ,'users.user_role_id')
+            // ->leftjoin('user_roles', 'user_roles.id', '=' ,'users.user_role_id')
+            ->leftJoin('players', function($join) {
+                $join->on('players.user_id', '=', 'users.id')
+                     ->where('user_roles.name', 'player'); // Conditional on user role
+            })
+            ->leftJoin('coaches', function($join) {
+                $join->on('coaches.user_id', '=', 'users.id')
+                     ->where('user_roles.name', 'coach'); // Conditional on user role
+            })
             ->where('school_users.school_id', $school->id)
             ->select(
                 'school_users.id',
                 'users.id as user_id',
                 'users.first_name',
                 'users.last_name',
+                'users.display_name as display_name',
                 'users.slug',
                 'user_roles.name as user_role',
-                'school_users.role as school_user_role'
+                'school_users.role as school_user_role',
+                'players.id as player_id', // Select player ID
+                'coaches.id as coach_id'   // Select coach ID
             )
             ->get();
 
