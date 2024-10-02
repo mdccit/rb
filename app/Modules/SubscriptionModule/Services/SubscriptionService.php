@@ -5,6 +5,7 @@ namespace App\Modules\SubscriptionModule\Services;
 use App\Models\Subscription;
 use Carbon\Carbon;
 use App\Extra\ThirdPartyAPI\StripeAPI;
+use Illuminate\Http\Request;
 
 class SubscriptionService
 {
@@ -28,25 +29,6 @@ class SubscriptionService
         return $subscription;
     }
 
-    // // Create a new subscription for the user
-    // public function createSubscription($data, $user)
-    // {
-    //     if ($user->subscription) {
-    //         throw new \Exception('User already has an active subscription.');
-    //     }
-
-    //     $subscription = new Subscription();
-    //     $subscription->user_id = $user->id;
-
-    //     if ($data['subscription_type'] === 'trial') {
-    //         $subscription->startTrial();
-    //     } else {
-    //         $subscription->startPaid($data['subscription_type'], $data['is_auto_renewal'] ?? false);
-    //     }
-
-    //     return $subscription;
-    // }
-
     public function createSubscription($data, $user)
     {
         // Check if the user already has an active subscription
@@ -56,16 +38,16 @@ class SubscriptionService
     
         // Create Stripe customer if the user doesn't already have one
         if (!$user->stripe_id) {
-            // Create a Stripe customer
-            $customer = \Stripe\Customer::create([
-                'email' => $user->email,
-                'name' => $user->first_name . ' ' . $user->last_name,
-            ]);
-    
-            // Update the user with the Stripe customer ID
-            $user->stripe_id = $customer->id;
-            $user->save();
+            $stripeCustomerId = $this->stripeAPI->createCustomer($user);
+            $user->stripe_id = $stripeCustomerId;
+            $user->save(); // Save the stripe_id to the user
+        } else {
+            $stripeCustomerId = $user->stripe_id;
         }
+    
+  
+        // If payment method is already confirmed, proceed with subscription
+        $paymentMethodId = $data['payment_method_id'];
     
         // Determine the Stripe price ID based on subscription type
         $priceId = $this->getPriceIdFromSubscriptionType($data['subscription_type']);
@@ -73,7 +55,7 @@ class SubscriptionService
         // Check if it's a trial subscription
         if ($data['subscription_type'] === 'trial') {
             // Create a Stripe subscription with a 1-month trial period
-            $stripeSubscription = $this->stripeAPI->createSubscriptionWithTrial($user->stripe_id, $priceId, 30); // 30 days trial
+            $stripeSubscription = $this->stripeAPI->createSubscriptionWithTrial($stripeCustomerId, $priceId, 30); // 30 days trial
     
             // Save trial details
             $userSubscription = new Subscription();
@@ -86,9 +68,8 @@ class SubscriptionService
     
             return $userSubscription;
         } else {
-            // If it's a paid subscription (monthly or annually), create the subscription without trial
-            $paymentMethodId = $data['payment_method']; // Get the payment method ID from the request
-            $stripeSubscription = $this->stripeAPI->createSubscription($user->stripe_id, $data['subscription_type'], $paymentMethodId);
+            // If it's a paid subscription (monthly or annually), create the subscription using the payment method
+            $stripeSubscription = $this->stripeAPI->createSubscription($stripeCustomerId, $priceId, $paymentMethodId);
     
             $userSubscription = new Subscription();
             $userSubscription->user_id = $user->id;

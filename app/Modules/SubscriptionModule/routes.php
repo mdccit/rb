@@ -25,6 +25,10 @@ Route::group(['namespace' => 'App\Modules\SubscriptionModule\Controllers', 'pref
          // New Stripe payment-related routes
          Route::get('/payment-form', 'SubscriptionController@showPaymentForm')->name('subscription.paymentForm'); // Display the Stripe payment form
          Route::post('/payment', 'SubscriptionController@handlePayment')->name('subscription.handlePayment'); // Handle the Stripe payment
+         Route::post(uri: '/create-setup-intent', 'SubscriptionController@createSetupIntent');
+         Route::post('/confirm-setup-intent', 'SubscriptionController@confirmSetupIntent');
+         Route::post('/confirm-payment-and-create-subscription', 'SubscriptionController@confirmPaymentAndCreateSubscription');
+
 
       });
     });

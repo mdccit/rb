@@ -8,14 +8,18 @@ use App\Extra\CommonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Extra\ThirdPartyAPI\StripeAPI;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class SubscriptionController extends Controller
 {
   protected $subscriptionService;
+  protected $stripeAPI;
 
-  public function __construct(SubscriptionService $subscriptionService)
+  public function __construct(SubscriptionService $subscriptionService, StripeAPI $stripeAPI)
   {
     $this->subscriptionService = $subscriptionService;
+    $this->stripeAPI = $stripeAPI;
   }
 
   // Show the current subscription of the user
@@ -106,4 +110,129 @@ class SubscriptionController extends Controller
       return CommonResponse::getResponse(500, $e->getMessage(), 'Failed to retrieve subscriptions');
     }
   }
+
+
+  /**
+   * Create a SetupIntent to get client_secret for payment method confirmation.
+   */
+  public function createSetupIntent($customerId)
+  {
+    try {
+      // Create a SetupIntent for the customer
+      $setupIntent = \Stripe\SetupIntent::create([
+        'customer' => $customerId,
+      ]);
+
+      // Log the entire SetupIntent object for debugging
+      Log::info('SetupIntent created: ' . json_encode($setupIntent));
+
+      // Check if the required fields are present
+      if (isset($setupIntent->client_secret) && isset($setupIntent->id)) {
+        return response()->json([
+          'message' => 'SetupIntent created. Please confirm the payment method.',
+          'client_secret' => $setupIntent->client_secret,
+          'setup_intent_id' => $setupIntent->id
+        ]);
+      } else {
+        return response()->json([
+          'message' => 'Failed to create SetupIntent',
+          'error' => 'SetupIntent is missing required fields.'
+        ], 500);
+      }
+
+    } catch (\Exception $e) {
+      // Log the error for debugging
+      Log::error('Error creating SetupIntent: ' . $e->getMessage());
+      return response()->json([
+        'message' => 'Failed to create SetupIntent',
+        'error' => $e->getMessage()
+      ], 500);
+    }
+  }
+
+
+  /**
+   * Confirm SetupIntent by passing setup_intent_id, payment_method_id, and client_secret.
+   */
+  public function confirmSetupIntent(Request $request)
+  {
+    $setupIntentId = $request->input('setup_intent_id');
+    $paymentMethodId = $request->input('payment_method_id');
+    $clientSecret = $request->input('client_secret');
+
+    try {
+      // Confirm the SetupIntent to attach the payment method
+      $confirmedPaymentMethod = $this->stripeAPI->confirmSetupIntent($setupIntentId, $paymentMethodId, $clientSecret);
+
+      if ($confirmedPaymentMethod['status'] === 'success') {
+        return response()->json([
+          'status' => 'success',
+          'message' => 'Payment method confirmed successfully',
+          'payment_method_id' => $confirmedPaymentMethod['payment_method_id']
+        ]);
+      }
+
+      return response()->json(['status' => 'error', 'message' => 'Failed to confirm payment method.']);
+
+    } catch (\Exception $e) {
+      Log::error('Error confirming payment method: ' . $e->getMessage());
+      return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+    }
+  }
+
+  /**
+   * Create subscription for the user using confirmed payment method.
+   */
+  public function createSubscription(Request $request)
+  {
+    $user = $request->user(); // Assuming the user is authenticated
+    $paymentMethodId = $request->input('payment_method_id');
+    $subscriptionType = $request->input('subscription_type'); // monthly, annually, or trial
+
+    try {
+      // Check if user already has an active subscription
+      if ($user->subscription) {
+        throw new \Exception('User already has an active subscription.');
+      }
+
+      // Determine the Stripe price ID based on subscription type
+      $priceId = $this->getPriceIdFromSubscriptionType($subscriptionType);
+
+      // Create the subscription with the payment method
+      $stripeSubscription = $this->stripeAPI->createSubscription($user->stripe_id, $priceId, $paymentMethodId);
+
+      // Save the subscription details to the database
+      $userSubscription = new Subscription();
+      $userSubscription->user_id = $user->id;
+      $userSubscription->subscription_type = $subscriptionType;
+      $userSubscription->status = 'active';
+      $userSubscription->start_date = Carbon::now();
+      $userSubscription->end_date = $subscriptionType === 'monthly' ? Carbon::now()->addMonth() : Carbon::now()->addYear();
+      $userSubscription->save();
+
+      return response()->json(['status' => 'success', 'message' => 'Subscription created successfully']);
+
+    } catch (\Exception $e) {
+      Log::error('Error creating subscription: ' . $e->getMessage());
+      return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+    }
+  }
+
+  /**
+   * Helper function to get Stripe price ID from subscription type.
+   */
+  private function getPriceIdFromSubscriptionType($subscriptionType)
+  {
+    // Assuming you're pulling these from config/services.php
+    if ($subscriptionType === 'monthly') {
+      return config('services.stripe.monthly_price_id');
+    } elseif ($subscriptionType === 'annually') {
+      return config('services.stripe.annual_price_id');
+    } elseif ($subscriptionType === 'trial') {
+      return 'price_for_trial_plan'; // You may need to set a plan for trials
+    } else {
+      throw new \Exception('Invalid subscription type.');
+    }
+  }
+
 }
