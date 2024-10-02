@@ -7,9 +7,12 @@ namespace App\Modules\PublicModule\Services;
 use App\Models\School;
 use App\Models\SchoolUser;
 use App\Models\User;
+use App\Traits\AzureBlobStorage;
 
 class SchoolService
 {
+    use AzureBlobStorage;
+
     public function getSchoolProfile ($school_slug){
         $school = School::connect(config('database.secondary'))
             ->where('slug', $school_slug)
@@ -177,5 +180,42 @@ class SchoolService
                 'other_data' => $other_data,
             ]);
         }
+    }
+
+    public function uploadProfilePicture ($file, $user_slug){
+        $user = User::connect(config('database.default'))
+            ->where('slug', $user_slug)
+            ->first();
+        $data = null;
+        if($user) {
+            $data = $this->uploadSingleFile($file, $user->id, 'school_profile_picture');
+        }
+        return $data;
+    }
+
+    public function uploadCoverPicture ($file, $user_slug){
+        $user = User::connect(config('database.default'))
+            ->where('slug', $user_slug)
+            ->first();
+        $data = null;
+        if($user) {
+            $data = $this->uploadSingleFile($file, $user->id, 'school_profile_cover');
+        }
+        return $data;
+    }
+
+    public function uploadMedia ($files, $user_slug){
+        $user = User::connect(config('database.default'))
+            ->where('slug', $user_slug)
+            ->first();
+        $dataArray = array();
+        if($user) {
+            $dataArray = $this->uploadMultipleFiles($files, $user->id, 'school_profile_media');
+        }
+        return $dataArray;
+    }
+
+    public function removeMedia ($media_id){
+        return $this->removeFile($media_id);
     }
 }
