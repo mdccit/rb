@@ -51,15 +51,19 @@ class StripeAPI
   }
 
 
-  public function confirmSetupIntent($setupIntentId, $paymentMethodId, $clientSecret)
+  public function confirmSetupIntent($setupIntentId, $paymentMethodId)
   {
     try {
-      // Make the POST request to Stripe API to confirm the SetupIntent
+      // Make the POST request to Stripe API to confirm the SetupIntent with a return_url
       $response = Http::withToken(env('STRIPE_SECRET')) // Set your Stripe secret key
+        ->asForm() // Set the content type to application/x-www-form-urlencoded
         ->post("https://api.stripe.com/v1/setup_intents/$setupIntentId/confirm", [
           'payment_method' => $paymentMethodId,
-          'client_secret' => $clientSecret
+          'return_url' => env('STRIPE_RETURN_URL') // Use an environment variable or hardcoded URL
         ]);
+
+      // Log the full response for debugging
+      Log::info('Stripe Confirm SetupIntent Response: ' . json_encode($response->json()));
 
       // Handle the response
       if ($response->successful()) {
@@ -72,16 +76,32 @@ class StripeAPI
             'payment_method_id' => $result['payment_method'] // Return the payment method ID
           ];
         } else {
-          return ['status' => 'error', 'message' => 'SetupIntent confirmation failed'];
+          return [
+            'status' => 'error',
+            'message' => 'SetupIntent confirmation failed with status: ' . $result['status']
+          ];
         }
       }
 
-      return ['status' => 'error', 'message' => 'Failed to confirm SetupIntent'];
+      // Log the response if it's not successful
+      Log::error('Failed Stripe SetupIntent Confirmation: ' . json_encode($response->json()));
+
+      return [
+        'status' => 'error',
+        'message' => 'Failed to confirm SetupIntent: ' . json_encode($response->json())
+      ];
 
     } catch (\Exception $e) {
-      return ['status' => 'error', 'message' => $e->getMessage()];
+      // Log the exception message for better error tracking
+      Log::error('Exception in confirming SetupIntent: ' . $e->getMessage());
+      return [
+        'status' => 'error',
+        'message' => 'Exception: ' . $e->getMessage()
+      ];
     }
   }
+
+
 
   // Method to create a new Stripe customer
   public function createCustomer($user)
@@ -141,23 +161,35 @@ class StripeAPI
 
 
   // Create a new subscription for a customer with optional trial and subscription type
-  public function createSubscription($customerId, $subscriptionType, $paymentMethodId = null, $trialDays = 0)
+  public function createSubscription($customerId, $subscriptionType, $paymentMethodId = null, $isAutoRenewal = true)
   {
-    // Attach the payment method if provided
-    if ($paymentMethodId) {
-      $this->attachPaymentMethodToCustomer($customerId, $paymentMethodId);
-    }
-
-    // Determine the price ID based on subscription type (monthly, annually, etc.)
-    $priceId = $this->getPriceIdFromSubscriptionType($subscriptionType);
-
-    // Create a subscription with an optional trial period
-    return Subscription::create([
-      'customer' => $customerId,
-      'items' => [['price' => $priceId]],
-      'trial_period_days' => $trialDays, // Set trial period days, default is 0 (no trial)
-    ]);
+      try {
+          // Attach the payment method to the customer if provided
+          if ($paymentMethodId) {
+              $this->attachPaymentMethodToCustomer($customerId, $paymentMethodId);
+          }
+  
+          // Determine the price ID based on subscription type (monthly, annually, etc.)
+          // $priceId = $this->getPriceIdFromSubscriptionType($subscriptionType);
+          $priceId = 'price_1Q5LsbB1aCt3RRcc6eRGc3wo';
+  
+          // Create a subscription with auto-renewal
+          $subscription = \Stripe\Subscription::create([
+              'customer' => $customerId,
+              'items' => [['price' => $priceId]],  // Pass the price ID
+              'expand' => ['latest_invoice.payment_intent'],  // Optional: Expand the payment intent for more details
+              'automatic_tax' => ['enabled' => false]  // Auto-renewal setting
+          ]);
+  
+          return $subscription;
+  
+      } catch (\Exception $e) {
+          Log::error('Stripe Subscription Creation Error: ' . $e->getMessage());
+          throw new \Exception('Failed to create subscription: ' . $e->getMessage());
+      }
   }
+  
+
 
   public function createSubscriptionWithTrial($customerId, $priceId, $trialDays = 30)
   {
@@ -182,11 +214,20 @@ class StripeAPI
   private function getPriceIdFromSubscriptionType($subscriptionType)
   {
     $priceIds = [
-      'trial' => null, // For trial subscriptions, Stripe may not charge immediately.
+      'trial' => config('services.stripe.monthly_price_id'), // For trial subscriptions, Stripe may not charge immediately.
       'monthly' => config('services.stripe.monthly_price_id'), // Monthly plan price ID from .env
       'annually' => config('services.stripe.annual_price_id'), // Annual plan price ID from .env
     ];
 
-    return $priceIds[$subscriptionType] ?? null;
+    // Log the subscription type and price ID for debugging purposes
+    Log::info('Retrieving price ID for subscription type: ' . $subscriptionType);
+
+    // Check if the price ID is available
+    if (!isset($priceIds[$subscriptionType]) || empty($priceIds[$subscriptionType])) {
+      Log::error('Invalid price ID for subscription type: ' . $subscriptionType);
+      throw new \Exception('Invalid price ID for subscription type');
+    }
+
+    return $priceIds[$subscriptionType];
   }
 }

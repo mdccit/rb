@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Validator;
 use App\Extra\ThirdPartyAPI\StripeAPI;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use App\Models\Subscription;
+use Carbon\Carbon;
 
 class SubscriptionController extends Controller
 {
@@ -112,44 +114,88 @@ class SubscriptionController extends Controller
   }
 
 
+  public function getStripeCustomerId(Request $request)
+  {
+      try {
+          // Retrieve the authenticated user
+          $user = $request->user();  // Assuming you are using token-based authentication like JWT or Laravel Passport
+  
+          // Check if the user already has a Stripe customer ID
+          if (!$user->stripe_id) {
+              // If not, create a new Stripe customer and save the stripe_id
+              $stripeCustomerId = $this->stripeAPI->createCustomer($user);
+              $user->stripe_id = $stripeCustomerId;
+              $user->save();
+          } else {
+              // If the user already has a Stripe customer ID
+              $stripeCustomerId = $user->stripe_id;
+          }
+  
+          return response()->json([
+              'status' => 'success',
+              'stripe_customer_id' => $stripeCustomerId
+          ], 200);
+  
+      } catch (\Exception $e) {
+          Log::error('Error retrieving Stripe customer ID: ' . $e->getMessage());
+          return response()->json([
+              'status' => 'error',
+              'message' => 'Failed to retrieve Stripe customer ID'
+          ], 500);
+      }
+  }
+  
+
+
+
   /**
    * Create a SetupIntent to get client_secret for payment method confirmation.
    */
-  public function createSetupIntent($customerId)
+  public function createSetupIntent(Request $request)
   {
-    try {
-      // Create a SetupIntent for the customer
-      $setupIntent = \Stripe\SetupIntent::create([
-        'customer' => $customerId,
-      ]);
-
-      // Log the entire SetupIntent object for debugging
-      Log::info('SetupIntent created: ' . json_encode($setupIntent));
-
-      // Check if the required fields are present
-      if (isset($setupIntent->client_secret) && isset($setupIntent->id)) {
-        return response()->json([
-          'message' => 'SetupIntent created. Please confirm the payment method.',
-          'client_secret' => $setupIntent->client_secret,
-          'setup_intent_id' => $setupIntent->id
-        ]);
-      } else {
-        return response()->json([
-          'message' => 'Failed to create SetupIntent',
-          'error' => 'SetupIntent is missing required fields.'
-        ], 500);
+      try {
+          // Retrieve the customer ID from the request
+          $customerId = $request->input('customer_id');
+  
+          // Ensure customer_id is provided
+          if (!$customerId) {
+              return response()->json([
+                  'message' => 'Customer ID is required.'
+              ], 422);
+          }
+  
+          // Create a SetupIntent for the provided customer
+          $setupIntent = \Stripe\SetupIntent::create([
+              'customer' => $customerId,
+          ]);
+  
+          // Log the entire SetupIntent object for debugging
+          Log::info('SetupIntent created: ' . json_encode($setupIntent));
+  
+          // Check if the required fields are present
+          if (isset($setupIntent->client_secret) && isset($setupIntent->id)) {
+              return response()->json([
+                  'message' => 'SetupIntent created. Please confirm the payment method.',
+                  'client_secret' => $setupIntent->client_secret,
+                  'setup_intent_id' => $setupIntent->id
+              ]);
+          } else {
+              return response()->json([
+                  'message' => 'Failed to create SetupIntent',
+                  'error' => 'SetupIntent is missing required fields.'
+              ], 500);
+          }
+  
+      } catch (\Exception $e) {
+          // Log the error for debugging
+          Log::error('Error creating SetupIntent: ' . $e->getMessage());
+          return response()->json([
+              'message' => 'Failed to create SetupIntent',
+              'error' => $e->getMessage()
+          ], 500);
       }
-
-    } catch (\Exception $e) {
-      // Log the error for debugging
-      Log::error('Error creating SetupIntent: ' . $e->getMessage());
-      return response()->json([
-        'message' => 'Failed to create SetupIntent',
-        'error' => $e->getMessage()
-      ], 500);
-    }
   }
-
+  
 
   /**
    * Confirm SetupIntent by passing setup_intent_id, payment_method_id, and client_secret.

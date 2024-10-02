@@ -22,12 +22,14 @@ Route::group(['namespace' => 'App\Modules\SubscriptionModule\Controllers', 'pref
         Route::put('/cancel', 'SubscriptionController@cancel')->name('subscription.cancel'); // Cancel the subscription
         Route::put('/renew', 'SubscriptionController@renew')->name('subscription.renew'); // Renew the subscription if applicable
 
-         // New Stripe payment-related routes
-         Route::get('/payment-form', 'SubscriptionController@showPaymentForm')->name('subscription.paymentForm'); // Display the Stripe payment form
-         Route::post('/payment', 'SubscriptionController@handlePayment')->name('subscription.handlePayment'); // Handle the Stripe payment
-         Route::post(uri: '/create-setup-intent', 'SubscriptionController@createSetupIntent');
-         Route::post('/confirm-setup-intent', 'SubscriptionController@confirmSetupIntent');
-         Route::post('/confirm-payment-and-create-subscription', 'SubscriptionController@confirmPaymentAndCreateSubscription');
+        // New Stripe payment-related routes
+        Route::get('/stripe/get-stripe-customer-id', 'SubscriptionController@getStripeCustomerId')->name('subscription.getStripeCustomerId');
+        Route::get('/stripe/payment-form', 'SubscriptionController@showPaymentForm')->name('subscription.paymentForm'); 
+        Route::post('/stripe/payment', 'SubscriptionController@handlePayment')->name('subscription.handlePayment');
+        Route::post('/stripe/create-setup-intent', 'SubscriptionController@createSetupIntent')->name('subscription.createSetupIntent');
+        Route::post('/stripe/confirm-setup-intent', 'SubscriptionController@confirmSetupIntent')->name('subscription.confirmSetupIntent');
+        Route::post('/stripe/confirm-payment-and-create-subscription', 'SubscriptionController@createSubscription');
+        
 
 
       });
