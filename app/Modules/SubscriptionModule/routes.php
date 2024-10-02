@@ -2,22 +2,25 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::group(['namespace' => 'App\Modules\AuthModule\Controllers', 'prefix' => 'api/' . config('app.version'), 'middleware' => ['api', 'locale', 'cors', 'json.response']], function () {
+Route::group(['namespace' => 'App\Modules\Subscription\Controllers', 'prefix' => 'api/' . config('app.version'), 'middleware' => ['api', 'locale', 'cors', 'json.response']], function () {
 
   //TODO All AuthModule routes define here
-  Route::prefix('auth')->group(function () {
+  Route::prefix('subscription')->group(function () {
 
     //TODO All routes that are required access key
     Route::middleware('access.key')->group(function () {
 
-      Route::get('/subscription', 'SubscriptionController@show')->name('subscription.show'); // Show user's subscription
+      // Routes for subscription retrieval by user ID and for all subscriptions
+      Route::get('/{userId}', 'SubscriptionController@getSubscriptionByUserId')->name('subscription.getByUserId');
+      Route::get('/all', 'SubscriptionController@getAllSubscriptions')->name('subscription.getAll');
 
-      Route::middleware('auth:api')->group(function () {     
+      Route::middleware('auth:api')->group(function () {
 
         // Subscription-related routes
-        Route::post('/subscription', 'SubscriptionController@store')->name('subscription.store'); // Create a new subscription
-        Route::put('/subscription/cancel', 'SubscriptionController@cancel')->name('subscription.cancel'); // Cancel the subscription
-        Route::put('/subscription/renew', 'SubscriptionController@renew')->name('subscription.renew'); // Renew the subscription if applicable
+        Route::get('/show', 'SubscriptionController@show')->name('subscription.show'); // Show user's subscription
+        Route::post('/create', 'SubscriptionController@store')->name('subscription.store'); // Create a new subscription
+        Route::put('/cancel', 'SubscriptionController@cancel')->name('subscription.cancel'); // Cancel the subscription
+        Route::put('/renew', 'SubscriptionController@renew')->name('subscription.renew'); // Renew the subscription if applicable
 
       });
     });

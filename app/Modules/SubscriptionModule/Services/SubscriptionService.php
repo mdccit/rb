@@ -62,4 +62,22 @@ class SubscriptionService
 
         $subscription->renewSubscription();
     }
+
+      // Retrieve a subscription by user ID
+      public function getSubscriptionByUserId($userId)
+      {
+          $subscription = Subscription::where('user_id', $userId)->first();
+  
+          if (!$subscription) {
+              throw new \Exception('No subscription found for the given user ID.');
+          }
+  
+          return $subscription;
+      }
+  
+      // Retrieve all subscriptions
+      public function getAllSubscriptions()
+      {
+          return Subscription::all();
+      }
 }
