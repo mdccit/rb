@@ -242,7 +242,8 @@ return [
         'CommonModule',
         'AdminModule',
         'UserModule',
-        'FeedModule'
+        'FeedModule',
+        'SubscriptionModule'
     ],
 
     /*

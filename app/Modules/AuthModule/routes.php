@@ -1,8 +1,7 @@
 <?php
-        
 use Illuminate\Support\Facades\Route;
 
-Route::group(['namespace' => 'App\Modules\AuthModule\Controllers','prefix' => 'api/'.config('app.version'), 'middleware' => ['api','locale','cors', 'json.response']], function() {
+Route::group(['namespace' => 'App\Modules\AuthModule\Controllers', 'prefix' => 'api/' . config('app.version'), 'middleware' => ['api', 'locale', 'cors', 'json.response']], function () {
 
     //TODO All AuthModule routes define here
     Route::prefix('auth')->group(function () {
@@ -38,6 +37,8 @@ Route::group(['namespace' => 'App\Modules\AuthModule\Controllers','prefix' => 'a
                     Route::put('/parent-register', 'RegisterController@parentRegister')->name('auth.parent.register');
                 });
 
+                // Registration Step 3 route for coach users
+                Route::put('/coach-register/step-three', 'RegisterController@coachRegisterStep3')->name('auth.coach.register.step3'); // Handle coach registration step 3
             });
         });
 
