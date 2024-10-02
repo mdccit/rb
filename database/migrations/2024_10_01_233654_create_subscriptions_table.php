@@ -10,11 +10,11 @@ return new class extends Migration {
         Schema::create('subscriptions', function (Blueprint $table) {
             $table->uuid('id')->primary(); // UUID primary key
             $table->uuid('user_id'); // UUID foreign key to users table
-            $table->string('subscription_type');
+            $table->enum('subscription_type', ['trial', 'monthly', 'annually']); 
             $table->boolean('auto_renewal')->default(false);
             $table->timestamp('start_date')->nullable();
             $table->timestamp('end_date')->nullable();
-            $table->enum('status', ['active', 'inactive', 'expired']);
+            $table->enum('status', ['active', 'trial', 'grace', 'expired']);
             $table->timestamps();
 
             // Foreign key constraint

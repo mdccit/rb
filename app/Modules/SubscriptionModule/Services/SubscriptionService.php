@@ -68,14 +68,13 @@ class SubscriptionService
             // Create a Stripe subscription with a 1-month trial period
             $stripeSubscription = $this->stripeAPI->createSubscriptionWithTrial($user->stripe_id, $priceId, 30); // 30 days trial
 
-            // Log trial information in your database
+            // Save trial details
             $userSubscription = new Subscription();
             $userSubscription->user_id = $user->id;
-            $userSubscription->subscription_type = 'trial';
-            $userSubscription->auto_renewal = $data['auto_renewal'] ?? false;
+            $userSubscription->subscription_type = 'trial'; // Setting the enum value
+            $userSubscription->status = 'trial'; // The status is 'trial' during the trial period
             $userSubscription->start_date = Carbon::now();
-            $userSubscription->end_date = Carbon::now()->addMonth(); // Trial period for 1 month
-            $userSubscription->status = 'trial';
+            $userSubscription->end_date = Carbon::now()->addMonth();
             $userSubscription->save();
 
             return $userSubscription;
@@ -83,14 +82,12 @@ class SubscriptionService
             // If it's a paid subscription (monthly or annually), create the subscription without trial
             $stripeSubscription = $this->stripeAPI->createSubscription($user->stripe_id, $priceId);
 
-            // Save the subscription in your database
             $userSubscription = new Subscription();
             $userSubscription->user_id = $user->id;
-            $userSubscription->subscription_type = $data['subscription_type'];
-            $userSubscription->auto_renewal = $data['auto_renewal'] ?? false;
+            $userSubscription->subscription_type = $data['subscription_type']; // 'monthly' or 'annually'
+            $userSubscription->status = 'active'; // Set status to active for paid subscriptions
             $userSubscription->start_date = Carbon::now();
             $userSubscription->end_date = $data['subscription_type'] === 'monthly' ? Carbon::now()->addMonth() : Carbon::now()->addYear();
-            $userSubscription->status = 'active';
             $userSubscription->save();
 
             return $userSubscription;
