@@ -41,9 +41,9 @@ class School extends Model
         'other_data',
 
         'other_data->teams_count',
-        'other_data->total_staff',
-        'other_data->admin_staff',
-        'other_data->non_admin_staff',
+        'other_data->total_members',
+        'other_data->editors',
+        'other_data->viewers',
         'other_data->academics',//array
         'other_data->average_utr',
         'other_data->tuition_in_of_state',

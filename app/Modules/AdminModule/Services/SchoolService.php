@@ -7,6 +7,7 @@ namespace App\Modules\AdminModule\Services;
 use App\Models\School;
 use App\Models\SchoolUser;
 use App\Traits\GeneralHelpers;
+use Illuminate\Support\Facades\DB;
 
 class SchoolService
 {
@@ -165,8 +166,8 @@ class SchoolService
                 'users.last_name',
                 'users.slug',
                 'user_roles.name as user_role',
-                'school_users.role as school_user_role'
             )
+            ->addSelect(DB::raw('IF((SELECT type FROM coaches WHERE user_id = users.id ) IS NULL,"viewer",(SELECT type FROM coaches WHERE user_id = users.id )) as user_permission_type'))
             ->get();
 
         $dataSet = [

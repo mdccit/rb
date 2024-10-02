@@ -12,7 +12,7 @@ class SchoolTeamService
 {
     public function getSchoolTeam ($school_id){
 
-        $team = SchoolTeam::connect(config('database.secondary'))
+        $teams = SchoolTeam::connect(config('database.secondary'))
                  ->join('schools','schools.id','=','school_teams.school_id')
                  ->where('school_id',$school_id)
                  ->select(
@@ -22,10 +22,27 @@ class SchoolTeamService
                     'schools.name as school_name'
                   )
                   ->get();
+        
+        foreach( $teams as $key=> $data){
+            $team_users = SchoolTeamUser::connect(config('database.secondary'))
+                          ->where('school_team_users.team_id',$data->team_id)
+                          ->join('users','users.id','=','school_team_users.user_id')
+                          ->select(
+                            'school_team_users.id as id',
+                            'school_team_users.user_id as user_id',
+                            'school_team_users.status',
+                            'school_team_users.player_id',
+                            'school_team_users.coache_id',
+                            'users.display_name as name',
+                            'users.user_role_id as role_id'
+                          )
+                         ->get();
+            $teams[$key]['team_users'] =$team_users;
+        }
        
 
         return [
-                'team' => $team
+                'team' => $teams
               ];
 
     }

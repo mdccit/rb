@@ -38,6 +38,8 @@ Route::group(['namespace' => 'App\Modules\AdminModule\Controllers','prefix' => '
                 Route::get('/schools/users/{school_id}', 'SchoolUsersController@getAllSchoolUsers')->name('admin.schools.users.get-all');
                 Route::get('/schools/search-users/{school_id}', 'SchoolUsersController@searchUsers')->name('admin.schools.users.search');
                 Route::post('/schools/add-user', 'SchoolUsersController@addSchoolUser')->name('admin.schools.users.add');
+                Route::put('/schools/manage-user-permission/{user_id}', 'SchoolUsersController@updateSchoolUserManageType')->name('admin.schools.users.manage-user-permission');
+                Route::put('/schools/remove-user/{user_id}', 'SchoolUsersController@removeSchoolUser')->name('admin.schools.users.remove');
 
                 Route::get('/businesses', 'BusinessesController@getAll')->name('admin.businesses.get-all');
                 Route::get('/businesses/{business_id}', 'BusinessesController@get')->name('admin.businesses.get');
@@ -49,7 +51,8 @@ Route::group(['namespace' => 'App\Modules\AdminModule\Controllers','prefix' => '
                 Route::get('/businesses/users/{business_id}', 'BusinessUsersController@getAllBusinessUsers')->name('admin.businesses.users.get-all');
                 Route::get('/businesses/search-users/{business_id}', 'BusinessUsersController@searchUsers')->name('admin.businesses.users.search');
                 Route::post('/businesses/add-user', 'BusinessUsersController@addBusinessUser')->name('admin.businesses.users.add');
-
+                Route::put('/businesses/manage-user-permission/{user_id}', 'BusinessUsersController@updateBusinessUserManageType')->name('admin.businesses.users.manage-user-permission');
+                Route::put('/businesses/remove-user/{user_id}', 'BusinessUsersController@removeBusinessUser')->name('admin.businesses.users.remove');
                 //resource category
                 Route::get('/resource-categories', 'ResourceCategoriesController@index')->name('admin.resources-category.index');
                 Route::post('/resource-categories-create', 'ResourceCategoriesController@storeCategory')->name('admin.resources-category.create');

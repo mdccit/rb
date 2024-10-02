@@ -93,4 +93,67 @@ class SchoolUsersController extends Controller
             );
         }
     }
+
+    public function updateSchoolUserManageType(Request $request,$user_id)
+    {
+        try{
+            $validator = Validator::make($request->all(), [
+                'school' => 'required|string',
+                'user_permission_type' => 'required|string|in:viewer,editor',
+            ]);
+            if ($validator->fails())
+            {
+                return CommonResponse::getResponse(
+                    422,
+                    $validator->errors(),
+                    'Input validation failed'
+                );
+            }
+
+            $this->schoolUserService->updateSchoolUserManageType($request->all(),$user_id);
+
+            return CommonResponse::getResponse(
+                200,
+                'Successfully updated',
+                'Successfully updated'
+            );
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    }
+
+    public function removeSchoolUser(Request $request,$user_id)
+    {
+        try{
+            $validator = Validator::make($request->all(), [
+                'school' => 'required|string',
+            ]);
+            if ($validator->fails())
+            {
+                return CommonResponse::getResponse(
+                    422,
+                    $validator->errors(),
+                    'Input validation failed'
+                );
+            }
+
+            $this->schoolUserService->removeSchoolUser($request->all(),$user_id);
+
+            return CommonResponse::getResponse(
+                200,
+                'Successfully removed',
+                'Successfully removed'
+            );
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    }
 }

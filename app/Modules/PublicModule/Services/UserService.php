@@ -527,6 +527,7 @@ class UserService
                 ->select(
                     'business_managers.id as business_manager_id',
                     'businesses.id as business_id',
+                    'businesses.slug as business_slug',
                     'business_managers.position',
                     'business_managers.type',
                     'business_managers.status',

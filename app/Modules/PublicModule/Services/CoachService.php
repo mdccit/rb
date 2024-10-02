@@ -43,7 +43,7 @@ class CoachService
     }
 
     public function uploadProfilePicture ($file, $user_slug){
-        $user = User::connect(config('database.default'))
+        $user = User::connect(config('database.secondary'))
             ->where('slug', $user_slug)
             ->first();
         $data = null;
@@ -54,7 +54,7 @@ class CoachService
     }
 
     public function uploadCoverPicture ($file, $user_slug){
-        $user = User::connect(config('database.default'))
+        $user = User::connect(config('database.secondary'))
             ->where('slug', $user_slug)
             ->first();
         $data = null;
@@ -65,7 +65,7 @@ class CoachService
     }
 
     public function uploadMedia ($files, $user_slug){
-        $user = User::connect(config('database.default'))
+        $user = User::connect(config('database.secondary'))
             ->where('slug', $user_slug)
             ->first();
         $dataArray = array();
