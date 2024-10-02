@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::group(['namespace' => 'App\Modules\Subscription\Controllers', 'prefix' => 'api/' . config('app.version'), 'middleware' => ['api', 'locale', 'cors', 'json.response']], function () {
+Route::group(['namespace' => 'App\Modules\SubscriptionModule\Controllers', 'prefix' => 'api/' . config('app.version'), 'middleware' => ['api', 'locale', 'cors', 'json.response']], function () {
 
   //TODO All AuthModule routes define here
   Route::prefix('subscription')->group(function () {

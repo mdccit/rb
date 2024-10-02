@@ -33,9 +33,11 @@ class SubscriptionController extends Controller
   public function store(Request $request)
   {
     try {
+
       $validator = Validator::make($request->all(), [
         'subscription_type' => 'required|in:trial,monthly,annually',
-        'auto_renewal' => 'sometimes|boolean',
+        'is_auto_renewal' => 'required|boolean',
+        'payment_method' => 'required|string',
       ]);
 
       if ($validator->fails()) {
@@ -76,24 +78,24 @@ class SubscriptionController extends Controller
   // Get subscription by user ID
   public function getSubscriptionByUserId($userId)
   {
-      // Validate the user ID format (UUID or numeric if using integers for IDs)
-      $validator = Validator::make(['user_id' => $userId], [
-          'user_id' => 'required|exists:users,id', // Validate that the user exists in the users table
-      ]);
-  
-      if ($validator->fails()) {
-          return CommonResponse::getResponse(422, $validator->errors(), 'Invalid User ID');
-      }
-  
-      // Proceed if validation passes
-      try {
-          $subscription = $this->subscriptionService->getSubscriptionByUserId($userId);
-          return CommonResponse::getResponse(200, 'Subscription retrieved successfully', 'Subscription data retrieved successfully', $subscription);
-      } catch (\Exception $e) {
-          return CommonResponse::getResponse(404, $e->getMessage(), 'Subscription not found');
-      }
+    // Validate the user ID format (UUID or numeric if using integers for IDs)
+    $validator = Validator::make(['user_id' => $userId], [
+      'user_id' => 'required|exists:users,id', // Validate that the user exists in the users table
+    ]);
+
+    if ($validator->fails()) {
+      return CommonResponse::getResponse(422, $validator->errors(), 'Invalid User ID');
+    }
+
+    // Proceed if validation passes
+    try {
+      $subscription = $this->subscriptionService->getSubscriptionByUserId($userId);
+      return CommonResponse::getResponse(200, 'Subscription retrieved successfully', 'Subscription data retrieved successfully', $subscription);
+    } catch (\Exception $e) {
+      return CommonResponse::getResponse(404, $e->getMessage(), 'Subscription not found');
+    }
   }
-  
+
   // Get all subscriptions
   public function getAllSubscriptions()
   {

@@ -21,7 +21,7 @@ class Subscription extends Model
     protected $fillable = [
         'user_id',
         'subscription_type',
-        'auto_renewal',
+        'is_auto_renewal',
         'start_date',
         'end_date',
         'status',
@@ -69,7 +69,7 @@ class Subscription extends Model
         $this->subscription_type = $type;
         $this->start_date = now();
         $this->end_date = $type === 'monthly' ? Carbon::now()->addMonth() : Carbon::now()->addYear();
-        $this->auto_renewal = $autoRenewal;
+        $this->is_auto_renewal = $autoRenewal;
         $this->status = 'active';
         $this->save();
     }
@@ -77,7 +77,7 @@ class Subscription extends Model
     // Handle auto-renewal if enabled
     public function renewSubscription()
     {
-        if ($this->auto_renewal && $this->isActive()) {
+        if ($this->is_auto_renewal && $this->isActive()) {
             $this->start_date = now();
             $this->end_date = $this->subscription_type === 'monthly' ? Carbon::now()->addMonth() : Carbon::now()->addYear();
             $this->status = 'active';
