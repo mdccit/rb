@@ -22,6 +22,10 @@ Route::group(['namespace' => 'App\Modules\Subscription\Controllers', 'prefix' =>
         Route::put('/cancel', 'SubscriptionController@cancel')->name('subscription.cancel'); // Cancel the subscription
         Route::put('/renew', 'SubscriptionController@renew')->name('subscription.renew'); // Renew the subscription if applicable
 
+         // New Stripe payment-related routes
+         Route::get('/payment-form', 'SubscriptionController@showPaymentForm')->name('subscription.paymentForm'); // Display the Stripe payment form
+         Route::post('/payment', 'SubscriptionController@handlePayment')->name('subscription.handlePayment'); // Handle the Stripe payment
+
       });
     });
   });
