@@ -4,6 +4,8 @@
 namespace App\Modules\PublicModule\Services;
 
 
+use App\Models\BusinessManager;
+use App\Models\Coach;
 use App\Models\School;
 use App\Models\SchoolUser;
 use App\Models\User;
@@ -34,24 +36,58 @@ class SchoolService
             )
             ->first();
 
-        $school_users = SchoolUser::connect(config('database.secondary'))
-            ->join('users', 'users.id', '=' ,'school_users.user_id')
-            ->join('user_roles', 'user_roles.id', '=' ,'users.user_role_id')
-            ->where('school_users.school_id', $school->id)
-            ->select(
-                'school_users.id',
-                'users.id as user_id',
-                'users.first_name',
-                'users.last_name',
-                'users.slug',
-                'user_roles.name as user_role',
-                'school_users.role as school_user_role'
-            )
-            ->get();
+        $school_users = array();
+        $coach_users = array();
+        $media_info = [
+            'profile_picture_url' => null,
+            'cover_picture_url' => null,
+            'media_urls' => array(),
+        ];
+
+        if($school){
+            $school_users = SchoolUser::connect(config('database.secondary'))
+                ->join('users', 'users.id', '=' ,'school_users.user_id')
+                ->join('user_roles', 'user_roles.id', '=' ,'users.user_role_id')
+                ->where('school_users.school_id', $school->id)
+                ->select(
+                    'school_users.id',
+                    'users.id as user_id',
+                    'users.first_name',
+                    'users.last_name',
+                    'users.slug',
+                    'user_roles.name as user_role'
+                )
+                ->get();
+
+            $coach_users = Coach::connect(config('database.secondary'))
+                ->join('users', 'users.id', '=' ,'coaches.user_id')
+                ->where('coaches.school_id', $school->id)
+                ->select(
+                    'coaches.id',
+                    'users.id as user_id',
+                    'users.first_name',
+                    'users.last_name',
+                    'users.slug',
+                    'coaches.type as management_type'
+                )
+                ->get();
+
+            $profile_picture = $this->getSingleFileByEntityId($school->id,'school_profile_picture');
+            $cover_picture = $this->getSingleFileByEntityId($school->id,'school_profile_cover');
+            $media_urls = $this->getMultipleFilesByEntityId($school->id,'school_profile_media');
+
+            $media_info = [
+                'profile_picture' => $profile_picture,
+                'cover_picture' => $cover_picture,
+                'media_urls' => $media_urls,
+            ];
+        }
 
         return [
             'school_info' => $school,
             'school_users_info' => $school_users,
+            'coach_users_info' => $coach_users,
+            'media_info' => $media_info,
         ];
     }
 
@@ -170,40 +206,47 @@ class SchoolService
         }
     }
 
-    public function uploadProfilePicture ($file, $user_slug){
-        $user = User::connect(config('database.default'))
-            ->where('slug', $user_slug)
+    public function uploadProfilePicture ($file, $school_slug){
+        $school = School::connect(config('database.secondary'))
+            ->where('slug', $school_slug)
             ->first();
         $data = null;
-        if($user) {
-            $data = $this->uploadSingleFile($file, $user->id, 'school_profile_picture');
+        if($school) {
+            $data = $this->uploadSingleFile($file, $school->id, 'school_profile_picture');
         }
         return $data;
     }
 
-    public function uploadCoverPicture ($file, $user_slug){
-        $user = User::connect(config('database.default'))
-            ->where('slug', $user_slug)
+    public function uploadCoverPicture ($file, $school_slug){
+        $school = School::connect(config('database.secondary'))
+            ->where('slug', $school_slug)
             ->first();
         $data = null;
-        if($user) {
-            $data = $this->uploadSingleFile($file, $user->id, 'school_profile_cover');
+        if($school) {
+            $data = $this->uploadSingleFile($file, $school->id, 'school_profile_cover');
         }
         return $data;
     }
 
-    public function uploadMedia ($files, $user_slug){
-        $user = User::connect(config('database.default'))
-            ->where('slug', $user_slug)
+    public function uploadMedia ($files, $school_slug){
+        $school = School::connect(config('database.secondary'))
+            ->where('slug', $school_slug)
             ->first();
         $dataArray = array();
-        if($user) {
-            $dataArray = $this->uploadMultipleFiles($files, $user->id, 'school_profile_media');
+        if($school) {
+            $dataArray = $this->uploadMultipleFiles($files, $school->id, 'school_profile_media');
         }
         return $dataArray;
     }
 
-    public function removeMedia ($media_id){
-        return $this->removeFile($media_id);
+    public function removeMedia (array $data, $school_slug){
+        $school = School::connect(config('database.secondary'))
+            ->where('slug', $school_slug)
+            ->first();
+        $isRemoved = false;
+        if($school) {
+            $isRemoved = $this->removeFile($data['media_id']);
+        }
+        return $isRemoved;
     }
 }
