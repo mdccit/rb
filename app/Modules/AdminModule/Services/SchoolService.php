@@ -28,16 +28,16 @@ class SchoolService
                 'bio',
                 'slug',
                 'other_data->teams_count as teams_count',
-                'other_data->total_staff as total_staff',
-                'other_data->admin_staff as admin_staff',
-                'other_data->non_admin_staff as non_admin_staff',
+                'other_data->total_members as total_members',
+                'other_data->editors as editors',
+                'other_data->viewers as viewers',
                 'created_at as joined_at'
             );
 
         if ($has_admins === 'has_admins') {
-            $query->where('other_data->admin_staff', '>',0);
+            $query->where('other_data->editors', '>',0);
         } elseif ($has_admins === 'no_admins') {
-            $query->where('other_data->admin_staff',0);
+            $query->where('other_data->editors',0);
         }
 
         if ($is_verified === 'verified') {
