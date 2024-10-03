@@ -252,5 +252,30 @@ class ModerationRequestController extends Controller
         }
     }
 
+    public function getAllModerationOpenCount()
+    {
+        try{
+            $dataSets = $this->moderationRequestService->getAllModerationOpenCount();
+
+            $responseData = [
+                'dataSets' => $dataSets,
+            ];
+
+            return CommonResponse::getResponse(
+                200,
+                'Successfully fetched',
+                'Successfully fetched',
+                $responseData
+            );
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    }
+
+
     
 }
