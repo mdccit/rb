@@ -590,7 +590,7 @@ class FeedService
     
             //     return $post;
             // });
-            $posts = $query->paginate(2)->through(function ($post) use ($userId, $azureBlobStorageService) {
+            $posts = $query->paginate(10)->through(function ($post) use ($userId, $azureBlobStorageService) {
                 // Add the user's like status to each post
                 $post->user_has_liked = $post->likes->contains('user_id', $userId);
                 unset($post->likes); // Remove the likes relationship
