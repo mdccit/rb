@@ -79,6 +79,12 @@ Route::group(['namespace' => 'App\Modules\PublicModule\Controllers','prefix' => 
                 Route::put('/schools/remove-academic/{school_slug}', 'SchoolsController@removeAcademic')->name('user.schools.remove.academic');
                 Route::put('/schools/update-tennis-info/{school_slug}', 'SchoolsController@updateTennisInfo')->name('user.schools.update.tennis-info');
                 Route::put('/schools/update-status-info/{school_slug}', 'SchoolsController@updateStatusInfo')->name('user.schools.update.status-info');
+
+                Route::post('/schools/upload-profile-picture/{school_slug}', 'SchoolsController@uploadProfilePicture')->name('user.schools.upload.profile-picture');
+                Route::post('/schools/upload-cover-picture/{school_slug}', 'SchoolsController@uploadCoverPicture')->name('user.schools.upload.cover-picture');
+                Route::post('/schools/upload-media/{school_slug}', 'SchoolsController@uploadMedia')->name('user.schools.upload.media');
+                Route::put('/schools/remove-media/{school_slug}', 'SchoolsController@removeMedia')->name('user.schools.remove.media');
+
             });
 
             //TODO only authenticated business manager users can be access
@@ -95,6 +101,11 @@ Route::group(['namespace' => 'App\Modules\PublicModule\Controllers','prefix' => 
 
                 Route::put('/businesses/update-basic-info/{business_slug}', 'BusinessesController@updateBasicInfo')->name('user.businesses.update.basic-info');
                 Route::put('/businesses/update-bio/{business_slug}', 'BusinessesController@updateBio')->name('user.businesses.update.bio');
+
+                Route::post('/businesses/upload-profile-picture/{school_slug}', 'BusinessesController@uploadProfilePicture')->name('user.businesses.upload.profile-picture');
+                Route::post('/businesses/upload-cover-picture/{school_slug}', 'BusinessesController@uploadCoverPicture')->name('user.businesses.upload.cover-picture');
+                Route::post('/businesses/upload-media/{school_slug}', 'BusinessesController@uploadMedia')->name('user.businesses.upload.media');
+                Route::put('/businesses/remove-media/{school_slug}', 'BusinessesController@removeMedia')->name('user.businesses.remove.media');
             });
 
             //TODO only authenticated parent users can be access

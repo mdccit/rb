@@ -148,7 +148,7 @@ class BusinessService
                 'users.last_name',
                 'users.slug',
                 'user_roles.name as user_role',
-                'business_managers.type as business_user_role'
+                'business_managers.type as user_permission_type'
             )
             ->get();
 
