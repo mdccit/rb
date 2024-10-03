@@ -31,7 +31,11 @@ class AuthController extends Controller
                 'first_name' => 'required|string|max:45',
                 'last_name' => 'required|string|max:45',
                 'email' => 'required|string|email|max:255|unique:users',
-                'password' => 'required|string|min:6|confirmed',
+                'password' => 'required|string|min:6',
+                'password_confirmation' => 'required|string|min:6|same:password',
+            ],
+            [
+                'password_confirmation.same' => 'Password confirmation doesn\'t match',
             ]);
             if ($validator->fails())
             {
@@ -126,8 +130,8 @@ class AuthController extends Controller
                 } else {
                     return CommonResponse::getResponse(
                         422,
-                        'Invalid Password',
-                        'Invalid Password'
+                        'Incorrect password. Please try again',
+                        'Incorrect password. Please try again'
                     );
                 }
             } else {

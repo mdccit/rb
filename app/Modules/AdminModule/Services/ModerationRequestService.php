@@ -151,4 +151,12 @@ class ModerationRequestService
                     )
                   ->get();
     }
+
+    public function getAllModerationOpenCount(){
+
+        return ModerationRequest::connect(config('database.secondary'))
+                    ->where('moderation_requests.is_closed', false)
+                    ->count();
+
+      }
 }
