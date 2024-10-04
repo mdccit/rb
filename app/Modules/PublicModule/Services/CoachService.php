@@ -132,7 +132,7 @@ class CoachService
                 UserAddress::connect(config('database.default'))
                     ->create([
                         'user_id' => $user->id,
-                        'country_id' => $data['phone_code_country'],
+                        'country_id' => $data['country'],
                         'is_default' => true,
                         'address_line_1' => $data['address_line_1'],
                         'address_line_2' => $data['address_line_2'],
@@ -143,7 +143,7 @@ class CoachService
                     ]);
             }else{
                 $user_address->update([
-                    'country_id' => $data['phone_code_country'],
+                    'country_id' => $data['country'],
                     'address_line_1' => $data['address_line_1'],
                     'address_line_2' => $data['address_line_2'],
                     'city' => $data['city'],
