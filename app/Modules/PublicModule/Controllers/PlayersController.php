@@ -419,15 +419,15 @@ class PlayersController extends Controller
     {
         try{
             $validator = Validator::make($request->all(), [
-                'gpa' => 'required|numeric|between:0,99.99',
-                'utr' => 'required|numeric|between:0,99.99',
-                'sat_score' => 'required|numeric|between:0,99.99',
-                'act_score' => 'required|numeric|between:0,99.99',
-                'toefl_score' => 'required|numeric|between:0,99.99',
-                'atp_ranking' => 'required|numeric|between:0,99.99',
-                'itf_ranking' => 'required|numeric|between:0,99.99',
-                'national_ranking' => 'required|numeric|between:0,99.99',
-                'wtn_score_manual' => 'required|numeric|between:0,99.99',
+                'gpa' => 'required|numeric',
+                'utr' => 'required|numeric',
+                'sat_score' => 'required|numeric',
+                'act_score' => 'required|numeric',
+                'toefl_score' => 'required|numeric',
+                'atp_ranking' => 'required|numeric',
+                'itf_ranking' => 'required|numeric',
+                'national_ranking' => 'required|numeric',
+                'wtn_score_manual' => 'required|numeric',
             ]);
             if ($validator->fails())
             {
