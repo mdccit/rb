@@ -28,12 +28,22 @@ Route::group(['namespace' => 'App\Modules\AdminModule\Controllers','prefix' => '
                 Route::delete('/user-delete/{user_id}', 'UsersController@userAccountDelete')->name('admin.users.delete');
                 Route::delete('/user-session-delete/{user_id}', 'UsersController@userSessionDelete')->name('admin.users.delete');
 
+                Route::post('/users/upload-profile-picture/{user_id}', 'UsersController@uploadProfilePicture')->name('admin.users.upload.profile-picture');
+                Route::post('/users/upload-cover-picture/{user_id}', 'UsersController@uploadCoverPicture')->name('admin.users.upload.cover-picture');
+                Route::post('/users/upload-media/{user_id}', 'UsersController@uploadMedia')->name('admin.users.upload.media');
+                Route::delete('/users/remove-media/{media_id}', 'UsersController@removeMedia')->name('admin.users.remove.media');
+
                 Route::get('/schools', 'SchoolsController@getAll')->name('admin.schools.get-all');
                 Route::get('/schools/{school_id}', 'SchoolsController@get')->name('admin.schools.get');
                 Route::delete('/schools/{school_id}', 'SchoolsController@destroySchool')->name('admin.schools.delete');
                 Route::post('/school-register', 'SchoolsController@registerSchool')->name('admin.schools.register');
                 Route::put('/school-update/{school_id}', 'SchoolsController@updateSchool')->name('admin.schools.update');
                 Route::get('/school-view/{school_id}', 'SchoolsController@viewSchool')->name('admin.schools.view');
+
+                Route::post('/schools/upload-profile-picture/{school_id}', 'SchoolsController@uploadProfilePicture')->name('admin.schools.upload.profile-picture');
+                Route::post('/schools/upload-cover-picture/{school_id}', 'SchoolsController@uploadCoverPicture')->name('admin.schools.upload.cover-picture');
+                Route::post('/schools/upload-media/{school_id}', 'SchoolsController@uploadMedia')->name('admin.schools.upload.media');
+                Route::delete('/schools/remove-media/{media_id}', 'SchoolsController@removeMedia')->name('admin.schools.remove.media');
 
                 Route::get('/schools/users/{school_id}', 'SchoolUsersController@getAllSchoolUsers')->name('admin.schools.users.get-all');
                 Route::get('/schools/search-users/{school_id}', 'SchoolUsersController@searchUsers')->name('admin.schools.users.search');
@@ -47,6 +57,11 @@ Route::group(['namespace' => 'App\Modules\AdminModule\Controllers','prefix' => '
                 Route::post('/business-register', 'BusinessesController@registerBusiness')->name('admin.businesses.register');
                 Route::put('/business-update/{business_id}', 'BusinessesController@updateBusiness')->name('admin.businesses.update');
                 Route::get('/business-view/{business_id}', 'BusinessesController@viewBusiness')->name('admin.businesses.view');
+
+                Route::post('/businesses/upload-profile-picture/{business_id}', 'BusinessesController@uploadProfilePicture')->name('admin.businesses.upload.profile-picture');
+                Route::post('/businesses/upload-cover-picture/{business_id}', 'BusinessesController@uploadCoverPicture')->name('admin.businesses.upload.cover-picture');
+                Route::post('/businesses/upload-media/{business_id}', 'BusinessesController@uploadMedia')->name('admin.businesses.upload.media');
+                Route::delete('/businesses/remove-media/{media_id}', 'BusinessesController@removeMedia')->name('admin.businesses.remove.media');
 
                 Route::get('/businesses/users/{business_id}', 'BusinessUsersController@getAllBusinessUsers')->name('admin.businesses.users.get-all');
                 Route::get('/businesses/search-users/{business_id}', 'BusinessUsersController@searchUsers')->name('admin.businesses.users.search');

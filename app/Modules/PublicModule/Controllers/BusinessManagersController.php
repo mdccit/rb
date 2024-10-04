@@ -169,7 +169,7 @@ class BusinessManagersController extends Controller
                 'gender' => 'required|string|in:male,female,other',
                 'date_of_birth' => 'nullable|date',
 
-                'position' => 'required|string|in:none,coach,assistant',
+                'position' => 'required|string|in:none,manager,assistant',
             ]);
 
             if ($validator->fails())
