@@ -35,7 +35,7 @@ class BusinessUserService
 
         $query = User::connect(config('database.secondary'))
             ->join('user_roles', 'user_roles.id', '=' ,'users.user_role_id')
-            ->whereNotIn('users.id', DB::table('business_managers')->pluck('user_id')->toArray())
+            ->whereNotIn('users.id', DB::table('business_managers')->whereNotNull('business_id')->pluck('user_id')->toArray())
 //            ->whereNotIn('users.id', DB::table('business_managers')->where('business_id', $business_id)->pluck('user_id')->toArray())
             ->where('user_roles.id', config('app.user_roles.business_manager'))
             ->select(
