@@ -56,7 +56,8 @@ class SchoolUserService
 
         $query = User::connect(config('database.secondary'))
             ->join('user_roles', 'user_roles.id', '=' ,'users.user_role_id')
-            ->whereNotIn('users.id', DB::table('school_users')->where('school_id', $school_id)->pluck('user_id')->toArray())
+            ->whereNotIn('users.id', DB::table('school_users')->pluck('user_id')->toArray())
+//            ->whereNotIn('users.id', DB::table('school_users')->where('school_id', $school_id)->pluck('user_id')->toArray())
             ->whereIn('user_roles.id', array(config('app.user_roles.player'), config('app.user_roles.coach')))
             ->select(
                 'users.id',
