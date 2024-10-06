@@ -12,6 +12,7 @@ class ModerationRequestService
 {
     public function getAll (array $data){
         $per_page_items = array_key_exists("per_page_items",$data)?$data['per_page_items']:0;
+        $status = array_key_exists("status",$data)?$data['status']:'';
 
         $query = ModerationRequest::connect(config('database.secondary'))
                     ->select(
@@ -26,7 +27,13 @@ class ModerationRequestService
                 )
                 ->orderBy('created_at', 'DESC');
         
-        
+        if($status == 'open'){
+            $query->where('is_closed', false);
+        }
+
+        if($status == 'close'){
+            $query->where('is_closed', true);
+        }
         $dataSet = array();
         if($per_page_items != 0 ){
             $dataSet = $query->paginate($per_page_items);

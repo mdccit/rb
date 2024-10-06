@@ -209,7 +209,11 @@ class SearchService
                           })
 
                         ->whereIn('connection_status', ['accepted', 'pending'])
-                        ->select(DB::raw("IF(sender_id = '$authId', receiver_id, sender_id) as user_id"), 'connection_status','id')
+                        ->select(DB::raw("IF(sender_id = '$authId', receiver_id, sender_id) as user_id"), 'receiver_id','sender_id','connection_status','id')
+                        // ->select(DB::raw("
+                        //      IF(receiver_id = '$authId', 'accepted', connection_status) as connection_status, 
+                        //     IF(sender_id = '$authId', receiver_id, sender_id) as user_id
+                        //   "), 'id')
                         ->get();
         return [
             'users' => $dataSet,
