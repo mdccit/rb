@@ -39,12 +39,12 @@ class SchoolService
             ->first();
 
         
-        // $school_users = array();
-        // $media_info = [
-        //     'profile_picture_url' => null,
-        //     'cover_picture_url' => null,
-        //     'media_urls' => array(),
-        // ];
+        $school_users = array();
+        $media_info = [
+            'profile_picture_url' => null,
+            'cover_picture_url' => null,
+            'media_urls' => array(),
+        ];
         $teams =[];
         if($school){
             $school_users = SchoolUser::connect(config('database.secondary'))
