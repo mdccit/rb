@@ -11,7 +11,8 @@ use App\Models\SchoolUser;
 use App\Models\User;
 use App\Traits\AzureBlobStorage;
 use Illuminate\Support\Facades\DB;
-
+use App\Models\SchoolTeam;
+use App\Models\SchoolTeamUser;
 class SchoolService
 {
     use AzureBlobStorage;
@@ -44,7 +45,7 @@ class SchoolService
         //     'cover_picture_url' => null,
         //     'media_urls' => array(),
         // ];
-
+        $teams =[];
         if($school){
             $school_users = SchoolUser::connect(config('database.secondary'))
             ->join('users', 'users.id', '=' ,'school_users.user_id')
@@ -96,12 +97,43 @@ class SchoolService
                 'cover_picture' => $cover_picture,
                 'media_urls' => $media_urls,
             ];
+
+            $teams = SchoolTeam::connect(config('database.secondary'))
+                        ->join('schools','schools.id','=','school_teams.school_id')
+                        ->where('school_id',$school->id)
+                        ->select(
+                            'school_teams.id as team_id',
+                            'school_teams.name as team_name',
+                            'school_teams.school_id',
+                            'schools.name as school_name'
+                        )
+                       ->get();
+   
+            foreach( $teams as $key=> $data){
+                    $team_users = SchoolTeamUser::connect(config('database.secondary'))
+                            ->where('school_team_users.team_id',$data->team_id)
+                            ->join('users','users.id','=','school_team_users.user_id')
+                            ->leftJoin('players','players.id','=','school_team_users.player_id')
+                            ->select(
+                                'school_team_users.id as id',
+                                'school_team_users.user_id as user_id',
+                                'school_team_users.status',
+                                'school_team_users.player_id',
+                                'school_team_users.coache_id',
+                                'users.display_name as name',
+                               'users.user_role_id as role_id',
+                               'players.*'
+                            )
+                           ->get();
+                    $teams[$key]['team_users'] =$team_users;
+            }
         }
 
         return [
             'school_info' => $school,
             'school_users_info' => $school_users,
             'media_info' => $media_info,
+            'team_info'  => $teams
         ];
     }
 
