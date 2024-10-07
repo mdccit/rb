@@ -172,7 +172,7 @@ class UserService
                             ->join('user_types', 'user_types.id', '=' ,'users.user_type_id')
                             ->join('sports', 'sports.id', '=' ,'players.sport_id')
                             ->where('players.has_parent', true)
-                            ->where('players.player_parent_id', $profile_info->id)
+                            ->where('players.player_parent_id', $profile_info->parent_id)
                             ->select(
                                 'players.id as player_id',
                                 'users.id as user_id',
@@ -649,7 +649,7 @@ class UserService
                     ->join('user_types', 'user_types.id', '=' ,'users.user_type_id')
                     ->join('sports', 'sports.id', '=' ,'players.sport_id')
                     ->where('players.has_parent', true)
-                    ->where('players.player_parent_id', $parent->id)
+                    ->where('players.player_parent_id', $parent->parent_id)
                     ->select(
                         'players.id as player_id',
                         'users.id as user_id',
