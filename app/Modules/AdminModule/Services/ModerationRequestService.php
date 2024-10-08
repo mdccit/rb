@@ -7,7 +7,6 @@ use App\Models\ModerationRequest;
 use Carbon\Carbon;
 use App\Models\User;
 use App\Models\ModerationLog;
-
 class ModerationRequestService
 {
     public function getAll (array $data){
@@ -24,9 +23,9 @@ class ModerationRequestService
                         'is_closed',
                         'closed_at',
                         'closed_by',
+                        'created_at'
                 )
                 ->orderBy('created_at', 'DESC');
-        
         if($status == 'open'){
             $query->where('is_closed', false);
         }
