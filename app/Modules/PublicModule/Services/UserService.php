@@ -206,6 +206,21 @@ class UserService
                                 'sports.name as sport_name'
                             )
                             ->get();
+                        foreach ($children_info as $i => $child_player){
+                            $user_phone = UserPhone::connect(config('database.secondary'))
+                                ->join('countries', 'countries.id', '=' ,'user_phones.country_id')
+                                ->where('user_phones.user_id', $child_player->user_id)
+                                ->where('user_phones.is_default', true)
+                                ->select(
+                                    'user_phones.id',
+                                    'user_phones.phone_code',
+                                    'user_phones.phone_number',
+                                    'countries.id as country_id',
+                                    'countries.name as country'
+                                )
+                                ->first();
+                            $children_info[$i]['phone_info'] = $user_phone;
+                        }
                     }
                     break;
                 default:
@@ -684,6 +699,22 @@ class UserService
                         'sports.name as sport_name'
                     )
                     ->get();
+
+                foreach ($childs as $i => $child_player){
+                    $user_phone = UserPhone::connect(config('database.secondary'))
+                        ->join('countries', 'countries.id', '=' ,'user_phones.country_id')
+                        ->where('user_phones.user_id', $child_player->user_id)
+                        ->where('user_phones.is_default', true)
+                        ->select(
+                            'user_phones.id',
+                            'user_phones.phone_code',
+                            'user_phones.phone_number',
+                            'countries.id as country_id',
+                            'countries.name as country'
+                        )
+                        ->first();
+                    $childs[$i]['phone_info'] = $user_phone;
+                }
             }
         }
 
