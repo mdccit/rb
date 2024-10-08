@@ -4,11 +4,15 @@
 namespace App\Modules\PublicModule\Services;
 
 
+use App\Models\BusinessManager;
+use App\Models\Coach;
 use App\Models\School;
 use App\Models\SchoolUser;
 use App\Models\User;
 use App\Traits\AzureBlobStorage;
-
+use Illuminate\Support\Facades\DB;
+use App\Models\SchoolTeam;
+use App\Models\SchoolTeamUser;
 class SchoolService
 {
     use AzureBlobStorage;
@@ -34,24 +38,102 @@ class SchoolService
             )
             ->first();
 
-        $school_users = SchoolUser::connect(config('database.secondary'))
+        
+        $school_users = array();
+        $media_info = [
+            'profile_picture_url' => null,
+            'cover_picture_url' => null,
+            'media_urls' => array(),
+        ];
+        $teams =[];
+        if($school){
+            $school_users = SchoolUser::connect(config('database.secondary'))
             ->join('users', 'users.id', '=' ,'school_users.user_id')
             ->join('user_roles', 'user_roles.id', '=' ,'users.user_role_id')
+            ->leftJoin('players', function($join) {
+                $join->on('players.user_id', '=', 'users.id')
+                     ->where('user_roles.name', 'player'); // Conditional on user role
+            })
+            ->leftJoin('coaches', function($join) {
+                $join->on('coaches.user_id', '=', 'users.id')
+                     ->where('user_roles.name', 'coach'); // Conditional on user role
+            })
             ->where('school_users.school_id', $school->id)
             ->select(
                 'school_users.id',
                 'users.id as user_id',
                 'users.first_name',
                 'users.last_name',
+                'users.display_name as display_name',
                 'users.slug',
                 'user_roles.name as user_role',
-                'school_users.role as school_user_role'
+                'school_users.role as school_user_role',
+                'players.id as player_id', // Select player ID
+                'coaches.id as coach_id'   // Select coach ID
             )
+            ->addSelect(DB::raw('IF((SELECT type FROM coaches WHERE user_id = users.id ) IS NULL,"viewer",(SELECT type FROM coaches WHERE user_id = users.id )) as user_permission_type'))
             ->get();
+            // $school_users = SchoolUser::connect(config('database.secondary'))
+            //     ->join('users', 'users.id', '=' ,'school_users.user_id')
+            //     ->join('user_roles', 'user_roles.id', '=' ,'users.user_role_id')
+            //     ->where('school_users.school_id', $school->id)
+            //     ->select(
+            //         'school_users.id',
+            //         'users.id as user_id',
+            //         'users.first_name',
+            //         'users.last_name',
+            //         'users.slug',
+            //         'user_roles.name as user_role',
+            //     )
+            //     ->addSelect(DB::raw('IF((SELECT type FROM coaches WHERE user_id = users.id ) IS NULL,"viewer",(SELECT type FROM coaches WHERE user_id = users.id )) as user_permission_type'))
+            //     ->get();
+
+            $profile_picture = $this->getSingleFileByEntityId($school->id,'school_profile_picture');
+            $cover_picture = $this->getSingleFileByEntityId($school->id,'school_profile_cover');
+            $media_urls = $this->getMultipleFilesByEntityId($school->id,'school_profile_media');
+
+            $media_info = [
+                'profile_picture' => $profile_picture,
+                'cover_picture' => $cover_picture,
+                'media_urls' => $media_urls,
+            ];
+
+            $teams = SchoolTeam::connect(config('database.secondary'))
+                        ->join('schools','schools.id','=','school_teams.school_id')
+                        ->where('school_id',$school->id)
+                        ->select(
+                            'school_teams.id as team_id',
+                            'school_teams.name as team_name',
+                            'school_teams.school_id',
+                            'schools.name as school_name'
+                        )
+                       ->get();
+   
+            foreach( $teams as $key=> $data){
+                    $team_users = SchoolTeamUser::connect(config('database.secondary'))
+                            ->where('school_team_users.team_id',$data->team_id)
+                            ->join('users','users.id','=','school_team_users.user_id')
+                            ->leftJoin('players','players.id','=','school_team_users.player_id')
+                            ->select(
+                                'school_team_users.id as id',
+                                'school_team_users.user_id as user_id',
+                                'school_team_users.status',
+                                'school_team_users.player_id',
+                                'school_team_users.coache_id',
+                                'users.display_name as name',
+                               'users.user_role_id as role_id',
+                               'players.*'
+                            )
+                           ->get();
+                    $teams[$key]['team_users'] =$team_users;
+            }
+        }
 
         return [
             'school_info' => $school,
             'school_users_info' => $school_users,
+            'media_info' => $media_info,
+            'team_info'  => $teams
         ];
     }
 
@@ -170,40 +252,47 @@ class SchoolService
         }
     }
 
-    public function uploadProfilePicture ($file, $user_slug){
-        $user = User::connect(config('database.default'))
-            ->where('slug', $user_slug)
+    public function uploadProfilePicture ($file, $school_slug){
+        $school = School::connect(config('database.secondary'))
+            ->where('slug', $school_slug)
             ->first();
         $data = null;
-        if($user) {
-            $data = $this->uploadSingleFile($file, $user->id, 'school_profile_picture');
+        if($school) {
+            $data = $this->uploadSingleFile($file, $school->id, 'school_profile_picture');
         }
         return $data;
     }
 
-    public function uploadCoverPicture ($file, $user_slug){
-        $user = User::connect(config('database.default'))
-            ->where('slug', $user_slug)
+    public function uploadCoverPicture ($file, $school_slug){
+        $school = School::connect(config('database.secondary'))
+            ->where('slug', $school_slug)
             ->first();
         $data = null;
-        if($user) {
-            $data = $this->uploadSingleFile($file, $user->id, 'school_profile_cover');
+        if($school) {
+            $data = $this->uploadSingleFile($file, $school->id, 'school_profile_cover');
         }
         return $data;
     }
 
-    public function uploadMedia ($files, $user_slug){
-        $user = User::connect(config('database.default'))
-            ->where('slug', $user_slug)
+    public function uploadMedia ($files, $school_slug){
+        $school = School::connect(config('database.secondary'))
+            ->where('slug', $school_slug)
             ->first();
         $dataArray = array();
-        if($user) {
-            $dataArray = $this->uploadMultipleFiles($files, $user->id, 'school_profile_media');
+        if($school) {
+            $dataArray = $this->uploadMultipleFiles($files, $school->id, 'school_profile_media');
         }
         return $dataArray;
     }
 
-    public function removeMedia ($media_id){
-        return $this->removeFile($media_id);
+    public function removeMedia (array $data, $school_slug){
+        $school = School::connect(config('database.secondary'))
+            ->where('slug', $school_slug)
+            ->first();
+        $isRemoved = false;
+        if($school) {
+            $isRemoved = $this->removeFile($data['media_id']);
+        }
+        return $isRemoved;
     }
 }

@@ -274,6 +274,12 @@ return [
         'premium'=>3,
     ],
 
+    'user_permission_type' => [
+        'none'=>'none',
+        'viewer'=>'viewer',
+        'editor'=>'editor',
+    ],
+
     'currencies' => [
         'default'=>1,
     ],
