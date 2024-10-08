@@ -220,6 +220,14 @@ class UserService
                                 )
                                 ->first();
                             $children_info[$i]['phone_info'] = $user_phone;
+
+                            $profile_picture = $this->getSingleFileByEntityId($user->id,'user_profile_picture');
+
+                            $media_info = [
+                                'profile_picture' => $profile_picture,
+                            ];
+
+                            $children_info[$i]['media_info'] = $media_info;
                         }
                     }
                     break;
@@ -714,6 +722,14 @@ class UserService
                         )
                         ->first();
                     $childs[$i]['phone_info'] = $user_phone;
+
+                    $profile_picture = $this->getSingleFileByEntityId($user->id,'user_profile_picture');
+
+                    $media_info = [
+                        'profile_picture' => $profile_picture,
+                    ];
+
+                    $childs[$i]['media_info'] = $media_info;
                 }
             }
         }
