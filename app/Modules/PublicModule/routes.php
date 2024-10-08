@@ -115,6 +115,9 @@ Route::group(['namespace' => 'App\Modules\PublicModule\Controllers','prefix' => 
                 Route::put('/parents/update-contact-info/{user_slug}', 'ParentsController@updateContactInfo')->name('user.parents.update.contact-info');
                 Route::put('/parents/update-other-info/{user_slug}', 'ParentsController@updatePersonalOtherInfo')->name('user.parents.update.other-info');
 
+                Route::put('/parents/child/add-new/{user_slug}', 'ParentsController@addNewChild')->name('user.parents.child.add-new');
+                Route::put('/parents/child/update/{user_id}', 'ParentsController@updateChild')->name('user.parents.child.update');
+
                 Route::post('/parents/upload-profile-picture/{user_slug}', 'ParentsController@uploadProfilePicture')->name('user.parents.upload.profile-picture');
                 Route::post('/parents/upload-cover-picture/{user_slug}', 'ParentsController@uploadCoverPicture')->name('user.parents.upload.cover-picture');
                 Route::post('/parents/upload-media/{user_slug}', 'ParentsController@uploadMedia')->name('user.parents.upload.media');
