@@ -224,6 +224,11 @@ trait AzureBlobStorage
             return 'video';
         }
 
+        // Check if the file is a pdf
+        if (strpos($mimeType, 'pdf') !== false) {
+            return 'pdf';
+        }
+
         // Default media type if not image or video (optional)
         return 'unknown';
     }
