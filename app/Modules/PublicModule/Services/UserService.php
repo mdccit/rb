@@ -35,6 +35,7 @@ class UserService
                 'users.date_of_birth',
                 'users.gender',
                 'users.nationality_id',
+                'users.country_id',
                 'users.is_approved',
                 'users.is_first_login',
                 'user_roles.id as user_role_id',
@@ -145,6 +146,7 @@ class UserService
                         ->select(
                             'business_managers.id as business_manager_id',
                             'businesses.id as business_id',
+                            'businesses.slug as business_slug',
                             'business_managers.position',
                             'business_managers.type',
                             'business_managers.status',
@@ -170,7 +172,7 @@ class UserService
                             ->join('user_types', 'user_types.id', '=' ,'users.user_type_id')
                             ->join('sports', 'sports.id', '=' ,'players.sport_id')
                             ->where('players.has_parent', true)
-                            ->where('players.player_parent_id', $profile_info->id)
+                            ->where('players.player_parent_id', $profile_info->parent_id)
                             ->select(
                                 'players.id as player_id',
                                 'users.id as user_id',
@@ -204,6 +206,29 @@ class UserService
                                 'sports.name as sport_name'
                             )
                             ->get();
+                        foreach ($children_info as $i => $child_player){
+                            $user_phone = UserPhone::connect(config('database.secondary'))
+                                ->join('countries', 'countries.id', '=' ,'user_phones.country_id')
+                                ->where('user_phones.user_id', $child_player->user_id)
+                                ->where('user_phones.is_default', true)
+                                ->select(
+                                    'user_phones.id',
+                                    'user_phones.phone_code',
+                                    'user_phones.phone_number',
+                                    'countries.id as country_id',
+                                    'countries.name as country'
+                                )
+                                ->first();
+                            $children_info[$i]['phone_info'] = $user_phone;
+
+                            $profile_picture = $this->getSingleFileByEntityId($user->id,'user_profile_picture');
+
+                            $media_info = [
+                                'profile_picture' => $profile_picture,
+                            ];
+
+                            $children_info[$i]['media_info'] = $media_info;
+                        }
                     }
                     break;
                 default:
@@ -241,6 +266,7 @@ class UserService
                 'users.gender',
                 'users.nationality_id',
                 'nationalities.name as nationality',
+                'users.country_id',
                 'users.is_approved',
                 'users.is_first_login',
                 'user_roles.id as user_role_id',
@@ -346,6 +372,7 @@ class UserService
                 'users.date_of_birth',
                 'users.gender',
                 'users.nationality_id',
+                'users.country_id',
                 'users.is_approved',
                 'users.is_first_login',
                 'user_roles.id as user_role_id',
@@ -459,6 +486,7 @@ class UserService
                 'users.date_of_birth',
                 'users.gender',
                 'users.nationality_id',
+                'users.country_id',
                 'users.is_approved',
                 'users.is_first_login',
                 'user_roles.id as user_role_id',
@@ -527,6 +555,7 @@ class UserService
                 ->select(
                     'business_managers.id as business_manager_id',
                     'businesses.id as business_id',
+                    'businesses.slug as business_slug',
                     'business_managers.position',
                     'business_managers.type',
                     'business_managers.status',
@@ -564,6 +593,7 @@ class UserService
                 'users.date_of_birth',
                 'users.gender',
                 'users.nationality_id',
+                'users.country_id',
                 'users.is_approved',
                 'users.is_first_login',
                 'user_roles.id as user_role_id',
@@ -642,7 +672,7 @@ class UserService
                     ->join('user_types', 'user_types.id', '=' ,'users.user_type_id')
                     ->join('sports', 'sports.id', '=' ,'players.sport_id')
                     ->where('players.has_parent', true)
-                    ->where('players.player_parent_id', $parent->id)
+                    ->where('players.player_parent_id', $parent->parent_id)
                     ->select(
                         'players.id as player_id',
                         'users.id as user_id',
@@ -663,6 +693,7 @@ class UserService
                         'users.date_of_birth',
                         'users.gender',
                         'users.nationality_id',
+                        'users.country_id',
                         'users.is_approved',
                         'users.is_first_login',
                         'user_roles.id as user_role_id',
@@ -676,6 +707,30 @@ class UserService
                         'sports.name as sport_name'
                     )
                     ->get();
+
+                foreach ($childs as $i => $child_player){
+                    $user_phone = UserPhone::connect(config('database.secondary'))
+                        ->join('countries', 'countries.id', '=' ,'user_phones.country_id')
+                        ->where('user_phones.user_id', $child_player->user_id)
+                        ->where('user_phones.is_default', true)
+                        ->select(
+                            'user_phones.id',
+                            'user_phones.phone_code',
+                            'user_phones.phone_number',
+                            'countries.id as country_id',
+                            'countries.name as country'
+                        )
+                        ->first();
+                    $childs[$i]['phone_info'] = $user_phone;
+
+                    $profile_picture = $this->getSingleFileByEntityId($user->id,'user_profile_picture');
+
+                    $media_info = [
+                        'profile_picture' => $profile_picture,
+                    ];
+
+                    $childs[$i]['media_info'] = $media_info;
+                }
             }
         }
 
