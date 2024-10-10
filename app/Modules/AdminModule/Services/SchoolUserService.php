@@ -68,8 +68,12 @@ class SchoolUserService
             );
 
         if ($search_key != null) {
-            $query->where('users.display_name', 'LIKE', '%' . $search_key . '%');
-            $query->orWhere('users.email', 'LIKE', '%' . $search_key . '%');
+            $query->whereIn('users.id', DB::table('users')
+                ->where('display_name', 'LIKE', '%' . $search_key . '%')
+                ->orWhere('email', 'LIKE', '%' . $search_key . '%')
+                ->pluck('id')->toArray());
+//            $query->where('users.display_name', 'LIKE', '%' . $search_key . '%');
+//            $query->orWhere('users.email', 'LIKE', '%' . $search_key . '%');
         }
 
 
