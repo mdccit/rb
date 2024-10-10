@@ -25,3 +25,8 @@ AZURE_STORAGE_ACCOUNT_NAME=recruitedv2
 AZURE_STORAGE_ACCOUNT_KEY="bfO3ptC+VdjUceYM6cOGgYdkufcRZ9GoyZw7r6/Ky8ptrLnRUsmDPzoNYAJw8KmEnTTpaeAqjlmR+AStFrfz3w=="
 AZURE_STORAGE_CONTAINER_NAME=recruited
 AZURE_STORAGE_URL=https://recruitedv2.blob.core.windows.net/
+
+
+# Stripe Subscription Price IDs
+STRIPE_MONTHLY_PRICE_ID=price_1Q5LsbB1aCt3RRcc6eRGc3wo 
+STRIPE_ANNUAL_PRICE_ID=price_1Q5LsbB1aCt3RRcc6eRGc3wo

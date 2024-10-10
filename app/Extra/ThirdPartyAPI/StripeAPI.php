@@ -163,32 +163,32 @@ class StripeAPI
   // Create a new subscription for a customer with optional trial and subscription type
   public function createSubscription($customerId, $subscriptionType, $paymentMethodId = null, $isAutoRenewal = true)
   {
-      try {
-          // Attach the payment method to the customer if provided
-          if ($paymentMethodId) {
-              $this->attachPaymentMethodToCustomer($customerId, $paymentMethodId);
-          }
-  
-          // Determine the price ID based on subscription type (monthly, annually, etc.)
-          // $priceId = $this->getPriceIdFromSubscriptionType($subscriptionType);
-          $priceId = 'price_1Q5LsbB1aCt3RRcc6eRGc3wo';
-  
-          // Create a subscription with auto-renewal
-          $subscription = \Stripe\Subscription::create([
-              'customer' => $customerId,
-              'items' => [['price' => $priceId]],  // Pass the price ID
-              'expand' => ['latest_invoice.payment_intent'],  // Optional: Expand the payment intent for more details
-              'automatic_tax' => ['enabled' => false]  // Auto-renewal setting
-          ]);
-  
-          return $subscription;
-  
-      } catch (\Exception $e) {
-          Log::error('Stripe Subscription Creation Error: ' . $e->getMessage());
-          throw new \Exception('Failed to create subscription: ' . $e->getMessage());
+    try {
+      // Attach the payment method to the customer if provided
+      if ($paymentMethodId) {
+        $this->attachPaymentMethodToCustomer($customerId, $paymentMethodId);
       }
+
+      // Determine the price ID based on subscription type (monthly, annually, etc.)
+      // $priceId = $this->getPriceIdFromSubscriptionType($subscriptionType);
+      $priceId = 'price_1Q5LsbB1aCt3RRcc6eRGc3wo';
+
+      // Create a subscription with auto-renewal
+      $subscription = \Stripe\Subscription::create([
+        'customer' => $customerId,
+        'items' => [['price' => $priceId]],  // Pass the price ID
+        'expand' => ['latest_invoice.payment_intent'],  // Optional: Expand the payment intent for more details
+        'automatic_tax' => ['enabled' => false]  // Auto-renewal setting
+      ]);
+
+      return $subscription;
+
+    } catch (\Exception $e) {
+      Log::error('Stripe Subscription Creation Error: ' . $e->getMessage());
+      throw new \Exception('Failed to create subscription: ' . $e->getMessage());
+    }
   }
-  
+
 
 
   public function createSubscriptionWithTrial($customerId, $priceId, $trialDays = 30)
@@ -229,5 +229,15 @@ class StripeAPI
     }
 
     return $priceIds[$subscriptionType];
+  }
+
+  public function getUserSubscriptions($stripeCustomerId)
+  {
+    return Subscription::all(['customer' => $stripeCustomerId, 'status' => 'all']);
+  }
+
+  public function getAllSubscriptions()
+  {
+    return Subscription::all();
   }
 }

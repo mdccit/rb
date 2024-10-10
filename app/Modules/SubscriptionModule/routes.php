@@ -24,15 +24,28 @@ Route::group(['namespace' => 'App\Modules\SubscriptionModule\Controllers', 'pref
 
         // New Stripe payment-related routes
         Route::get('/stripe/get-stripe-customer-id', 'SubscriptionController@getStripeCustomerId')->name('subscription.getStripeCustomerId');
-        Route::get('/stripe/payment-form', 'SubscriptionController@showPaymentForm')->name('subscription.paymentForm'); 
+        Route::get('/stripe/payment-form', 'SubscriptionController@showPaymentForm')->name('subscription.paymentForm');
         Route::post('/stripe/payment', 'SubscriptionController@handlePayment')->name('subscription.handlePayment');
         Route::post('/stripe/create-setup-intent', 'SubscriptionController@createSetupIntent')->name('subscription.createSetupIntent');
         Route::post('/stripe/confirm-setup-intent', 'SubscriptionController@confirmSetupIntent')->name('subscription.confirmSetupIntent');
         Route::post('/stripe/confirm-payment-and-create-subscription', 'SubscriptionController@createSubscription');
-        
-
 
       });
+    });
+  });
+
+
+  Route::prefix('stripe')->group(function () {
+
+    //TODO All routes that are required access key
+    Route::middleware('access.key')->group(function () {
+
+      Route::get('/all', 'SubscriptionController@showAllSubscriptions')->name('subscriptions.all');
+
+      Route::middleware('auth:api')->group(function () {
+        Route::get('/user', 'SubscriptionController@showUserSubscription')->name('subscriptions.user');
+      });
+
     });
   });
 });
