@@ -11,9 +11,12 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use App\Models\SchoolUser;
 use  App\Services\AzureBlobStorageService;
+use App\Traits\AzureBlobStorage;
 
 class FeedService
 {
+    use AzureBlobStorage;
+
     /**
      * Create a new post with a given type (post, event, blog).
      *
@@ -158,7 +161,11 @@ class FeedService
                 ->with('business')
                 ->with('user')
                 ->findOrFail($id);
+                $profile_picture = $this->getSingleFileByEntityId($post->user_id,'user_profile_picture');
+                $post->user_profile_picture = $profile_picture;
 
+                $school_profile_picture = $this->getSingleFileByEntityId($post->user_id,'school_profile_picture');
+                $post->school_profile_picture = $school_profile_picture;
 
 
             // Return a success response with the retrieved post
@@ -570,7 +577,7 @@ class FeedService
             if ($type) {
                 $query->where('type', $type);
             }
-    
+            
             // Sort posts by the specified sort column and order
             $query->orderBy($sortBy, $sortOrder);
     
@@ -602,10 +609,17 @@ class FeedService
                 } else {
                     $post->media = null; // Set media to null if no media
                 }
+                $profile_picture = $this->getSingleFileByEntityId($post->user_id,'user_profile_picture');
+                $post->user_profile_picture = $profile_picture;
+
+                $school_profile_picture = $this->getSingleFileByEntityId($post->user_id,'school_profile_picture');
+                $post->school_profile_picture = $school_profile_picture;
+                
             
                 return $post;
             });
-    
+
+            
             // Return a success response with the retrieved posts and their interactions
             return CommonResponse::getResponse(
                 200,
