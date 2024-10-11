@@ -315,4 +315,21 @@ class SubscriptionController extends Controller
       return response()->json(['error' => 'Failed to retrieve all subscriptions'], 500);
     }
   }
+
+
+  public function getPaymentHistory(Request $request)
+  {
+      // Assuming you have the authenticated user's stripe_customer_id
+      $user = $request->user(); // Or however you're getting the current user
+      $stripeCustomerId = $user->stripe_id;
+
+      // Get payment history from the StripeAPI service
+      $paymentHistory = $this->stripeAPI->getCustomerPaymentHistory($stripeCustomerId);
+
+      if (isset($paymentHistory['error'])) {
+          return response()->json(['error' => $paymentHistory['error']], 500);
+      }
+
+      return response()->json($paymentHistory);
+  }
 }

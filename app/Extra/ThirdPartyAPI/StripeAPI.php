@@ -7,6 +7,7 @@ use Stripe\Customer;
 use Stripe\Subscription;
 use Stripe\PaymentIntent;
 use Stripe\PaymentMethod;
+use Stripe\Invoice;
 use Stripe\SetupIntent;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
@@ -240,4 +241,83 @@ class StripeAPI
   {
     return Subscription::all();
   }
+
+  // Cancel subscription
+  public function cancelSubscription($subscriptionId)
+  {
+    $subscription = Subscription::retrieve($subscriptionId);
+    return $subscription->cancel();
+  }
+
+  // Renew subscription
+  public function renewSubscription($subscriptionId)
+  {
+    $subscription = Subscription::retrieve($subscriptionId);
+    return $subscription->save(); // Resuming subscription (usually from a canceled state)
+  }
+
+  // Change subscription plan
+  public function changeSubscriptionPlan($subscriptionId, $newPlanId)
+  {
+    $subscription = Subscription::retrieve($subscriptionId);
+
+
+    // Update the subscription's plan
+    return Subscription::update($subscriptionId, [
+      'items' => [
+        [
+          'id' => $subscription->items->data[0]->id,  // Item ID to update
+          'price' => $newPlanId, // Plan ID is now called 'price' in Stripe
+        ],
+      ],
+    ]);
+
+  }
+
+  // Update payment method for subscription
+  public function updatePaymentMethod($customerId, $paymentMethodId)
+  {
+    // Attach new payment method to the customer
+    $paymentMethod = PaymentMethod::retrieve($paymentMethodId);
+    $paymentMethod->attach(['customer' => $customerId]);
+
+    // Update the customer's invoice settings to use the new payment method
+    $customer = Customer::update($customerId, [
+      'invoice_settings' => ['default_payment_method' => $paymentMethodId],
+    ]);
+
+    return $customer;
+  }
+
+  public function getCustomerPaymentHistory($stripeCustomerId)
+  {
+    try {
+      Stripe::setApiKey(config('services.stripe.secret'));
+
+      // Retrieve all invoices for the customer
+      $invoices = Invoice::all([
+        'customer' => $stripeCustomerId,
+        'limit' => 100 // Limit the number of invoices returned
+      ]);
+
+      // Format the payment history data
+      $paymentHistory = [];
+      foreach ($invoices->data as $invoice) {
+        $paymentHistory[] = [
+          'invoice_id' => $invoice->id,
+          'amount_paid' => $invoice->amount_paid / 100, // Convert amount to dollars
+          'currency' => $invoice->currency,
+          'status' => $invoice->status,
+          'created' => date('Y-m-d H:i:s', $invoice->created),
+          'payment_method' => $invoice->payment_method,
+          'hosted_invoice_url' => $invoice->hosted_invoice_url // Link to Stripe invoice
+        ];
+      }
+
+      return $paymentHistory;
+    } catch (\Exception $e) {
+      return ['error' => $e->getMessage()];
+    }
+  }
+
 }

@@ -27,6 +27,10 @@ AZURE_STORAGE_CONTAINER_NAME=recruited
 AZURE_STORAGE_URL=https://recruitedv2.blob.core.windows.net/
 
 
+# Stripe Keys
+STRIPE_KEY=pk_test_51Q5IlqB1aCt3RRccXbVS8aYnSTynl0TufY4s4mPxlYeZKbZrX2YpKxkwMBbeitKm8iWBAyWwWzcLyYByyE9sGegG00OJSEbT2i
+STRIPE_SECRET=sk_test_51Q5IlqB1aCt3RRccS2Hy7sHOuQlWghvB77dhgI969TUSUYnKkrEAwGUpQ6KsPAKASrLRM9ygsHqIUSLXIZtGazDN00HH302iWE
+STRIPE_WEBHOOK_SECRET=your-stripe-webhook-secret
 # Stripe Subscription Price IDs
 STRIPE_MONTHLY_PRICE_ID=price_1Q5LsbB1aCt3RRcc6eRGc3wo 
 STRIPE_ANNUAL_PRICE_ID=price_1Q5LsbB1aCt3RRcc6eRGc3wo

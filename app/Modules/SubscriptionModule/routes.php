@@ -11,7 +11,7 @@ Route::group(['namespace' => 'App\Modules\SubscriptionModule\Controllers', 'pref
     Route::middleware('access.key')->group(function () {
 
       // Routes for subscription retrieval by user ID and for all subscriptions
-      Route::get('/{userId}', 'SubscriptionController@getSubscriptionByUserId')->name('subscription.getByUserId');
+      Route::get('/single', 'SubscriptionController@getSubscriptionByUserId')->name('subscription.getByUserId');
       Route::get('/all', 'SubscriptionController@getAllSubscriptions')->name('subscription.getAll');
 
       Route::middleware('auth:api')->group(function () {
@@ -21,6 +21,7 @@ Route::group(['namespace' => 'App\Modules\SubscriptionModule\Controllers', 'pref
         Route::post('/create', 'SubscriptionController@store')->name('subscription.store'); // Create a new subscription
         Route::put('/cancel', 'SubscriptionController@cancel')->name('subscription.cancel'); // Cancel the subscription
         Route::put('/renew', 'SubscriptionController@renew')->name('subscription.renew'); // Renew the subscription if applicable
+        Route::put('/payment-history', 'SubscriptionController@getPaymentHistory')->name('subscription.paymenthistory'); // Renew the subscription if applicable
 
         // New Stripe payment-related routes
         Route::get('/stripe/get-stripe-customer-id', 'SubscriptionController@getStripeCustomerId')->name('subscription.getStripeCustomerId');
