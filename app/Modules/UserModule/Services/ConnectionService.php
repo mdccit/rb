@@ -6,10 +6,12 @@ namespace App\Modules\UserModule\Services;
 
 use App\Models\ConnectionRequest;
 use App\Models\User;
-
+use App\Traits\AzureBlobStorage;
 
 class ConnectionService
 {
+    use AzureBlobStorage;
+
     public function requestConnection (array $data){
 
         ConnectionRequest::connect(config('database.default'))
@@ -117,6 +119,8 @@ class ConnectionService
                 }
 
                 $user =  $query->first();
+                $profile_picture = $this->getSingleFileByEntityId($user->id,'user_profile_picture');
+                $user->profile_picture =$profile_picture;
                 $user->connection_status ='connect';
 
                 foreach($auth_user_connection_ids as $auth_user_connection_id){
@@ -170,6 +174,8 @@ class ConnectionService
                 }
         
                 $user =  $query->first();
+                $profile_picture = $this->getSingleFileByEntityId($user->id,'user_profile_picture');
+                $user->profile_picture =$profile_picture;
                 
                 $connect = ConnectionRequest::connect(config('database.secondary'))
                           ->where(function ($query) {
