@@ -294,4 +294,13 @@ return [
         'tennis'=> "Tennis",
     ],
 
+    'single_file_media_types' => [
+        'user_profile_picture',
+        'user_profile_cover',
+        'school_profile_picture',
+        'school_profile_cover',
+        'business_profile_picture',
+        'business_profile_cover'
+    ],
+
 ];

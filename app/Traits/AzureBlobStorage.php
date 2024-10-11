@@ -37,6 +37,17 @@ trait AzureBlobStorage
             $options = ['Content-Type' => $contentType];
             $upload_success = Storage::disk('azure')->putFileAs($storagePath, $file, $fileName, $options);
             if ($upload_success){
+                //Remove previous files
+                if (in_array($entityType, config('app.single_file_media_types'))){
+                    $media_list = Media::connect(config('database.default'))
+                        ->where('entity_id', $entityId)
+                        ->where('entity_type', $entityType)
+                        ->get();
+                    foreach ($media_list as $media){
+                        $this->removeFile($media->id);
+                    }
+                }
+
                 // Save media record in the database
                 $media = Media::connect(config('database.default'))->create([
                     'id' => (string) Str::uuid(),
