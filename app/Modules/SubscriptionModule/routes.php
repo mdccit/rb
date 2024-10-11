@@ -21,7 +21,6 @@ Route::group(['namespace' => 'App\Modules\SubscriptionModule\Controllers', 'pref
         Route::post('/create', 'SubscriptionController@store')->name('subscription.store'); // Create a new subscription
         Route::put('/cancel', 'SubscriptionController@cancel')->name('subscription.cancel'); // Cancel the subscription
         Route::put('/renew', 'SubscriptionController@renew')->name('subscription.renew'); // Renew the subscription if applicable
-        Route::put('/payment-history', 'SubscriptionController@getPaymentHistory')->name('subscription.paymenthistory'); // Renew the subscription if applicable
 
         // New Stripe payment-related routes
         Route::get('/stripe/get-stripe-customer-id', 'SubscriptionController@getStripeCustomerId')->name('subscription.getStripeCustomerId');
@@ -30,6 +29,7 @@ Route::group(['namespace' => 'App\Modules\SubscriptionModule\Controllers', 'pref
         Route::post('/stripe/create-setup-intent', 'SubscriptionController@createSetupIntent')->name('subscription.createSetupIntent');
         Route::post('/stripe/confirm-setup-intent', 'SubscriptionController@confirmSetupIntent')->name('subscription.confirmSetupIntent');
         Route::post('/stripe/confirm-payment-and-create-subscription', 'SubscriptionController@createSubscription');
+        Route::get('/stripe/payment-history', 'SubscriptionController@getPaymentHistoryFromStripe')->name('subscription.stripe.payment.history'); // Renew the subscription if applicable
 
       });
     });

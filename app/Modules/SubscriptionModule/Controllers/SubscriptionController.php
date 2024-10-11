@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Log;
 use App\Models\Subscription;
 use Carbon\Carbon;
 
+
 class SubscriptionController extends Controller
 {
   protected $subscriptionService;
@@ -317,19 +318,19 @@ class SubscriptionController extends Controller
   }
 
 
-  public function getPaymentHistory(Request $request)
+  public function getPaymentHistoryFromStripe(Request $request)
   {
-      // Assuming you have the authenticated user's stripe_customer_id
-      $user = $request->user(); // Or however you're getting the current user
-      $stripeCustomerId = $user->stripe_id;
+    // Assuming you have the authenticated user's stripe_customer_id
+    $user = $request->user(); // Or however you're getting the current user
+    $stripeCustomerId = $user->stripe_id;
 
-      // Get payment history from the StripeAPI service
-      $paymentHistory = $this->stripeAPI->getCustomerPaymentHistory($stripeCustomerId);
+    // Get payment history from the StripeAPI service
+    $paymentHistory = $this->stripeAPI->getCustomerPaymentHistory($stripeCustomerId);
 
-      if (isset($paymentHistory['error'])) {
-          return response()->json(['error' => $paymentHistory['error']], 500);
-      }
+    if (isset($paymentHistory['error'])) {
+      return response()->json(['error' => $paymentHistory['error']], 500);
+    }
 
-      return response()->json($paymentHistory);
-  }
+    return response()->json($paymentHistory);
+  }  
 }
