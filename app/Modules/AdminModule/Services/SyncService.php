@@ -293,20 +293,24 @@ class SyncService
 
     public function history($school_id){
 
-        
         $history = SyncLog::connect(config('database.secondary'))
                     ->where('school_id', $school_id)
-                    ->join('users', 'users.id', '=' ,'sync_logs.created_by')
+                    ->join('users', 'users.id', '=', 'sync_logs.created_by')
                     ->select(
-                        'sync_logs.id',
-                        'sync_logs.school_id',
-                        'sync_logs.status',
-                        'sync_logs.data',
-                        'users.first_name as created_by',
-                        'sync_logs.created_at',
-                        'sync_logs.updated_at'
+                       'sync_logs.id',
+                       'sync_logs.school_id',
+                       'sync_logs.status',
+                       'sync_logs.data',
+                       'users.first_name as created_by',
+                       'sync_logs.created_at',
+                       'sync_logs.updated_at'
                     )
-                    ->get();
+                    ->latest('sync_logs.created_at') // Orders by created_at in descending order
+                    ->first();
+        
+        if (!$history) {
+            $history = null; // Explicitly set to null if no record is found
+        }
 
         return $history;
                     
