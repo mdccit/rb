@@ -29,8 +29,10 @@ class Coach extends Model
     protected $fillable = [
         'user_id',
         'school_id',
+        'sport_id',
         'position',
         'type',
-        'status'
+        'status',
+        'preferred_gender_type'
     ];
 }

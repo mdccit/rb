@@ -7,10 +7,10 @@
         "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
         "client_secret": "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",
         "redirect_uris": [
-            "https://recruited.pro/login"
+            "https://qa.web.v2.recruited.qualitapps.com/google-auth"
         ],
         "javascript_origins": [
-            "https://recruited.pro"
+            "https://qa.web.v2.recruited.qualitapps.com"
         ]
     }
 }

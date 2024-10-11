@@ -4,6 +4,7 @@ namespace App\Modules\AdminModule\Controllers;
 
 use App\Extra\CommonResponse;
 use App\Http\Controllers\Controller;
+use App\Models\Business;
 use App\Modules\AdminModule\Services\BusinessService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -72,7 +73,7 @@ class BusinessesController extends Controller
             {
                 return CommonResponse::getResponse(
                     422,
-                    $validator->errors()->all(),
+                    $validator->errors(),
                     'Input validation failed'
                 );
             }
@@ -106,7 +107,7 @@ class BusinessesController extends Controller
             {
                 return CommonResponse::getResponse(
                     422,
-                    $validator->errors()->all(),
+                    $validator->errors(),
                     'Input validation failed'
                 );
             }
@@ -156,6 +157,154 @@ class BusinessesController extends Controller
                 'Successfully fetched',
                 'Successfully fetched',
                 $responseData
+            );
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    }
+
+    public function uploadProfilePicture(Request $request,$business_id)
+    {
+        try{
+            $validator = Validator::make($request->all(), [
+                'file.*' => 'required|mimes:jpg,jpeg,png|max:51200',
+            ]);
+            if ($validator->fails())
+            {
+                return CommonResponse::getResponse(
+                    422,
+                    $validator->errors(),
+                    'Input validation failed'
+                );
+            }
+
+            $business = Business::connect(config('database.secondary'))
+                ->where('id', $business_id)
+                ->first();
+            if(!$business) {
+                return CommonResponse::getResponse(
+                    401,
+                    'No business associated with this business id',
+                    'No business associated with this business id'
+                );
+            }
+
+            $responseData = $this->businessService->uploadProfilePicture($request->file('file'),$business_id);
+
+            return CommonResponse::getResponse(
+                200,
+                'Successfully Uploaded',
+                'Successfully Uploaded',
+                $responseData
+            );
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    }
+
+    public function uploadCoverPicture(Request $request,$business_id)
+    {
+        try{
+            $validator = Validator::make($request->all(), [
+                'file.*' => 'required|mimes:jpg,jpeg,png|max:51200',
+            ]);
+            if ($validator->fails())
+            {
+                return CommonResponse::getResponse(
+                    422,
+                    $validator->errors(),
+                    'Input validation failed'
+                );
+            }
+
+            $business = Business::connect(config('database.secondary'))
+                ->where('id', $business_id)
+                ->first();
+            if(!$business) {
+                return CommonResponse::getResponse(
+                    401,
+                    'No business associated with this business id',
+                    'No business associated with this business id'
+                );
+            }
+
+            $responseData = $this->businessService->uploadCoverPicture($request->file('file'),$business_id);
+
+            return CommonResponse::getResponse(
+                200,
+                'Successfully Uploaded',
+                'Successfully Uploaded',
+                $responseData
+            );
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    }
+
+    public function uploadMedia(Request $request,$business_id)
+    {
+        try{
+            $validator = Validator::make($request->all(), [
+                'files.*' => 'required|mimes:jpg,jpeg,png,mp4|max:51200',
+            ]);
+            if ($validator->fails())
+            {
+                return CommonResponse::getResponse(
+                    422,
+                    $validator->errors(),
+                    'Input validation failed'
+                );
+            }
+
+            $business = Business::connect(config('database.secondary'))
+                ->where('id', $business_id)
+                ->first();
+            if(!$business) {
+                return CommonResponse::getResponse(
+                    401,
+                    'No business associated with this business id',
+                    'No business associated with this business id'
+                );
+            }
+
+            $responseData = $this->businessService->uploadMedia($request->file('files'),$business_id);
+
+            return CommonResponse::getResponse(
+                200,
+                'Successfully Uploaded',
+                'Successfully Uploaded',
+                $responseData
+            );
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    }
+
+    public function removeMedia($media_id)
+    {
+        try{
+            $this->businessService->removeMedia($media_id);
+
+            return CommonResponse::getResponse(
+                200,
+                'Successfully Removed Media',
+                'Successfully Removed Media',
             );
         }catch (\Exception $e){
             return CommonResponse::getResponse(

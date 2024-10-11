@@ -30,6 +30,7 @@
       margin: auto;
       background-color: rgb(223, 233, 241);
       font-family: Figtree, sans-serif;
+	  padding: 30px;
     "
 >
 <div
@@ -68,6 +69,11 @@
                     {{$password_reset->recovery_code}}
                 </b></p>
             <br>
+            <a
+                href="{{config('app.frontend_url').'reset-password'}}"
+                style="font-size: 14px; color: blue"
+            >{{config('app.frontend_url').'reset-password'}}</a>
+
             <p  style="font-size: 12px; color: #4d4949;">
                 If you did not request a password reset, please ignore this email or contact our support team immediately.
             </p>

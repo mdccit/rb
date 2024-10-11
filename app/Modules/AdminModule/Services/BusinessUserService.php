@@ -24,7 +24,7 @@ class BusinessUserService
                 'users.first_name',
                 'users.last_name',
                 'user_roles.name as user_role',
-                'business_managers.type as business_user_role'
+                'business_managers.type as user_permission_type'
             )
             ->get();
     }
@@ -35,7 +35,8 @@ class BusinessUserService
 
         $query = User::connect(config('database.secondary'))
             ->join('user_roles', 'user_roles.id', '=' ,'users.user_role_id')
-            ->whereNotIn('users.id', DB::table('business_managers')->where('business_id', $business_id)->pluck('user_id')->toArray())
+            ->whereNotIn('users.id', DB::table('business_managers')->whereNotNull('business_id')->pluck('user_id')->toArray())
+//            ->whereNotIn('users.id', DB::table('business_managers')->where('business_id', $business_id)->pluck('user_id')->toArray())
             ->where('user_roles.id', config('app.user_roles.business_manager'))
             ->select(
                 'users.id',
@@ -46,7 +47,12 @@ class BusinessUserService
             );
 
         if ($search_key != null) {
-            $query->where('users.display_name', 'LIKE', '%' . $search_key . '%');
+            $query->whereIn('users.id', DB::table('users')
+                ->where('display_name', 'LIKE', '%' . $search_key . '%')
+                ->orWhere('email', 'LIKE', '%' . $search_key . '%')
+                ->pluck('id')->toArray());
+//            $query->where('users.display_name', 'LIKE', '%' . $search_key . '%');
+//            $query->orWhere('users.email', 'LIKE', '%' . $search_key . '%');
         }
 
 
@@ -74,24 +80,21 @@ class BusinessUserService
             ->where('id', $data['business'])
             ->first();
         if($business){
+            $this ->getOtherData($business->id);
 
-            $total_staff = 1;
-            $non_admin_staff = 1;
+            $total_members = BusinessManager::connect(config('database.secondary'))
+                ->where('business_id', $data['business'])
+                ->count();
+            $editors = BusinessManager::connect(config('database.secondary'))
+                ->where('type', config('app.user_permission_type.editor'))
+                ->where('business_id', $data['business'])
+                ->count();
+            $viewers = $total_members - $editors;
 
             $other_data = $business->other_data;
-            if($other_data){
-                $total_staff += $business->other_data['total_staff'];
-                $non_admin_staff += $business->other_data['non_admin_staff'];
-            }else{
-                $other_data = [
-                    'teams_count' => 0,
-                    'total_staff' => 0,
-                    'admin_staff' => 0,
-                    'non_admin_staff' => 0,
-                ];
-            }
-            $other_data['total_staff'] = $total_staff;
-            $other_data['non_admin_staff'] = $non_admin_staff;
+            $other_data['total_members'] = $total_members;
+            $other_data['editors'] = $editors;
+            $other_data['viewers'] = $viewers;
 
             $business->update(['other_data' => $other_data]);
         }
@@ -103,7 +106,98 @@ class BusinessUserService
             Notification::route('mail',$user->email)->notify(new BusinessManagerApprovalEmailNotification($user));
         }
 
+    }
 
+    public function updateBusinessUserManageType(array $data, $user_id)
+    {
+        $business_manager = BusinessManager::connect(config('database.default'))
+            ->where('user_id', $user_id)
+            ->where('business_id', $data['business'])
+            ->first();
+        if($business_manager){
+            $business_manager->update([
+                'type' => $data['user_permission_type'],
+            ]);
+
+            $business = Business::connect(config('database.default'))
+                ->where('id', $data['business'])
+                ->first();
+            if($business){
+                $this ->getOtherData($business->id);
+
+                $total_members = BusinessManager::connect(config('database.secondary'))
+                    ->where('business_id', $data['business'])
+                    ->count();
+                $editors = BusinessManager::connect(config('database.secondary'))
+                    ->where('type', config('app.user_permission_type.editor'))
+                    ->where('business_id', $data['business'])
+                    ->count();
+                $viewers = $total_members - $editors;
+
+                $other_data = $business->other_data;
+                $other_data['total_members'] = $total_members;
+                $other_data['editors'] = $editors;
+                $other_data['viewers'] = $viewers;
+
+                $business->update(['other_data' => $other_data]);
+            }
+        }
+    }
+
+    public function removeBusinessUser(array $data, $user_id)
+    {
+        $business_manager = BusinessManager::connect(config('database.default'))
+            ->where('user_id', $user_id)
+            ->where('business_id', $data['business'])
+            ->first();
+        if($business_manager){
+            $business_manager->update([
+                'type' => 'none',
+                'business_id' => null,
+                'status' => 'cancelled'
+            ]);
+        }
+
+        $business = Business::connect(config('database.default'))
+            ->where('id', $data['business'])
+            ->first();
+        if($business){
+            $this ->getOtherData($business->id);
+
+            $total_members = BusinessManager::connect(config('database.secondary'))
+                ->where('business_id', $data['business'])
+                ->count();
+            $editors = BusinessManager::connect(config('database.secondary'))
+                ->where('type', config('app.user_permission_type.editor'))
+                ->where('business_id', $data['business'])
+                ->count();
+            $viewers = $total_members - $editors;
+
+            $other_data = $business->other_data;
+            $other_data['total_members'] = $total_members;
+            $other_data['editors'] = $editors;
+            $other_data['viewers'] = $viewers;
+
+            $business->update(['other_data' => $other_data]);
+        }
+    }
+
+    private function getOtherData($business_id){
+        $business = Business::connect(config('database.default'))
+            ->where('id', $business_id)
+            ->whereNull('other_data')
+            ->first();
+        if($business){
+            $other_data = [
+                'total_members' => 0,
+                'editors' => 0,
+                'viewers' => 0,
+            ];
+
+            $business->update([
+                'other_data' => $other_data,
+            ]);
+        }
     }
 
 }

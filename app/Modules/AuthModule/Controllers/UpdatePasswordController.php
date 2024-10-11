@@ -24,13 +24,17 @@ class UpdatePasswordController extends Controller
             
             $validator = Validator::make($request->all(), [
                 'current_password' => 'required|string|current_password',
-                'password' => 'required|string|min:6|confirmed',
-            ]);
+                'password' => 'required|string|min:6',
+                'password_confirmation' => 'required|string|min:6|same:password',
+            ],
+                [
+                    'password_confirmation.same' => 'Password confirmation doesn\'t match',
+                ]);
 
             if ($validator->fails()) {
                 return CommonResponse::getResponse(
                     422,
-                    $validator->errors()->all(),
+                    $validator->errors(),
                     'Input validation failed'
                 );
             }

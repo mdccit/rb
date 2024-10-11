@@ -21,6 +21,27 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | AZURE STORAGE URL
+    |--------------------------------------------------------------------------
+    |
+    |
+    */
+
+    'azure_storage_url' => env('AZURE_STORAGE_URL', ''),
+    'azure_storage_container' => env('AZURE_STORAGE_CONTAINER_NAME', ''),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Frontend Application URL
+    |--------------------------------------------------------------------------
+    |
+    |
+    */
+
+    'frontend_url' => env('FRONTEND_APP_URL', 'http://127.0.0.1:3000'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Version
     |--------------------------------------------------------------------------
     |
@@ -252,8 +273,25 @@ return [
         'premium'=>3,
     ],
 
+    'user_permission_type' => [
+        'none'=>'none',
+        'viewer'=>'viewer',
+        'editor'=>'editor',
+    ],
+
     'currencies' => [
         'default'=>1,
+    ],
+
+    'year' => [
+        'freshman'=> "Freshman",
+        'sophomore'=>"Sophomore",
+        'junior'=>"Junior",
+        'senior'=>"Senior & 5th year",
+    ],
+
+    'sports' => [
+        'tennis'=> "Tennis",
     ],
 
 ];

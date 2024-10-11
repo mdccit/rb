@@ -92,7 +92,7 @@ class PlayerController extends Controller
             {
                 return CommonResponse::getResponse(
                     422,
-                    $validator->errors()->all(),
+                    $validator->errors(),
                     'Input validation failed'
                 );
             }
@@ -112,8 +112,8 @@ class PlayerController extends Controller
 
                 return CommonResponse::getResponse(
                     422,
-                    $e->getMessage(),
-                    'Something went to wrong'
+                    'Player does not exists',
+                    'Player does not exists'
                 );
             }
         }catch (\Exception $e){
