@@ -320,4 +320,18 @@ class StripeAPI
     }
   }
 
+  public function getCustomerPaymentMethods($customerId) {
+    try {
+        // Retrieve payment methods for the customer
+        $paymentMethods = PaymentMethod::all([
+            'customer' => $customerId,
+            'type' => 'card', // Only retrieve card payment methods
+        ]);
+
+        return $paymentMethods->data;
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
+    }
+}
+
 }

@@ -333,4 +333,20 @@ class SubscriptionController extends Controller
 
     return response()->json($paymentHistory);
   }  
+
+
+  public function getCustomerPaymentMethods(Request $request) {
+    $user = Auth::user();
+
+    if (!$user->stripe_id) {
+        return response()->json(['error' => 'No Stripe customer ID found'], 404);
+    }
+
+    // Call the StripeAPI function to retrieve payment methods
+    $stripeAPI = new StripeAPI();
+    $paymentMethods = $stripeAPI->getCustomerPaymentMethods($user->stripe_id);
+
+    return response()->json($paymentMethods);
+}
+
 }
