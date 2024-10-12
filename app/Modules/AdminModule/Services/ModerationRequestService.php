@@ -14,16 +14,19 @@ class ModerationRequestService
         $status = array_key_exists("status",$data)?$data['status']:'';
 
         $query = ModerationRequest::connect(config('database.secondary'))
+                   ->join('users', 'users.id', '=', 'moderation_requests.moderatable_id')
                     ->select(
-                        'id',
-                        'moderatable_type',
-                        'moderatable_id',
-                        'priority', 
-                        'created_by',
-                        'is_closed',
-                        'closed_at',
-                        'closed_by',
-                        'created_at'
+                        'moderation_requests.id',
+                        'moderation_requests.moderatable_type',
+                        'moderation_requests.moderatable_id',
+                        'moderation_requests.priority', 
+                        'moderation_requests.created_by',
+                        'moderation_requests.is_closed',
+                        'moderation_requests.closed_at',
+                        'moderation_requests.closed_by',
+                        'moderation_requests.created_at',
+                        'users.display_name',
+                        'users.email'
                 )
                 ->orderBy('created_at', 'DESC');
         if($status == 'open'){
