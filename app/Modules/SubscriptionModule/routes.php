@@ -31,6 +31,7 @@ Route::group(['namespace' => 'App\Modules\SubscriptionModule\Controllers', 'pref
         Route::post('/stripe/confirm-payment-and-create-subscription', 'SubscriptionController@createSubscription');
         Route::get('/stripe/payment-history', 'SubscriptionController@getPaymentHistoryFromStripe')->name('subscription.stripe.payment.history'); // Renew the subscription if applicable
         Route::get('/stripe/customer-payment-methods', 'SubscriptionController@getCustomerPaymentMethods')->name('subscription.get.customer.payment.methods');
+        Route::get('/stripe/customer-active-payment-method', 'SubscriptionController@getSubscriptionPaymentMethod')->name('subscription.get.customer.active.payment.method');
 
       });
     });

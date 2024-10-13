@@ -3,6 +3,8 @@
 namespace App\Modules\SubscriptionModule\Services;
 
 use App\Models\Subscription;
+use Stripe\PaymentMethod;
+use Stripe\Customer;
 use Carbon\Carbon;
 use App\Extra\ThirdPartyAPI\StripeAPI;
 use Illuminate\Http\Request;
@@ -35,7 +37,7 @@ class SubscriptionService
         if ($user->subscription) {
             throw new \Exception('User already has an active subscription.');
         }
-    
+
         // Create Stripe customer if the user doesn't already have one
         if (!$user->stripe_id) {
             $stripeCustomerId = $this->stripeAPI->createCustomer($user);
@@ -44,19 +46,29 @@ class SubscriptionService
         } else {
             $stripeCustomerId = $user->stripe_id;
         }
-    
-  
+
+
         // If payment method is already confirmed, proceed with subscription
         $paymentMethodId = $data['payment_method_id'];
-    
+        $paymentMethod = PaymentMethod::retrieve($paymentMethodId);
+        $paymentMethod->attach(['customer' => $stripeCustomerId]);
+
+        // Set the default payment method for the customer
+        Customer::update($stripeCustomerId, [
+            'invoice_settings' => [
+                'default_payment_method' => $paymentMethodId,
+            ],
+        ]);
+
+
         // Determine the Stripe price ID based on subscription type
         $priceId = $this->getPriceIdFromSubscriptionType($data['subscription_type']);
-    
+
         // Check if it's a trial subscription
         if ($data['subscription_type'] === 'trial') {
             // Create a Stripe subscription with a 1-month trial period
             $stripeSubscription = $this->stripeAPI->createSubscriptionWithTrial($stripeCustomerId, $priceId, 30); // 30 days trial
-    
+
             // Save trial details
             $userSubscription = new Subscription();
             $userSubscription->user_id = $user->id;
@@ -65,12 +77,12 @@ class SubscriptionService
             $userSubscription->start_date = Carbon::now();
             $userSubscription->end_date = Carbon::now()->addMonth(); // 1-month trial
             $userSubscription->save();
-    
+
             return $userSubscription;
         } else {
             // If it's a paid subscription (monthly or annually), create the subscription using the payment method
             $stripeSubscription = $this->stripeAPI->createSubscription($stripeCustomerId, $priceId, $paymentMethodId);
-    
+
             $userSubscription = new Subscription();
             $userSubscription->user_id = $user->id;
             $userSubscription->subscription_type = $data['subscription_type']; // 'monthly' or 'annually'
@@ -78,11 +90,11 @@ class SubscriptionService
             $userSubscription->start_date = Carbon::now();
             $userSubscription->end_date = $data['subscription_type'] === 'monthly' ? Carbon::now()->addMonth() : Carbon::now()->addYear();
             $userSubscription->save();
-    
+
             return $userSubscription;
         }
     }
-    
+
 
     // Cancel the current subscription of the user
     public function cancelSubscription($user)

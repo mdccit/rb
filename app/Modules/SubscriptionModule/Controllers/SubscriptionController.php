@@ -349,4 +349,26 @@ class SubscriptionController extends Controller
     return response()->json($paymentMethods);
 }
 
+  /**
+     * Get the payment method summary for the currently active subscription.
+     */
+    public function getSubscriptionPaymentMethod(Request $request)
+    {
+        $user = auth()->user();
+
+        if (!$user->stripe_id) {
+            return response()->json(['error' => 'User does not have a Stripe customer ID.'], 404);
+        }
+
+        try {
+            $paymentMethod = $this->stripeAPI->getSubscriptionPaymentMethod($user->stripe_id);
+
+            return response()->json([
+                'payment_method' => $paymentMethod,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
 }

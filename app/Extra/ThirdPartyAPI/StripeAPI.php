@@ -175,11 +175,12 @@ class StripeAPI
       $priceId = 'price_1Q5LsbB1aCt3RRcc6eRGc3wo';
 
       // Create a subscription with auto-renewal
-      $subscription = \Stripe\Subscription::create([
+      $subscription = Subscription::create([
         'customer' => $customerId,
         'items' => [['price' => $priceId]],  // Pass the price ID
         'expand' => ['latest_invoice.payment_intent'],  // Optional: Expand the payment intent for more details
-        'automatic_tax' => ['enabled' => false]  // Auto-renewal setting
+        'automatic_tax' => ['enabled' => false],
+        'default_payment_method' => $paymentMethodId  
       ]);
 
       return $subscription;
@@ -332,6 +333,41 @@ class StripeAPI
     } catch (\Exception $e) {
         return response()->json(['error' => $e->getMessage()], 500);
     }
-}
+  }
 
+   /**
+     * Get the active subscription of the customer and its associated payment method (card details).
+     */
+    public function getSubscriptionPaymentMethod($customerId)
+    {
+        // Retrieve all active subscriptions of the customer
+        $subscriptions = Subscription::all([
+            'customer' => $customerId,
+            'status' => 'active', // Only active subscriptions
+        ]);
+
+        if (count($subscriptions->data) > 0) {
+            // Assume the customer has one active subscription. You can adjust logic for multiple subscriptions.
+            $subscription = $subscriptions->data[0];
+
+            // Check if the subscription has a default payment method
+            if ($subscription->default_payment_method) {
+                // Retrieve the payment method (typically a card)
+                $paymentMethod = PaymentMethod::retrieve($subscription->default_payment_method);
+
+                // Return the payment method data, especially card details
+                return [
+                    'brand' => $paymentMethod->card->brand,
+                    'last4' => $paymentMethod->card->last4,
+                    'exp_month' => $paymentMethod->card->exp_month,
+                    'exp_year' => $paymentMethod->card->exp_year,
+                    'billing_details' => $paymentMethod->billing_details,
+                ];
+            } else {
+                throw new \Exception('No default payment method found for this subscription.');
+            }
+        } else {
+            throw new \Exception('No active subscription found for this customer.');
+        }
+    }
 }
