@@ -23,6 +23,9 @@ Route::group(['namespace' => 'App\Modules\SubscriptionModule\Controllers', 'pref
         Route::put('/renew', 'SubscriptionController@renew')->name('subscription.renew'); // Renew the subscription if applicable
         Route::delete('/remove-payment-method/{payment_method_id}', 'SubscriptionController@removePaymentMethod')->name('subscription.removePaymentMethod');
 
+        // Recurring Subscriptions
+        Route::post('/create', 'SubscriptionController@createRecurringSubscription')->name('subscription.createRecurring');
+
         // New Stripe payment-related routes
         Route::get('/stripe/get-stripe-customer-id', 'SubscriptionController@getStripeCustomerId')->name('subscription.getStripeCustomerId');
         Route::get('/stripe/payment-form', 'SubscriptionController@showPaymentForm')->name('subscription.paymentForm');

@@ -221,4 +221,70 @@ class SubscriptionService
         }
     }
 
+
+    public function createRecurringSubscription($user, $data)
+    {
+        $stripeCustomerId = $user->stripe_id;
+
+        if (!$stripeCustomerId) {
+            // Create customer if not exists
+            $stripeCustomerId = $this->stripeAPI->createCustomer($user);
+            $user->stripe_id = $stripeCustomerId;
+            $user->save();
+        }
+
+        // Attach Payment Method
+        $paymentMethodId = $data['payment_method_id'];
+        $paymentMethod = PaymentMethod::retrieve($paymentMethodId);
+        $paymentMethod->attach(['customer' => $stripeCustomerId]);
+
+        // Set default payment method for future invoices
+        Customer::update($stripeCustomerId, [
+            'invoice_settings' => ['default_payment_method' => $paymentMethodId],
+        ]);
+
+        // Create Stripe subscription
+        $stripeSubscription = $this->stripeAPI->createSubscription($stripeCustomerId, $data['plan_id'], $paymentMethodId);
+
+        // Save the subscription to the local database
+        $userSubscription = new Subscription();
+        $userSubscription->user_id = $user->id;
+        $userSubscription->stripe_subscription_id = $stripeSubscription->id;
+        $userSubscription->status = 'active';
+        $userSubscription->start_date = Carbon::now();
+        $userSubscription->end_date = $this->calculateEndDate($data['plan_id']); // Calculate based on the plan
+        $userSubscription->save();
+
+        return $userSubscription;
+    }
+
+
+    public function cancelRecurringSubscription($user)
+    {
+        $stripeSubscriptionId = $user->subscription->stripe_subscription_id;
+
+        // Cancel subscription in Stripe
+        $this->stripeAPI->cancelRecurringSubscription($stripeSubscriptionId);
+
+        // Update local subscription status
+        $userSubscription = $user->subscription;
+        $userSubscription->status = 'inactive';
+        $userSubscription->save();
+    }
+
+    public function calculateEndDate($planId)
+{
+    // This assumes you have different plans for monthly, yearly, etc.
+    
+    switch ($planId) {
+        case 'monthly_plan_id':  // Replace with your actual monthly plan ID
+            return Carbon::now()->addMonth(); // For a monthly plan, add 1 month
+        
+        case 'yearly_plan_id':  // Replace with your actual yearly plan ID
+            return Carbon::now()->addYear(); // For a yearly plan, add 1 year
+        
+        default:
+            throw new \Exception('Unknown plan ID');
+    }
+}
 }

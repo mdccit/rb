@@ -384,4 +384,11 @@ class StripeAPI
     }
 }
 
+
+public function cancelRecurringSubscription($stripeSubscriptionId)
+{
+    $subscription = \Stripe\Subscription::retrieve($stripeSubscriptionId);
+    $subscription->cancel();  // Optionally, use cancel_at_period_end to delay cancellation until the end of the billing cycle
+}
+
 }

@@ -377,20 +377,38 @@ class SubscriptionController extends Controller
 
   public function removePaymentMethod(Request $request, $payment_method_id)
   {
-      try {
-          $user = $request->user();  // Get the logged-in user
-  
-          // Call the service to remove the payment method
-          $this->subscriptionService->removePaymentMethod($user, $payment_method_id);
-  
-          // Return success response using CommonResponse class
-          return CommonResponse::getResponse(200, 'Payment method removed successfully', 'The payment method has been removed successfully');
-      } catch (\Exception $e) {
-          // Return failure response using CommonResponse class
-          return CommonResponse::getResponse(500, $e->getMessage(), 'Failed to remove payment method');
-      }
+    try {
+      $user = $request->user();  // Get the logged-in user
+
+      // Call the service to remove the payment method
+      $this->subscriptionService->removePaymentMethod($user, $payment_method_id);
+
+      // Return success response using CommonResponse class
+      return CommonResponse::getResponse(200, 'Payment method removed successfully', 'The payment method has been removed successfully');
+    } catch (\Exception $e) {
+      // Return failure response using CommonResponse class
+      return CommonResponse::getResponse(500, $e->getMessage(), 'Failed to remove payment method');
+    }
   }
-  
+
+
+  /**
+   * Create recurring subscription
+   */
+  public function createRecurringSubscription(Request $request)
+  {
+    try {
+      $user = $request->user(); // Get the authenticated user
+      $data = $request->all(); // Subscription data sent from frontend (e.g., plan, payment method)
+
+      // Call the service to create the subscription
+      $subscription = $this->subscriptionService->createRecurringSubscription($data, $user);
+
+      return CommonResponse::getResponse(200, 'Subscription created successfully', 'Recurring subscription created.', $subscription);
+    } catch (\Exception $e) {
+      return CommonResponse::getResponse(500, $e->getMessage(), 'Failed to create subscription');
+    }
+  }
 
 
 }
