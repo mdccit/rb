@@ -180,7 +180,7 @@ class StripeAPI
         'items' => [['price' => $priceId]],  // Pass the price ID
         'expand' => ['latest_invoice.payment_intent'],  // Optional: Expand the payment intent for more details
         'automatic_tax' => ['enabled' => false],
-        'default_payment_method' => $paymentMethodId  
+        'default_payment_method' => $paymentMethodId
       ]);
 
       return $subscription;
@@ -321,53 +321,67 @@ class StripeAPI
     }
   }
 
-  public function getCustomerPaymentMethods($customerId) {
+  public function getCustomerPaymentMethods($customerId)
+  {
     try {
-        // Retrieve payment methods for the customer
-        $paymentMethods = PaymentMethod::all([
-            'customer' => $customerId,
-            'type' => 'card', // Only retrieve card payment methods
-        ]);
+      // Retrieve payment methods for the customer
+      $paymentMethods = PaymentMethod::all([
+        'customer' => $customerId,
+        'type' => 'card', // Only retrieve card payment methods
+      ]);
 
-        return $paymentMethods->data;
+      return $paymentMethods->data;
     } catch (\Exception $e) {
-        return response()->json(['error' => $e->getMessage()], 500);
+      return response()->json(['error' => $e->getMessage()], 500);
     }
   }
 
-   /**
-     * Get the active subscription of the customer and its associated payment method (card details).
-     */
-    public function getSubscriptionPaymentMethod($customerId)
-    {
-        // Retrieve all active subscriptions of the customer
-        $subscriptions = Subscription::all([
-            'customer' => $customerId,
-            'status' => 'active', // Only active subscriptions
-        ]);
+  /**
+   * Get the active subscription of the customer and its associated payment method (card details).
+   */
+  public function getSubscriptionPaymentMethod($customerId)
+  {
+    // Retrieve all active subscriptions of the customer
+    $subscriptions = Subscription::all([
+      'customer' => $customerId,
+      'status' => 'active', // Only active subscriptions
+    ]);
 
-        if (count($subscriptions->data) > 0) {
-            // Assume the customer has one active subscription. You can adjust logic for multiple subscriptions.
-            $subscription = $subscriptions->data[0];
+    if (count($subscriptions->data) > 0) {
+      // Assume the customer has one active subscription. You can adjust logic for multiple subscriptions.
+      $subscription = $subscriptions->data[0];
 
-            // Check if the subscription has a default payment method
-            if ($subscription->default_payment_method) {
-                // Retrieve the payment method (typically a card)
-                $paymentMethod = PaymentMethod::retrieve($subscription->default_payment_method);
+      // Check if the subscription has a default payment method
+      if ($subscription->default_payment_method) {
+        // Retrieve the payment method (typically a card)
+        $paymentMethod = PaymentMethod::retrieve($subscription->default_payment_method);
 
-                // Return the payment method data, especially card details
-                return [
-                    'brand' => $paymentMethod->card->brand,
-                    'last4' => $paymentMethod->card->last4,
-                    'exp_month' => $paymentMethod->card->exp_month,
-                    'exp_year' => $paymentMethod->card->exp_year,
-                    'billing_details' => $paymentMethod->billing_details,
-                ];
-            } else {
-                throw new \Exception('No default payment method found for this subscription.');
-            }
-        } else {
-            throw new \Exception('No active subscription found for this customer.');
-        }
+        // Return the payment method data, especially card details
+        return [
+          'brand' => $paymentMethod->card->brand,
+          'last4' => $paymentMethod->card->last4,
+          'exp_month' => $paymentMethod->card->exp_month,
+          'exp_year' => $paymentMethod->card->exp_year,
+          'billing_details' => $paymentMethod->billing_details,
+        ];
+      } else {
+        throw new \Exception('No default payment method found for this subscription.');
+      }
+    } else {
+      throw new \Exception('No active subscription found for this customer.');
     }
+  }
+
+  public function detachPaymentMethod($paymentMethodId)
+{
+    try {
+        // Retrieve the payment method and detach it from the customer
+        $paymentMethod = PaymentMethod::retrieve($paymentMethodId);
+        $paymentMethod->detach();
+        return $paymentMethod;
+    } catch (\Exception $e) {
+        throw new \Exception('Failed to remove the payment method: ' . $e->getMessage());
+    }
+}
+
 }

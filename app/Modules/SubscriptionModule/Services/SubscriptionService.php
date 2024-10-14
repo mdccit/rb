@@ -8,7 +8,7 @@ use Stripe\Customer;
 use Carbon\Carbon;
 use App\Extra\ThirdPartyAPI\StripeAPI;
 use Illuminate\Http\Request;
-use Stripe\Subscription AS StripeSubscription;
+use Stripe\Subscription as StripeSubscription;
 
 class SubscriptionService
 {
@@ -101,12 +101,12 @@ class SubscriptionService
     public function cancelSubscription($user)
     {
         $stripeCustomerId = $user->stripe_id;
-    
+
         // Check if the user has a Stripe customer ID
         if (!$stripeCustomerId) {
             throw new \Exception('No Stripe customer ID found.');
         }
-    
+
         // Retrieve the active subscription for the customer from Stripe
         try {
             // Fetch all active subscriptions for the customer from Stripe
@@ -114,37 +114,37 @@ class SubscriptionService
                 'customer' => $stripeCustomerId,
                 'status' => 'active',
             ]);
-    
+
             // Ensure there is at least one active subscription
             if (empty($subscriptions->data)) {
                 throw new \Exception('No active subscription found for this customer on Stripe.');
             }
-    
+
             // Get the first active subscription (assuming the user has only one active subscription)
             $activeSubscription = $subscriptions->data[0];
-    
+
             // Cancel the subscription on Stripe (you can add options here like `cancel_at_period_end`)
             $stripeSubscription = StripeSubscription::retrieve($activeSubscription->id);
             $stripeSubscription->cancel();  // If you want to cancel at the end of the period, use cancel(['at_period_end' => true])
-    
+
             // Now update the local database
             $subscription = Subscription::where('user_id', $user->id)->first();
-    
+
             // Ensure the local subscription exists
             if (!$subscription) {
                 throw new \Exception('No active subscription found in the local database.');
             }
-    
+
             // Mark the subscription as canceled or inactive in the local database
             $subscription->status = 'inactive';  // or 'canceled'
             $subscription->save();
-    
+
         } catch (\Exception $e) {
             // Throw an exception with more context if cancellation fails
             throw new \Exception('Failed to cancel subscription: ' . $e->getMessage());
         }
     }
-    
+
 
     // Renew the current subscription if it's active and supports auto-renewal
     public function renewSubscription($user)
@@ -187,6 +187,38 @@ class SubscriptionService
         ];
 
         return $priceIds[$subscriptionType] ?? null;
+    }
+
+
+
+    public function removePaymentMethod($user, $paymentMethodId)
+    {
+        // Check if the user has a Stripe customer ID
+        $stripeCustomerId = $user->stripe_id;
+        if (!$stripeCustomerId) {
+            throw new \Exception('No Stripe customer ID found.');
+        }
+
+        // Retrieve active subscriptions for the customer from Stripe
+        $subscriptions = StripeSubscription::all([
+            'customer' => $stripeCustomerId,
+            'status' => 'active',
+        ]);
+
+        // Check if the payment method is being used in any active subscription
+        foreach ($subscriptions->data as $subscription) {
+            if ($subscription->default_payment_method === $paymentMethodId) {
+                throw new \Exception('Cannot remove payment method as it is attached to an active subscription.');
+            }
+        }
+
+        // Call the StripeAPI to remove the payment method
+        try {
+            $paymentMethod = PaymentMethod::retrieve($paymentMethodId);
+            $paymentMethod->detach();
+        } catch (\Exception $e) {
+            throw new \Exception('Failed to remove payment method: ' . $e->getMessage());
+        }
     }
 
 }
