@@ -37,6 +37,14 @@ Route::group(['namespace' => 'App\Modules\SubscriptionModule\Controllers', 'pref
         Route::get('/stripe/customer-payment-methods', 'SubscriptionController@getCustomerPaymentMethods')->name('subscription.get.customer.payment.methods');
         Route::get('/stripe/customer-active-payment-method', 'SubscriptionController@getSubscriptionPaymentMethod')->name('subscription.get.customer.active.payment.method');
 
+
+
+        // Admin Panel Subscriptions
+        Route::get('/admin/subscriptions', 'SubscriptionController@adminListSubscriptions')->name('admin.subscriptions.list');
+        Route::get('/admin/subscription/{id}', 'SubscriptionController@getSubscriptionDetails')->name('admin.subscription.view');
+        Route::put('/admin/subscription/{id}/status', 'SubscriptionController@updateSubscriptionStatus')->name('admin.subscription.update.status');
+        Route::put('/admin/subscription/{id}/cancel', 'SubscriptionController@cancelSubscription')->name('admin.subscription.cancel');
+
       });
     });
   });

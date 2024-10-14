@@ -243,11 +243,22 @@ class StripeAPI
     return Subscription::all();
   }
 
-  // Cancel subscription
+  /**
+   * Cancel Stripe Subscription
+   * 
+   * @param string $subscriptionId
+   * @return \Stripe\Subscription
+   */
   public function cancelSubscription($subscriptionId)
   {
-    $subscription = Subscription::retrieve($subscriptionId);
-    return $subscription->cancel();
+    try {
+      // Retrieve and cancel the subscription from Stripe
+      $subscription = Subscription::retrieve($subscriptionId);
+      $subscription->cancel();
+      return $subscription;
+    } catch (\Exception $e) {
+      throw new \Exception('Failed to cancel subscription: ' . $e->getMessage());
+    }
   }
 
   // Renew subscription
@@ -255,6 +266,23 @@ class StripeAPI
   {
     $subscription = Subscription::retrieve($subscriptionId);
     return $subscription->save(); // Resuming subscription (usually from a canceled state)
+  }
+
+  /**
+   * Retrieve Stripe Subscription
+   * 
+   * @param string $subscriptionId
+   * @return \Stripe\Subscription
+   */
+  public function retrieveSubscription($subscriptionId)
+  {
+    try {
+      // Retrieve the subscription from Stripe
+      $subscription = Subscription::retrieve($subscriptionId);
+      return $subscription;
+    } catch (\Exception $e) {
+      throw new \Exception('Failed to retrieve subscription: ' . $e->getMessage());
+    }
   }
 
   // Change subscription plan
@@ -373,22 +401,22 @@ class StripeAPI
   }
 
   public function detachPaymentMethod($paymentMethodId)
-{
+  {
     try {
-        // Retrieve the payment method and detach it from the customer
-        $paymentMethod = PaymentMethod::retrieve($paymentMethodId);
-        $paymentMethod->detach();
-        return $paymentMethod;
+      // Retrieve the payment method and detach it from the customer
+      $paymentMethod = PaymentMethod::retrieve($paymentMethodId);
+      $paymentMethod->detach();
+      return $paymentMethod;
     } catch (\Exception $e) {
-        throw new \Exception('Failed to remove the payment method: ' . $e->getMessage());
+      throw new \Exception('Failed to remove the payment method: ' . $e->getMessage());
     }
-}
+  }
 
 
-public function cancelRecurringSubscription($stripeSubscriptionId)
-{
+  public function cancelRecurringSubscription($stripeSubscriptionId)
+  {
     $subscription = \Stripe\Subscription::retrieve($stripeSubscriptionId);
     $subscription->cancel();  // Optionally, use cancel_at_period_end to delay cancellation until the end of the billing cycle
-}
+  }
 
 }

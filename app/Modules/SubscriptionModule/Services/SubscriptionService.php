@@ -8,6 +8,8 @@ use Stripe\Customer;
 use Carbon\Carbon;
 use App\Extra\ThirdPartyAPI\StripeAPI;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Config;
+
 use Stripe\Subscription as StripeSubscription;
 
 class SubscriptionService
@@ -173,7 +175,9 @@ class SubscriptionService
     // Retrieve all subscriptions
     public function getAllSubscriptions()
     {
-        return Subscription::all();
+        $subscriptions = Subscription::with('user')->get();
+
+        return $subscriptions;
     }
 
 
@@ -273,18 +277,36 @@ class SubscriptionService
     }
 
     public function calculateEndDate($planId)
-{
-    // This assumes you have different plans for monthly, yearly, etc.
-    
-    switch ($planId) {
-        case 'monthly_plan_id':  // Replace with your actual monthly plan ID
-            return Carbon::now()->addMonth(); // For a monthly plan, add 1 month
-        
-        case 'yearly_plan_id':  // Replace with your actual yearly plan ID
-            return Carbon::now()->addYear(); // For a yearly plan, add 1 year
-        
-        default:
-            throw new \Exception('Unknown plan ID');
+    {
+        // Fetch the monthly and annual price IDs from the configuration
+        $monthlyPriceId = Config::get('services.stripe.monthly_price_id');
+        $annualPriceId = Config::get('services.stripe.annual_price_id');
+
+        // This assumes you have different plans for monthly and yearly
+        switch ($planId) {
+            case $monthlyPriceId:  // Monthly plan ID
+                return Carbon::now()->addMonth();  // For a monthly plan, add 1 month
+
+            case $annualPriceId:  // Annual plan ID
+                return Carbon::now()->addYear();  // For a yearly plan, add 1 year
+
+            default:
+                throw new \Exception('Unknown plan ID');
+        }
     }
+
+    public function getSubscriptionBySubscriptionId($id)
+{
+    // Retrieve the subscription with the associated user and Stripe data
+    $subscription = Subscription::with('user')->findOrFail($id);
+
+    // Optionally, retrieve Stripe subscription data if necessary
+    if ($subscription->stripe_subscription_id) {
+        $stripeSubscription = $this->stripeAPI->retrieveSubscription($subscription->stripe_subscription_id);
+        $subscription->stripe_details = $stripeSubscription;
+    }
+
+    return $subscription;
 }
+
 }
