@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Models\UserAddress;
 use App\Models\UserPhone;
 use App\Traits\AzureBlobStorage;
+use Illuminate\Support\Facades\DB;
 
 class UserService
 {
@@ -46,6 +47,7 @@ class UserService
                 'users.email_verified_at',
                 'users.last_logged_at as last_seen_at',
             )
+            ->addSelect(DB::raw('IF((SELECT name as countries FROM countries WHERE id = users.country_id ) IS NULL,NULL,(SELECT name FROM countries WHERE id = users.country_id )) as country'))
             ->first();
 
         $user_phone = null;
