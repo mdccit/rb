@@ -48,7 +48,7 @@ class UserService
                 'user_types.name as user_type',
                 'users.created_at as joined_at',
                 'users.last_logged_at as last_seen_at'
-            );
+            )->orderBy('users.created_at', 'DESC');
 
         if($user_role != 0){
             $query->where('users.user_role_id', $user_role);

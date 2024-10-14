@@ -7,26 +7,35 @@ use App\Models\ModerationRequest;
 use Carbon\Carbon;
 use App\Models\User;
 use App\Models\ModerationLog;
-
 class ModerationRequestService
 {
     public function getAll (array $data){
         $per_page_items = array_key_exists("per_page_items",$data)?$data['per_page_items']:0;
+        $status = array_key_exists("status",$data)?$data['status']:'';
 
         $query = ModerationRequest::connect(config('database.secondary'))
+                   ->join('users', 'users.id', '=', 'moderation_requests.moderatable_id')
                     ->select(
-                        'id',
-                        'moderatable_type',
-                        'moderatable_id',
-                        'priority', 
-                        'created_by',
-                        'is_closed',
-                        'closed_at',
-                        'closed_by',
+                        'moderation_requests.id',
+                        'moderation_requests.moderatable_type',
+                        'moderation_requests.moderatable_id',
+                        'moderation_requests.priority', 
+                        'moderation_requests.created_by',
+                        'moderation_requests.is_closed',
+                        'moderation_requests.closed_at',
+                        'moderation_requests.closed_by',
+                        'moderation_requests.created_at',
+                        'users.display_name',
+                        'users.email'
                 )
                 ->orderBy('created_at', 'DESC');
-        
-        
+        if($status == 'open'){
+            $query->where('is_closed', false);
+        }
+
+        if($status == 'close'){
+            $query->where('is_closed', true);
+        }
         $dataSet = array();
         if($per_page_items != 0 ){
             $dataSet = $query->paginate($per_page_items);
