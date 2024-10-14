@@ -332,43 +332,46 @@ class SubscriptionController extends Controller
     }
 
     return response()->json($paymentHistory);
-  }  
+  }
 
 
-  public function getCustomerPaymentMethods(Request $request) {
+  public function getCustomerPaymentMethods(Request $request)
+  {
     $user = Auth::user();
 
     if (!$user->stripe_id) {
-        return response()->json(['error' => 'No Stripe customer ID found'], 404);
+      return response()->json(['error' => 'No Stripe customer ID found'], 404);
     }
 
-    // Call the StripeAPI function to retrieve payment methods
-    $stripeAPI = new StripeAPI();
-    $paymentMethods = $stripeAPI->getCustomerPaymentMethods($user->stripe_id);
+    try {
+      $paymentMethods = $this->stripeAPI->getCustomerPaymentMethods($user->stripe_id);
 
-    return response()->json($paymentMethods);
-}
+      return CommonResponse::getResponse(200, 'Subscription retrieved successfully', 'Subscription data retrieved successfully', $paymentMethods);
+    } catch (\Exception $e) {
+      return CommonResponse::getResponse(500, $e->getMessage(), 'Failed to retrieve subscription');
+
+    }
+  }
 
   /**
-     * Get the payment method summary for the currently active subscription.
-     */
-    public function getSubscriptionPaymentMethod(Request $request)
-    {
-        $user = auth()->user();
+   * Get the payment method summary for the currently active subscription.
+   */
+  public function getSubscriptionPaymentMethod(Request $request)
+  {
+    $user = auth()->user();
 
-        if (!$user->stripe_id) {
-            return response()->json(['error' => 'User does not have a Stripe customer ID.'], 404);
-        }
-
-        try {
-            $paymentMethod = $this->stripeAPI->getSubscriptionPaymentMethod($user->stripe_id);
-
-            return response()->json([
-                'payment_method' => $paymentMethod,
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
+    if (!$user->stripe_id) {
+      return response()->json(['error' => 'User does not have a Stripe customer ID.'], 404);
     }
+
+    try {
+      $paymentMethod = $this->stripeAPI->getSubscriptionPaymentMethod($user->stripe_id);
+
+      return CommonResponse::getResponse(200, 'Subscription retrieved successfully', 'Subscription data retrieved successfully', $paymentMethod);
+    } catch (\Exception $e) {
+      return CommonResponse::getResponse(500, $e->getMessage(), 'Failed to retrieve subscription');
+
+    }
+  }
 
 }
