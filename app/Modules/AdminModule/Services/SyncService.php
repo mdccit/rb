@@ -67,6 +67,7 @@ class SyncService
         $results = [];
 
         foreach ($response_results['results'] as $result) {
+            $connect_school =  School::connect(config('database.secondary'))->where('gov_id', $result['id'])->first();
             $results[] = [
                 'id' => $result['id'],
                 'name' => $result['school']['name'],
@@ -75,6 +76,7 @@ class SyncService
                 'state' => $result['school']['state'],
                 'zip' => $result['school']['zip'],
                 'school_url' => $result['school']['school_url'],
+                'connect' =>  $connect_school
            ];
        }
 
