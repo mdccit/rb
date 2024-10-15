@@ -94,6 +94,8 @@ class MigrateInOrder extends Command
             '2024_08_13_070939_create_posts_table.php',
             '2024_08_14_041548_create_comments_table.php',
             '2024_08_14_041613_create_likes_table.php',
+            '2024_08_28_062152_create_sync_logs_table.php',
+            '2024_08_31_041541_create_sync_settings_table.php',
             '2024_08_30_064700_create_moderation_requests_table.php',
             '2024_08_30_064727_create_moderation_comments_table.php',
             '2024_08_30_105500_add_slug_column_to_users_table.php',
@@ -134,6 +136,7 @@ class MigrateInOrder extends Command
         $this->call(PlayerBudgetSeeder::class);
         $this->call(ConferenceSeeder::class);
         $this->call(DivisionSeeder::class);
+        $this->call(SyncSettingSeeder::class);
 
         $this->call(UserSeeder::class);
         $this->call(SportSeeder::class);
