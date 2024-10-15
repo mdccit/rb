@@ -111,6 +111,7 @@ class MigrateInOrder extends Command
             '2024_09_19_103015_add_new_sport_id_column_to_coaches_table.php',
             '2024_09_16_200041_create_media_information_table.php',
             '2024_09_16_200133_create_media_table.php',
+            '2024_10_15_030838_add_other_data_column_to_transfer_player_table.php',
 
         ];
 

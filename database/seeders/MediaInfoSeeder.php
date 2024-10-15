@@ -24,7 +24,8 @@ class MediaInfoSeeder extends Seeder
 //            'business_profile_cover' => 'business/profile/cover/',
 //            'business_profile_media' => 'business/profile/media/',
 
-            'transcript' => 'user/profile/transcript/',
+            // 'transcript' => 'user/profile/transcript/',
+            'transfer_user_profile_picture' => 'user/profile/transfer/',
         ];
 
         // Iterate over the storage paths and create the entries in the MediaInformation table
