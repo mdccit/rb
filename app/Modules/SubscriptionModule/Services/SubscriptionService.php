@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use App\Extra\ThirdPartyAPI\StripeAPI;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
+use App\Notifications\Subscription\PaymentSuccessEmail;
 
 use Stripe\Subscription as StripeSubscription;
 
@@ -29,22 +30,22 @@ class SubscriptionService
         if (!$user->stripe_id) {
             throw new \Exception('User does not have a Stripe customer ID.');
         }
-    
+
         // Retrieve active subscription for the customer from Stripe
         $stripeSubscriptions = $this->stripeAPI->getCustomerActiveSubscriptions($user->stripe_id);
-    
+
         // Ensure there is at least one active subscription
         if (empty($stripeSubscriptions->data)) {
             throw new \Exception('No active subscription found for this customer on Stripe.');
         }
-    
+
         // Get the first active subscription (assuming the user only has one active subscription)
         $activeSubscription = $stripeSubscriptions->data[0];
-    
+
         // Check if the subscription contains items and retrieve the price
         if (!empty($activeSubscription->items->data) && isset($activeSubscription->items->data[0]->price)) {
             $priceObject = $activeSubscription->items->data[0]->price;
-    
+
             // Prepare subscription data with price and currency
             $subscription = [
                 'stripe_subscription_id' => $activeSubscription->id,
@@ -54,14 +55,14 @@ class SubscriptionService
                 'price' => isset($priceObject->unit_amount) ? $priceObject->unit_amount / 100 : null,  // Convert to dollars
                 'currency' => isset($priceObject->currency) ? strtoupper($priceObject->currency) : null,
             ];
-    
+
             return $subscription;
         } else {
             throw new \Exception('No price found for this subscription on Stripe.');
         }
     }
-    
-    
+
+
     public function createSubscription($data, $user)
     {
         // Check if the user already has an active subscription
@@ -114,6 +115,14 @@ class SubscriptionService
             // If it's a paid subscription (monthly or annually), create the subscription using the payment method
             $stripeSubscription = $this->stripeAPI->createSubscription($stripeCustomerId, $priceId, $paymentMethodId);
 
+            if ($stripeSubscription) {
+                $amount = $stripeSubscription->amount;
+                $currency = strtoupper($stripeSubscription->currency);
+
+                // Trigger the payment success email notification
+                $user->notify(new PaymentSuccessEmail($stripeSubscription, $amount, $currency));
+            }
+
             $userSubscription = new Subscription();
             $userSubscription->user_id = $user->id;
             $userSubscription->subscription_type = $data['subscription_type']; // 'monthly' or 'annually'
@@ -121,6 +130,7 @@ class SubscriptionService
             $userSubscription->start_date = Carbon::now();
             $userSubscription->end_date = $data['subscription_type'] === 'monthly' ? Carbon::now()->addMonth() : Carbon::now()->addYear();
             $userSubscription->save();
+
 
             return $userSubscription;
         }
@@ -327,16 +337,16 @@ class SubscriptionService
     {
         // Retrieve the subscription with the associated user
         $subscription = Subscription::with('user')->findOrFail($id);
-    
+
         // Retrieve the subscription from Stripe if available
         if ($subscription->stripe_subscription_id) {
             $stripeSubscription = $this->stripeAPI->retrieveSubscription($subscription->stripe_subscription_id);
             $subscription->stripe_details = $stripeSubscription;
-    
+
             // Check if the subscription contains items and retrieve the price
             if (!empty($stripeSubscription->items->data) && isset($stripeSubscription->items->data[0]->price)) {
                 $priceObject = $stripeSubscription->items->data[0]->price;
-    
+
                 // Get the unit amount and currency
                 $subscription->price = isset($priceObject->unit_amount) ? $priceObject->unit_amount / 100 : null;  // Convert to dollars
                 $subscription->currency = isset($priceObject->currency) ? strtoupper($priceObject->currency) : null;
@@ -344,9 +354,9 @@ class SubscriptionService
                 throw new \Exception('No price found for this subscription.');
             }
         }
-    
+
         return $subscription;
     }
-    
+
 
 }

@@ -65,12 +65,12 @@
 	  </svg>
 
         <h3>Payment Successful!  <br> Thank You for Your Purchase</h3>
-		<p style="font-size: 14px; color: #4d4949;"><b>Hi Lahiru</b></p>
+		<p style="font-size: 14px; color: #4d4949;"><b>Hi {{ $display_name }} </b></p>
         <p style="font-size: 16px; color: #4d4949;">We’re happy to inform you that your payment was successfully processed! Thank you for choosing Recruited
         </p>
         <p style="font-size: 14px; color: #4d4949;"><b>Here are the details of your payment</b></p>
-		<p style="font-size: 14px; color: #4d4949;">Amount Paid: $100.00</p>
-		<p style="font-size: 14px; color: #4d4949;">Payment Date: 2024 11 05</p>
+		<p style="font-size: 14px; color: #4d4949;">Amount Paid:  {{ $currency }} {{ number_format($amount, 2) }}</p>
+		<p style="font-size: 14px; color: #4d4949;">Payment Date: {{ $subscription->start_date }}</p>
 		<p style="font-size: 14px; color: #4d4949;">Transaction ID: 129-283</p>
       
         <br>

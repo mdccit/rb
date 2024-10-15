@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use App\Models\Subscription;
 use Carbon\Carbon;
+use App\Notifications\Subscription\PaymentSuccessEmail;
 
 
 class SubscriptionController extends Controller
@@ -233,6 +234,7 @@ class SubscriptionController extends Controller
   public function createSubscription(Request $request)
   {
     $user = $request->user(); // Assuming the user is authenticated
+    $displayName = $user->display_name;
     $paymentMethodId = $request->input('payment_method_id');
     $subscriptionType = $request->input('subscription_type'); // monthly, annually, or trial
 
@@ -248,6 +250,8 @@ class SubscriptionController extends Controller
       // Create the subscription with the payment method
       $stripeSubscription = $this->stripeAPI->createSubscription($user->stripe_id, $priceId, $paymentMethodId);
 
+
+
       // Save the subscription details to the database
       $userSubscription = new Subscription();
       $userSubscription->user_id = $user->id;
@@ -256,6 +260,15 @@ class SubscriptionController extends Controller
       $userSubscription->start_date = Carbon::now();
       $userSubscription->end_date = $subscriptionType === 'monthly' ? Carbon::now()->addMonth() : Carbon::now()->addYear();
       $userSubscription->save();
+
+      if ($stripeSubscription) {
+        $amount = $stripeSubscription->amount;
+        $currency = strtoupper($stripeSubscription->currency);
+
+        // Trigger the payment success email notification
+        $user->notify(new PaymentSuccessEmail($stripeSubscription, $amount, $currency ,$displayName ));
+    }
+
 
       return response()->json(['status' => 'success', 'message' => 'Subscription created successfully']);
 
