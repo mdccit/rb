@@ -13,6 +13,10 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         // $schedule->command('inspire')->hourly();
+        // $schedule->call(function () {
+        //     // Handle subscription expiration and grace period
+        //     app('App\Modules\AuthModule\Services\RegisterService')->handleSubscriptionExpiration();
+        // })->daily(); // Run the job every day
     }
 
     /**
