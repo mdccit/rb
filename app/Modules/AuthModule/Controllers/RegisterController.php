@@ -183,4 +183,57 @@ class RegisterController extends Controller
             );
         }
     }
+
+
+    public function coachRegisterStep3(Request $request)
+{
+    try {
+        $validator = Validator::make($request->all(), [
+            'user_type' => 'required|in:2,3', // 2: Standard, 3: Premium
+            'subscription_type' => 'required|in:trial,paid', // For selecting subscription type
+        ]);
+
+        if ($validator->fails()) {
+            return CommonResponse::getResponse(
+                422,
+                $validator->errors(),
+                'Input validation failed'
+            );
+        }
+
+        $user = $request->user();
+
+        // Check if the user is a coach
+        if (!$user->isCoach()) {
+            return CommonResponse::getResponse(
+                403,
+                'User is not authorized as a coach',
+                'Unauthorized access'
+            );
+        }
+
+        // If the user selects Premium (user_type = 3), set up subscription
+        if ($request->input('user_type') == 3) {
+            // Create a new subscription (trial or paid) for the user
+            $subscription = $this->registerService->createSubscription($request->all(), $user);
+
+            // Assign premium user type to the user
+            $user->user_type_id = 3; // Premium user type
+            $user->save();
+        }
+
+        return CommonResponse::getResponse(
+            200,
+            'Successfully registered for premium account',
+            'Step 3 completed'
+        );
+    } catch (\Exception $e) {
+        return CommonResponse::getResponse(
+            422,
+            $e->getMessage(),
+            'Something went wrong'
+        );
+    }
+}
+
 }
