@@ -73,7 +73,7 @@ Route::group(['namespace' => 'App\Modules\AdminModule\Controllers','prefix' => '
                 Route::post('/resource-categories-create', 'ResourceCategoriesController@storeCategory')->name('admin.resources-category.create');
                 Route::put('/resource-categories-update/{id}', 'ResourceCategoriesController@updateCategory')->name('admin.resources-category.update');
                 Route::delete('/resource-categories-delete/{id}', 'ResourceCategoriesController@destroyCategory')->name('admin.resources-category.delete');
-                
+
                 //resource
                 Route::get('/resource', 'ResourceController@index')->name('admin.resources.index');
                 Route::post('/resource-create', 'ResourceController@store')->name('admin.resources.create');
@@ -91,7 +91,7 @@ Route::group(['namespace' => 'App\Modules\AdminModule\Controllers','prefix' => '
                 Route::get('/player-get/{id}', 'PlayerController@getUser')->name('admin.player.index');
                 Route::put('/player-update/{id}', 'PlayerController@updateUser')->name('admin.player.update');
 
-                //morderation 
+                //morderation
                 Route::get('/morderation-get-all', 'ModerationRequestController@getAll')->name('admin.morderation.get-all');
                 Route::get('/morderation-get/{id}', 'ModerationRequestController@get')->name('admin.morderation.get');
                 Route::put('/morderation-close/{id}', 'ModerationRequestController@close')->name('admin.morderation.close');
@@ -102,6 +102,11 @@ Route::group(['namespace' => 'App\Modules\AdminModule\Controllers','prefix' => '
                 Route::put('/morderation-approve/{id}', 'ModerationRequestController@userApprove')->name('admin.morderation.approve');
                 Route::get('/morderation-log/{id}', 'ModerationRequestController@getAllModerationLog')->name('admin.morderation.log');
                 Route::get('/morderation-open-count', 'ModerationRequestController@getAllModerationOpenCount')->name('admin.morderation.open-count');
+
+                // Transcript
+                Route::get('/transcript/get-transcripts', 'TranscriptController@getTranscripts')->name('admin.transcript.get');
+                Route::put('/transcript/update-transcript/{id}', 'TranscriptController@updateTranscript')->name('admin.transcript.update');
+                Route::delete('/transcript/delete-transcript/{id}', 'TranscriptController@deleteTranscript')->name('admin.transcript.delete');
 
             });
 
