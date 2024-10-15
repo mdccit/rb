@@ -164,9 +164,15 @@ class StripeAPI
 
       Log::info("Payment method $paymentMethodId attached successfully to customer $customerId");
 
+      // Return a success message in case of successful attachment
+      return ['status' => 'success', 'message' => 'Payment method attached successfully.'];
+
+
     } catch (\Exception $e) {
       Log::error('Error attaching payment method: ' . $e->getMessage());
-      throw new \Exception('Failed to attach payment method to customer: ' . $e->getMessage());
+
+      // Return an error message if there is an exception
+      return ['status' => 'error', 'message' => $e->getMessage()];
     }
   }
 

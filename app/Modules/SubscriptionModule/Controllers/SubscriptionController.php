@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Log;
 use App\Models\Subscription;
 use Carbon\Carbon;
 use App\Notifications\Subscription\PaymentSuccessEmail;
+use Stripe\PaymentMethod;
+use Stripe\Customer;
 
 
 class SubscriptionController extends Controller
@@ -266,8 +268,8 @@ class SubscriptionController extends Controller
         $currency = strtoupper($stripeSubscription->currency);
 
         // Trigger the payment success email notification
-        $user->notify(new PaymentSuccessEmail($stripeSubscription, $amount, $currency ,$displayName ));
-    }
+        $user->notify(new PaymentSuccessEmail($stripeSubscription, $amount, $currency, $displayName));
+      }
 
 
       return response()->json(['status' => 'success', 'message' => 'Subscription created successfully']);
@@ -422,5 +424,139 @@ class SubscriptionController extends Controller
       return CommonResponse::getResponse(500, $e->getMessage(), 'Failed to create subscription');
     }
   }
+
+  public function update(Request $request)
+  {
+    try {
+      $user = $request->user();
+      $subscription = $user->subscription;
+
+      if (!$subscription) {
+        return CommonResponse::getResponse(404, 'No active subscription found', 'Subscription not found.');
+      }
+
+      $validatedData = $request->validate([
+        'subscription_type' => 'in:trial,monthly,annually',
+        'is_auto_renewal' => 'boolean',
+      ]);
+
+      if (isset($validatedData['subscription_type'])) {
+        $subscription->subscription_type = $validatedData['subscription_type'];
+      }
+
+      if (isset($validatedData['is_auto_renewal'])) {
+        $subscription->is_auto_renewal = $validatedData['is_auto_renewal'];
+      }
+
+      $subscription->save();
+
+      return CommonResponse::getResponse(200, 'Subscription updated successfully', 'Subscription updated successfully.', $subscription);
+    } catch (\Exception $e) {
+      return CommonResponse::getResponse(500, $e->getMessage(), 'Failed to update subscription');
+    }
+  }
+
+
+  public function upgrade(Request $request)
+  {
+    try {
+      $user = $request->user();
+      $subscription = $user->subscription;
+
+      if (!$subscription || $subscription->status !== 'active') {
+        return CommonResponse::getResponse(404, 'No active subscription found', 'Subscription not found.');
+      }
+
+      $validatedData = $request->validate([
+        'subscription_type' => 'required|in:monthly,annually',
+      ]);
+
+      if ($validatedData['subscription_type'] === 'monthly') {
+        $subscription->subscription_type = 'monthly';
+        $subscription->end_date = now()->addMonth();
+      } elseif ($validatedData['subscription_type'] === 'annually') {
+        $subscription->subscription_type = 'annually';
+        $subscription->end_date = now()->addYear();
+      }
+
+      $subscription->save();
+
+      return CommonResponse::getResponse(200, 'Subscription upgraded successfully', 'Subscription upgraded successfully.', $subscription);
+    } catch (\Exception $e) {
+      return CommonResponse::getResponse(500, $e->getMessage(), 'Failed to upgrade subscription');
+    }
+  }
+
+  public function checkStatus(Request $request)
+  {
+    try {
+      $user = $request->user();
+      $subscription = $user->subscription;
+
+      if (!$subscription) {
+        return CommonResponse::getResponse(404, 'No active subscription found', 'Subscription not found.');
+      }
+
+      return CommonResponse::getResponse(200, 'Subscription status retrieved successfully', 'Subscription status retrieved.', [
+        'subscription_type' => $subscription->subscription_type,
+        'status' => $subscription->status,
+        'start_date' => $subscription->start_date,
+        'end_date' => $subscription->end_date,
+        'is_auto_renewal' => $subscription->is_auto_renewal,
+      ]);
+    } catch (\Exception $e) {
+      return CommonResponse::getResponse(500, $e->getMessage(), 'Failed to retrieve subscription status');
+    }
+  }
+
+  public function getUpcomingInvoice(Request $request)
+  {
+    try {
+      $user = $request->user();
+      $stripeCustomerId = $user->stripe_id;
+
+      if (!$stripeCustomerId) {
+        return CommonResponse::getResponse(404, 'Stripe customer ID not found', 'User does not have a Stripe customer ID.');
+      }
+
+      $upcomingInvoice = \Stripe\Invoice::upcoming([
+        'customer' => $stripeCustomerId,
+      ]);
+
+      return CommonResponse::getResponse(200, 'Upcoming invoice retrieved successfully', 'Stripe upcoming invoice retrieved.', $upcomingInvoice);
+    } catch (\Exception $e) {
+      return CommonResponse::getResponse(500, $e->getMessage(), 'Failed to retrieve upcoming invoice');
+    }
+  }
+  public function updatePaymentMethod(Request $request)
+  {
+      try {
+          $user = $request->user();
+          $stripeCustomerId = $user->stripe_id;
+  
+          if (!$stripeCustomerId) {
+              return CommonResponse::getResponse(404, 'Stripe customer ID not found', 'User does not have a Stripe customer ID.');
+          }
+  
+          $validatedData = $request->validate([
+              'payment_method_id' => 'required|string',
+          ]);
+  
+          $paymentMethodId = $validatedData['payment_method_id'];
+  
+          // Call StripeAPI service to attach the payment method
+          $result = $this->stripeAPI->attachPaymentMethodToCustomer($paymentMethodId, $stripeCustomerId);
+  
+          if ($result['status'] === 'error') {
+              return CommonResponse::getResponse(500, $result['message'], 'Failed to update payment method.');
+          }
+  
+          return CommonResponse::getResponse(200, 'Payment method updated successfully', 'Stripe payment method updated successfully.');
+      } catch (\Exception $e) {
+          return CommonResponse::getResponse(500, $e->getMessage(), 'Failed to update payment method');
+      }
+  }
+  
+
 
 }
