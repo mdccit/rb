@@ -17,6 +17,7 @@ class ResourceCategoriesService
                         'title',
                         'description',
                         'icon',
+                        'created_at'
                 );
         if ($search_key != null) {
             $query->where('title', 'LIKE', '%' . $search_key . '%');
