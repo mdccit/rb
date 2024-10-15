@@ -410,28 +410,4 @@ class SubscriptionController extends Controller
     }
   }
 
-
-  public function adminListSubscriptions(Request $request)
-  {
-    try {
-      $subscriptions = $this->subscriptionService->getAllSubscriptions($request);
-
-      return CommonResponse::getResponse(200, 'Subscription retrieved successfully', 'Recurring retrieved successfully.', $subscriptions);
-    } catch (\Exception $e) {
-      return CommonResponse::getResponse(500, $e->getMessage(), 'Failed to create subscription');
-    } 
-  }
-
-  public function getSubscriptionDetails($id)
-  {
-    try {
-      $subscription = $this->subscriptionService->getSubscriptionBySubscriptionId($id);
-      return CommonResponse::getResponse(200, 'Subscription details retrieved successfully', 'Subscription data retrieved successfully', $subscription);
-    } catch (\Exception $e) {
-      return CommonResponse::getResponse(500, $e->getMessage(), 'Failed to retrieve subscription details');
-    }
-  }
-
-
-
 }
