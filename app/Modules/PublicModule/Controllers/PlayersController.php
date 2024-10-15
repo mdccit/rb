@@ -428,7 +428,18 @@ class PlayersController extends Controller
                 'itf_ranking' => 'required|numeric',
                 'national_ranking' => 'required|numeric',
                 'wtn_score_manual' => 'required|numeric',
-            ]);
+            ],
+                [
+                    'gpa.required' => 'The GPA field is required',
+                    'utr.required' => 'The UTR field is required',
+                    'sat_score.required' => 'The SAT Score field is required',
+                    'act_score.required' => 'The ACT Score field is required',
+                    'toefl_score.required' => 'The TOEFL Score field is required',
+                    'atp_ranking.required' => 'The ATP Ranking field is required',
+                    'itf_ranking.required' => 'The ITF Ranking field is required',
+                    'national_ranking.required' => 'The National Ranking field is required',
+                    'wtn_score_manual.required' => 'The WTN Score field is required',
+                ]);
             if ($validator->fails())
             {
                 return CommonResponse::getResponse(
