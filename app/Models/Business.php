@@ -29,10 +29,15 @@ class Business extends Model
     protected $fillable = [
         'name',
         'bio',
+        'slug',
         'is_verified',
         'is_approved',
         'url',
         'other_data',
+
+        'other_data->total_members',
+        'other_data->editors',
+        'other_data->viewers',
     ];
 
     /**

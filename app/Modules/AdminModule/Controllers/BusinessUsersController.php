@@ -73,7 +73,7 @@ class BusinessUsersController extends Controller
             {
                 return CommonResponse::getResponse(
                     422,
-                    $validator->errors()->all(),
+                    $validator->errors(),
                     'Input validation failed'
                 );
             }
@@ -84,6 +84,69 @@ class BusinessUsersController extends Controller
                 200,
                 'Successfully Added',
                 'Successfully Added'
+            );
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    }
+
+    public function updateBusinessUserManageType(Request $request,$user_id)
+    {
+        try{
+            $validator = Validator::make($request->all(), [
+                'business' => 'required|string',
+                'user_permission_type' => 'required|string|in:viewer,editor',
+            ]);
+            if ($validator->fails())
+            {
+                return CommonResponse::getResponse(
+                    422,
+                    $validator->errors(),
+                    'Input validation failed'
+                );
+            }
+
+            $this->businessUserService->updateBusinessUserManageType($request->all(),$user_id);
+
+            return CommonResponse::getResponse(
+                200,
+                'Successfully updated',
+                'Successfully updated'
+            );
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    }
+
+    public function removeBusinessUser(Request $request,$user_id)
+    {
+        try{
+            $validator = Validator::make($request->all(), [
+                'business' => 'required|string',
+            ]);
+            if ($validator->fails())
+            {
+                return CommonResponse::getResponse(
+                    422,
+                    $validator->errors(),
+                    'Input validation failed'
+                );
+            }
+
+            $this->businessUserService->removeBusinessUser($request->all(),$user_id);
+
+            return CommonResponse::getResponse(
+                200,
+                'Successfully removed',
+                'Successfully removed'
             );
         }catch (\Exception $e){
             return CommonResponse::getResponse(

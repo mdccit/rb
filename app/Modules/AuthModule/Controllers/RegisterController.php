@@ -25,7 +25,7 @@ class RegisterController extends Controller
             $validator = Validator::make($request->all(), [
                 'country' => 'required|numeric',
                 'phone_code_country' => 'required|numeric',
-                'phone_number' => 'required|string|max:15|unique:user_phones',
+                'phone_number' => 'required|string|max:15',
                 'gender' => 'required|string|in:male,female,other',
                 'handedness' => 'required|string|in:right,left,both',
                 'height_in_cm' => 'boolean',
@@ -42,7 +42,7 @@ class RegisterController extends Controller
             {
                 return CommonResponse::getResponse(
                     422,
-                    $validator->errors()->all(),
+                    $validator->errors(),
                     'Input validation failed'
                 );
             }
@@ -52,8 +52,8 @@ class RegisterController extends Controller
 
             return CommonResponse::getResponse(
                 200,
-                'Successfully Updated',
-                'Successfully Updated'
+                'Your account has been successfully updated',
+                'Your account has been successfully updated'
             );
         }catch (\Exception $e){
             return CommonResponse::getResponse(
@@ -70,13 +70,13 @@ class RegisterController extends Controller
             $validator = Validator::make($request->all(), [
                 'country' => 'required|numeric',
                 'phone_code_country' => 'required|numeric',
-                'phone_number' => 'required|string|max:15|unique:user_phones',
+                'phone_number' => 'required|string|max:15',
             ]);
             if ($validator->fails())
             {
                 return CommonResponse::getResponse(
                     422,
-                    $validator->errors()->all(),
+                    $validator->errors(),
                     'Input validation failed'
                 );
             }
@@ -104,13 +104,13 @@ class RegisterController extends Controller
             $validator = Validator::make($request->all(), [
                 'country' => 'required|numeric',
                 'phone_code_country' => 'required|numeric',
-                'phone_number' => 'required|string|max:15|unique:user_phones',
+                'phone_number' => 'required|string|max:15',
             ]);
             if ($validator->fails())
             {
                 return CommonResponse::getResponse(
                     422,
-                    $validator->errors()->all(),
+                    $validator->errors(),
                     'Input validation failed'
                 );
             }
@@ -138,7 +138,7 @@ class RegisterController extends Controller
             $validator = Validator::make($request->all(), [
                 'country' => 'required|numeric',
                 'phone_code_country' => 'required|numeric',
-                'phone_number' => 'required|string|max:15|unique:user_phones',
+                'phone_number' => 'required|string|max:15',
 
                 'player_first_name' => 'required|string|max:45',
                 'player_last_name' => 'required|string|max:45',
@@ -162,7 +162,7 @@ class RegisterController extends Controller
             {
                 return CommonResponse::getResponse(
                     422,
-                    $validator->errors()->all(),
+                    $validator->errors(),
                     'Input validation failed'
                 );
             }
