@@ -20,6 +20,16 @@ class StripeAPI
     Stripe::setApiKey(config('services.stripe.secret'));
   }
 
+
+  public function getCustomerActiveSubscriptions($stripeCustomerId)
+  {
+    return Subscription::all([
+      'customer' => $stripeCustomerId,
+      'status' => 'active',
+    ]);
+  }
+
+
   public function createSetupIntent($customerId)
   {
     try {

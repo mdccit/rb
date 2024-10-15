@@ -25,15 +25,43 @@ class SubscriptionService
     // Get the current user's subscription
     public function getUserSubscription($user)
     {
-        $subscription = $user->subscription;
-
-        if (!$subscription) {
-            throw new \Exception('No active subscription found.');
+        // Ensure the user has a Stripe customer ID
+        if (!$user->stripe_id) {
+            throw new \Exception('User does not have a Stripe customer ID.');
         }
-
-        return $subscription;
+    
+        // Retrieve active subscription for the customer from Stripe
+        $stripeSubscriptions = $this->stripeAPI->getCustomerActiveSubscriptions($user->stripe_id);
+    
+        // Ensure there is at least one active subscription
+        if (empty($stripeSubscriptions->data)) {
+            throw new \Exception('No active subscription found for this customer on Stripe.');
+        }
+    
+        // Get the first active subscription (assuming the user only has one active subscription)
+        $activeSubscription = $stripeSubscriptions->data[0];
+    
+        // Check if the subscription contains items and retrieve the price
+        if (!empty($activeSubscription->items->data) && isset($activeSubscription->items->data[0]->price)) {
+            $priceObject = $activeSubscription->items->data[0]->price;
+    
+            // Prepare subscription data with price and currency
+            $subscription = [
+                'stripe_subscription_id' => $activeSubscription->id,
+                'start_date' => Carbon::createFromTimestamp($activeSubscription->current_period_start),
+                'end_date' => Carbon::createFromTimestamp($activeSubscription->current_period_end),
+                'status' => $activeSubscription->status,
+                'price' => isset($priceObject->unit_amount) ? $priceObject->unit_amount / 100 : null,  // Convert to dollars
+                'currency' => isset($priceObject->currency) ? strtoupper($priceObject->currency) : null,
+            ];
+    
+            return $subscription;
+        } else {
+            throw new \Exception('No price found for this subscription on Stripe.');
+        }
     }
-
+    
+    
     public function createSubscription($data, $user)
     {
         // Check if the user already has an active subscription
@@ -296,17 +324,29 @@ class SubscriptionService
     }
 
     public function getSubscriptionBySubscriptionId($id)
-{
-    // Retrieve the subscription with the associated user and Stripe data
-    $subscription = Subscription::with('user')->findOrFail($id);
-
-    // Optionally, retrieve Stripe subscription data if necessary
-    if ($subscription->stripe_subscription_id) {
-        $stripeSubscription = $this->stripeAPI->retrieveSubscription($subscription->stripe_subscription_id);
-        $subscription->stripe_details = $stripeSubscription;
+    {
+        // Retrieve the subscription with the associated user
+        $subscription = Subscription::with('user')->findOrFail($id);
+    
+        // Retrieve the subscription from Stripe if available
+        if ($subscription->stripe_subscription_id) {
+            $stripeSubscription = $this->stripeAPI->retrieveSubscription($subscription->stripe_subscription_id);
+            $subscription->stripe_details = $stripeSubscription;
+    
+            // Check if the subscription contains items and retrieve the price
+            if (!empty($stripeSubscription->items->data) && isset($stripeSubscription->items->data[0]->price)) {
+                $priceObject = $stripeSubscription->items->data[0]->price;
+    
+                // Get the unit amount and currency
+                $subscription->price = isset($priceObject->unit_amount) ? $priceObject->unit_amount / 100 : null;  // Convert to dollars
+                $subscription->currency = isset($priceObject->currency) ? strtoupper($priceObject->currency) : null;
+            } else {
+                throw new \Exception('No price found for this subscription.');
+            }
+        }
+    
+        return $subscription;
     }
-
-    return $subscription;
-}
+    
 
 }
