@@ -17,6 +17,7 @@ use App\Traits\GeneralHelpers;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use App\Models\Subscription;
 
 class RegisterService
 {
@@ -233,6 +234,53 @@ class RegisterService
                     'height' => $height,
                     'other_data' => $other_data
                 ]);
+        }
+    }
+    public function createSubscription($data, $user)
+    {
+        $subscriptionType = $data['subscription_type']; // trial, monthly, or annually
+        $autoRenewal = $data['is_auto_renewal'] ?? false;
+
+        // Check if the user already has a subscription
+        if ($user->subscription) {
+            return response()->json(['message' => 'User already has a subscription.'], 400);
+        }
+
+        // Create a new subscription
+        $subscription = new Subscription();
+        $subscription->user_id = $user->id;
+
+        if ($subscriptionType === 'trial') {
+            // Start a trial subscription
+            $subscription->startTrial();
+        } else {
+            // Start a paid subscription (monthly or annually)
+            $subscription->startPaid($subscriptionType, $autoRenewal);
+        }
+
+        return $subscription;
+    }
+
+    public function handleSubscriptionExpiration()
+    {
+        // Find all subscriptions that are expired but within the grace period
+        $subscriptions = Subscription::where('status', 'expired')
+            ->orWhere(function ($query) {
+                $query->where('status', 'expired')
+                      ->whereDate('end_date', '>', Carbon::now()->subDays(Subscription::GRACE_PERIOD_DAYS));
+            })
+            ->get();
+
+        foreach ($subscriptions as $subscription) {
+            // If the subscription is still within the grace period, allow access
+            if ($subscription->isInGracePeriod()) {
+                // If in grace period, you can notify the user or keep the status as 'expired'
+                // but allow access to services until grace period ends
+                continue;
+            }
+
+            // If grace period is over, end it and mark the subscription as fully expired
+            $subscription->endGracePeriod();
         }
     }
 }

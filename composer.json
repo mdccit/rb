@@ -10,6 +10,7 @@
         "google/apiclient": "^2.17",
         "guzzlehttp/guzzle": "^7.2",
         "hisorange/browser-detect": "^5.0",
+        "laravel/cashier": "*",
         "laravel/framework": "^10.10",
         "laravel/passport": "^12.2",
         "laravel/sanctum": "^3.3",
@@ -19,7 +20,8 @@
         "spatie/pdf-to-image": "^1.2",
         "spatie/pdf-to-text": "^1.53",
         "spatie/temporary-directory": "^2.2",
-        "thiagoalessio/tesseract_ocr": "^2.13"
+        "thiagoalessio/tesseract_ocr": "^2.13",
+        "stripe/stripe-php": "^13.18"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",
