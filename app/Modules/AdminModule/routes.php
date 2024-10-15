@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::group(['namespace' => 'App\Modules\AdminModule\Controllers','prefix' => 'api/'.config('app.version'), 'middleware' => ['api','access.key','locale','cors', 'json.response']], function() {
+Route::group(['namespace' => 'App\Modules\AdminModule\Controllers', 'prefix' => 'api/' . config('app.version'), 'middleware' => ['api', 'access.key', 'locale', 'cors', 'json.response']], function () {
 
     //TODO All PublicModule routes define here
     Route::prefix('admin')->group(function () {
@@ -73,7 +73,7 @@ Route::group(['namespace' => 'App\Modules\AdminModule\Controllers','prefix' => '
                 Route::post('/resource-categories-create', 'ResourceCategoriesController@storeCategory')->name('admin.resources-category.create');
                 Route::put('/resource-categories-update/{id}', 'ResourceCategoriesController@updateCategory')->name('admin.resources-category.update');
                 Route::delete('/resource-categories-delete/{id}', 'ResourceCategoriesController@destroyCategory')->name('admin.resources-category.delete');
-                
+
                 //resource
                 Route::get('/resource', 'ResourceController@index')->name('admin.resources.index');
                 Route::post('/resource-create', 'ResourceController@store')->name('admin.resources.create');
@@ -102,6 +102,14 @@ Route::group(['namespace' => 'App\Modules\AdminModule\Controllers','prefix' => '
                 Route::put('/morderation-approve/{id}', 'ModerationRequestController@userApprove')->name('admin.morderation.approve');
                 Route::get('/morderation-log/{id}', 'ModerationRequestController@getAllModerationLog')->name('admin.morderation.log');
                 Route::get('/morderation-open-count', 'ModerationRequestController@getAllModerationOpenCount')->name('admin.morderation.open-count');
+
+
+
+                // Admin Panel Subscriptions
+                Route::get('/subscriptions', 'SubscriptionController@adminListSubscriptions')->name('admin.subscriptions.list');
+                Route::get('/subscription/{id}', 'SubscriptionController@getSubscriptionDetails')->name('admin.subscription.view');
+                Route::put('/subscription/{id}/status', 'SubscriptionController@updateSubscriptionStatus')->name('admin.subscription.update.status');
+                Route::put('/subscription/{id}/cancel', 'SubscriptionController@cancelSubscription')->name('admin.subscription.cancel');
 
             });
 

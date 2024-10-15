@@ -239,7 +239,7 @@ class RegisterService
     public function createSubscription($data, $user)
     {
         $subscriptionType = $data['subscription_type']; // trial, monthly, or annually
-        $autoRenewal = $data['auto_renewal'] ?? false;
+        $autoRenewal = $data['is_auto_renewal'] ?? false;
 
         // Check if the user already has a subscription
         if ($user->subscription) {
