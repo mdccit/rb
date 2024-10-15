@@ -8,9 +8,13 @@ use Database\Seeders\CurrencySeeder;
 use Database\Seeders\DivisionSeeder;
 use Database\Seeders\NationalitySeeder;
 use Database\Seeders\PlayerBudgetSeeder;
+use Database\Seeders\SportSeeder;
 use Database\Seeders\UserRoleSeeder;
+use Database\Seeders\UserSeeder;
 use Database\Seeders\UserTypeSeeder;
+use Database\Seeders\MediaInformationSeeder;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 class MigrateInOrder extends Command
 {
@@ -83,12 +87,31 @@ class MigrateInOrder extends Command
             '2024_08_05_162830_create_business_managers_table.php',
             '2024_08_13_065442_create_resource_categories_table.php',
             '2024_08_13_100733_create_resources_table.php',
+            '2024_09_04_064002_create_connection_requests_table.php',
             '2024_08_21_051101_create_conversations_table.php',
             '2024_08_20_061356_create_chat_messages_table.php',
             '2024_08_14_070409_create_transfer_players_table.php',
             '2024_08_13_070939_create_posts_table.php',
             '2024_08_14_041548_create_comments_table.php',
-            '2024_08_14_041613_create_likes_table.php'
+            '2024_08_14_041613_create_likes_table.php',
+            '2024_08_30_064700_create_moderation_requests_table.php',
+            '2024_08_30_064727_create_moderation_comments_table.php',
+            '2024_08_30_105500_add_slug_column_to_users_table.php',
+            '2024_09_03_111301_add_slug_column_to_schools_table.php',
+            '2024_09_04_035811_add_slug_column_to_businesses_table.php',
+            '2024_09_04_050449_add_preferred_gender_type_column_to_coaches_table.php',
+            '2024_09_06_052537_create_moderation_logs_table.php',
+            '2024_09_04_100828_create_recent_searches_table.php',
+            '2024_09_04_101938_create_save_searches_table.php',
+            '2024_09_06_052537_create_moderation_logs_table.php',
+            '2024_09_15_153755_create_school_teams_table.php',
+            '2024_09_20_153806_create_school_team_users_table.php',
+            '2024_09_19_100207_create_sports_table.php',
+            '2024_09_19_100453_add_new_sport_id_column_to_players_table.php',
+            '2024_09_19_103015_add_new_sport_id_column_to_coaches_table.php',
+            '2024_09_16_200041_create_media_information_table.php',
+            '2024_09_16_200133_create_media_table.php',
+
         ];
 
 
@@ -111,6 +134,10 @@ class MigrateInOrder extends Command
         $this->call(PlayerBudgetSeeder::class);
         $this->call(ConferenceSeeder::class);
         $this->call(DivisionSeeder::class);
+
+        $this->call(UserSeeder::class);
+        $this->call(SportSeeder::class);
+        $this->call(MediaInformationSeeder::class);
 
         //Passport Config
         //Create personal client for 'RecruitedProV2'

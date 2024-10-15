@@ -36,6 +36,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'other_names',
         'display_name',
         'email',
+        'bio',
         'password',
         'provider_id',
         'provider_name',
@@ -44,7 +45,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'user_type_id',
         'country_id',
         'nationality_id',
+        'slug',
         'gender',
+        'is_approved',
         'date_of_birth',
         'email_verified_at',
         'last_logged_at'
