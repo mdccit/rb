@@ -151,7 +151,7 @@ class ResourceController extends Controller
             'title' => 'required|string|max:255',
             'content' => 'required|string|min:3|max:9999999', 
             'weight' => 'required|integer',
-            'category_id' => 'required|integer|exists:resource_categories,id',
+            'category_id' => 'required|exists:resource_categories,id',
         ]);
 
         return $validator;
