@@ -20,7 +20,8 @@ class TransferPlayer extends Model
     }
 
     protected $fillable = [
-        'name',
+        'first_name',
+        'last_name',
         'school',
         'utr_score_manual',
         'year',
@@ -34,6 +35,8 @@ class TransferPlayer extends Model
         'phone_number',
         'height',
         'gender',
+        'other_data',
+        'sport_id',
         'created_by',
     ];
 
