@@ -62,7 +62,7 @@ class ResourceService
                     ]);
     }
 
-    public function update(array $data, int $resource_id){
+    public function update(array $data,  $resource_id){
         
         Resource::connect(config('database.default'))
                 ->where('id', $resource_id)
@@ -75,7 +75,7 @@ class ResourceService
     
     }
 
-    public function destroy(int $resource_id){
+    public function destroy( $resource_id){
        
         Resource::connect(config('database.default'))->destroy($resource_id);
         
