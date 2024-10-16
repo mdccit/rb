@@ -60,4 +60,10 @@ class School extends Model
     protected $casts = [
         'other_data' => 'array',
     ];
+
+    public function syncLogs()
+    {
+        return $this->hasMany(SyncLog::class);
+    }
+
 }

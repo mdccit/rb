@@ -69,7 +69,9 @@ Route::group(['namespace' => 'App\Modules\UserModule\Controllers','prefix' => 'a
 
             //TODO only authenticated player users can be access
             Route::middleware('auth.is_player')->group(function () {
-
+                Route::get('/transcript/get-transcript', 'TranscriptController@getTranscript')->name('user.transcript.get');
+                Route::post('/transcript/create-transcript', 'TranscriptController@createTranscript')->name('user.transcript.create');
+                Route::delete('/transcript/delete-transcript/{id}', 'TranscriptController@deleteTranscript')->name('user.transcript.delete');
             });
 
             //TODO only authenticated coach users can be access

@@ -14,17 +14,18 @@ class MediaInfoSeeder extends Seeder
     public function run(): void
     {
         $storagePaths = [
-//            'user_profile_media' => 'user/profile/media/',
-//
-//            'school_profile_picture' => 'school/profile/picture/',
-//            'school_profile_cover' => 'school/profile/cover/',
-//            'school_profile_media' => 'school/profile/media/',
-//
-//            'business_profile_picture' => 'business/profile/picture/',
-//            'business_profile_cover' => 'business/profile/cover/',
-//            'business_profile_media' => 'business/profile/media/',
+            'user_profile_media' => 'user/profile/media/',
 
-            // 'transcript' => 'user/profile/transcript/',
+            'school_profile_picture' => 'school/profile/picture/',
+            'school_profile_cover' => 'school/profile/cover/',
+            'school_profile_media' => 'school/profile/media/',
+
+            'business_profile_picture' => 'business/profile/picture/',
+            'business_profile_cover' => 'business/profile/cover/',
+            'business_profile_media' => 'business/profile/media/',
+
+            'transcript' => 'user/profile/transcript/',
+
             'transfer_user_profile_picture' => 'user/profile/transfer/',
         ];
 
