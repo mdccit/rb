@@ -25,7 +25,7 @@ class StripeAPI
   {
     return Subscription::all([
       'customer' => $stripeCustomerId,
-      'status' => 'active',
+      'status' => 'all',
     ]);
   }
 
@@ -186,9 +186,7 @@ class StripeAPI
         $this->attachPaymentMethodToCustomer($customerId, $paymentMethodId);
       }
 
-      // Determine the price ID based on subscription type (monthly, annually, etc.)
       $priceId = $this->getPriceIdFromSubscriptionType($subscriptionType);
-      // $priceId = 'price_1Q5LsbB1aCt3RRcc6eRGc3wo';
 
       // Create a subscription with auto-renewal
       $subscription = Subscription::create([
@@ -223,6 +221,7 @@ class StripeAPI
               'items' => [['price' => $priceId]], // Price ID for the subscription plan
               'trial_period_days' => $trialDays,  // Set the trial period duration (e.g., 30 days)
               'default_payment_method' => $paymentMethodId,
+              'automatic_tax' => ['enabled' => false],
               'expand' => ['latest_invoice.payment_intent'],
           ]);
   
@@ -407,10 +406,13 @@ class StripeAPI
       'status' => 'active', // Only active subscriptions
     ]);
 
+    Log::info('active payment');
+    Log::info($subscriptions);
     if (count($subscriptions->data) > 0) {
       // Assume the customer has one active subscription. You can adjust logic for multiple subscriptions.
       $subscription = $subscriptions->data[0];
 
+      Log::info($subscription);
       // Check if the subscription has a default payment method
       if ($subscription->default_payment_method) {
         // Retrieve the payment method (typically a card)
