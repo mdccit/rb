@@ -16,12 +16,13 @@ Route::group(['namespace' => 'App\Modules\UserModule\Controllers','prefix' => 'a
 
             //resource
             Route::get('/resource', 'ResourceController@index')->name('user.resources.index');
+            Route::get('/resource-category', 'ResourceController@getAllCategories')->name('user.resources.categoru');
 
             Route::get('/players/{user_id}', 'UsersController@getPlayerProfile')->name('user.players.view');
             Route::get('/coaches/{user_id}', 'UsersController@getCoachProfile')->name('user.coaches.view');
             Route::get('/business-managers/{user_id}', 'UsersController@getBusinessManagerProfile')->name('user.business-managers.view');
             Route::get('/parents/{user_id}', 'UsersController@getParentProfile')->name('user.parents.view');
-            
+
             //connections
             Route::post('/connections-request', 'ConnectionController@requestConnection')->name('connections.connect.request');
             Route::put('/connections-accept/{id}', 'ConnectionController@connectionAccept')->name('connections.connect.accept');
@@ -51,8 +52,8 @@ Route::group(['namespace' => 'App\Modules\UserModule\Controllers','prefix' => 'a
 
             //TODO only authenticated default users can be access
             Route::middleware('auth.is_default')->group(function () {
-   
-                
+
+
 
             });
 
@@ -69,13 +70,15 @@ Route::group(['namespace' => 'App\Modules\UserModule\Controllers','prefix' => 'a
 
             //TODO only authenticated player users can be access
             Route::middleware('auth.is_player')->group(function () {
-
+                Route::get('/transcript/get-transcript', 'TranscriptController@getTranscript')->name('user.transcript.get');
+                Route::post('/transcript/create-transcript', 'TranscriptController@createTranscript')->name('user.transcript.create');
+                Route::delete('/transcript/delete-transcript/{id}', 'TranscriptController@deleteTranscript')->name('user.transcript.delete');
             });
 
             //TODO only authenticated coach users can be access
             Route::middleware('auth.is_coach')->group(function () {
                 //get transfer player
-                Route::get('/transfer-player', 'TransferPlayerController@getAllUsers')->name('user.transfer.get-all');
+                Route::get('/transfer-players', 'TransferPlayerController@getAllUsers')->name('user.transfer.get-all');
 
             });
 

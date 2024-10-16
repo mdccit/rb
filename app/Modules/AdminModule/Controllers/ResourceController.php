@@ -151,11 +151,46 @@ class ResourceController extends Controller
             'title' => 'required|string|max:255',
             'content' => 'required|string|min:3|max:9999999', 
             'weight' => 'required|integer',
-            'category_id' => 'required|integer|exists:resource_categories,id',
+            'category_id' => 'required|exists:resource_categories,id',
         ]);
 
         return $validator;
         
+    }
+
+    public function getResource($resource_id){
+        try{
+           
+            $resources = Resource::connect(config('database.secondary'))->where('id', $resource_id)->first();
+
+            if($resources){
+
+                $data =$this->resourceService->getResource($resource_id);
+                $responseData = [
+                    'dataSets' => $data,
+                ];
+                return CommonResponse::getResponse(
+                        200,
+                        'Successfully Resource Fetch',
+                        'Successfully Resource Fetch',
+                        $responseData
+                    );
+            }else{
+
+                return CommonResponse::getResponse(
+                    422,
+                    'Resource does not exist',
+                    'Resource does not exist'
+                );
+
+            }   
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
     }
 
 }
