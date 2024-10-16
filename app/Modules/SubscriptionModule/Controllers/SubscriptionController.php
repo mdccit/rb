@@ -280,10 +280,10 @@ class SubscriptionController extends Controller
 
 
         return response()->json(['status' => 'success', 'message' => 'Trial subscription created successfully']);
-      } else if ($subscriptionType === 'monthly') {
+      } else if ($subscriptionType === 'premium') {
 
         // Create the subscription with the payment method
-        $stripeSubscription = $this->stripeAPI->createSubscription($user->stripe_id, $subscriptionType, $paymentMethodId, true);
+        $stripeSubscription = $this->stripeAPI->createSubscription($user->stripe_id, 'monthly', $paymentMethodId, true);
 
         $subscriptionId = $stripeSubscription->id;
         $startDate = Carbon::createFromTimestamp($stripeSubscription->current_period_start);
