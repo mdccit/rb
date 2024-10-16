@@ -94,6 +94,8 @@ class MigrateInOrder extends Command
             '2024_08_13_070939_create_posts_table.php',
             '2024_08_14_041548_create_comments_table.php',
             '2024_08_14_041613_create_likes_table.php',
+            '2024_08_28_062152_create_sync_logs_table.php',
+            '2024_08_31_041541_create_sync_settings_table.php',
             '2024_08_30_064700_create_moderation_requests_table.php',
             '2024_08_30_064727_create_moderation_comments_table.php',
             '2024_08_30_105500_add_slug_column_to_users_table.php',
@@ -111,9 +113,11 @@ class MigrateInOrder extends Command
             '2024_09_19_103015_add_new_sport_id_column_to_coaches_table.php',
             '2024_09_16_200041_create_media_information_table.php',
             '2024_09_16_200133_create_media_table.php',
+            '2024_10_11_002816_create_transcripts_table.php',
             '2024_09_20_063604_exist_school_team_users_table.php',
             '2024_09_20_153806_create_school_team_users_table.php',
             '2024_10_01_233654_create_subscriptions_table.php',
+            '2024_10_15_030838_add_other_data_column_to_transfer_player_table.php',
 
         ];
 
@@ -137,6 +141,7 @@ class MigrateInOrder extends Command
         $this->call(PlayerBudgetSeeder::class);
         $this->call(ConferenceSeeder::class);
         $this->call(DivisionSeeder::class);
+        $this->call(SyncSettingSeeder::class);
 
         $this->call(UserSeeder::class);
         $this->call(SportSeeder::class);

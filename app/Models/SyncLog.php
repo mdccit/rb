@@ -5,10 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ChatMessage extends Model
+class SyncLog extends Model
 {
     use HasFactory;
-
 
     /**
      * Connect the relevant database
@@ -20,21 +19,30 @@ class ChatMessage extends Model
         return (new static)->setConnection($connection);
     }
 
-    protected $fillable = ['type', 'message_status', 'content','created_by','conversation_id'];
+    protected $fillable = [
+        'school_id',
+        'status',
+        'data',
+        'created_by',
+        'updated_at'
+    ];
 
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected $casts = [
+        'data' => 'array',
+    ];
 
-    public function conversations()
+    public function school()
     {
-        return $this->belongsTo(Conversation::class, 'conversation_id','id');
+        return $this->belongsTo(School::class);
     }
 
-    public function creator()
+    public function user()
     {
         return $this->belongsTo(User::class, 'created_by');
     }
-
-    // public function conversation()
-    // {
-    //     return $this->belongsTo(Conversation::class, 'conversation_id', 'id');
-    // }
 }
