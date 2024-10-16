@@ -118,9 +118,6 @@ class SubscriptionService
             if ($stripeSubscription) {
                 $amount = $stripeSubscription->amount;
                 $currency = strtoupper($stripeSubscription->currency);
-
-                // Trigger the payment success email notification
-                $user->notify(new PaymentSuccessEmail($stripeSubscription, $amount, $currency));
             }
 
             $userSubscription = new Subscription();

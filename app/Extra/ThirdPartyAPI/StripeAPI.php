@@ -186,9 +186,7 @@ class StripeAPI
         $this->attachPaymentMethodToCustomer($customerId, $paymentMethodId);
       }
 
-      // Determine the price ID based on subscription type (monthly, annually, etc.)
       $priceId = $this->getPriceIdFromSubscriptionType($subscriptionType);
-      // $priceId = 'price_1Q5LsbB1aCt3RRcc6eRGc3wo';
 
       // Create a subscription with auto-renewal
       $subscription = Subscription::create([
@@ -223,6 +221,7 @@ class StripeAPI
               'items' => [['price' => $priceId]], // Price ID for the subscription plan
               'trial_period_days' => $trialDays,  // Set the trial period duration (e.g., 30 days)
               'default_payment_method' => $paymentMethodId,
+              'automatic_tax' => ['enabled' => false],
               'expand' => ['latest_invoice.payment_intent'],
           ]);
   
