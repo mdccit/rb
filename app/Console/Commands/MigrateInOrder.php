@@ -117,6 +117,8 @@ class MigrateInOrder extends Command
             '2024_09_20_063604_exist_school_team_users_table.php',
             '2024_09_20_153806_create_school_team_users_table.php',
             '2024_10_01_233654_create_subscriptions_table.php',
+            '2024_10_15_030838_add_other_data_column_to_transfer_player_table.php',
+            '2024_10_16_030122_add_has_used_trial_to_users_table.php'
 
         ];
 

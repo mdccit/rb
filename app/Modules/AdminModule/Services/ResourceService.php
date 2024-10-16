@@ -20,7 +20,7 @@ class ResourceService
                         'content',
                         'category_id',
                         'created_at'
-                );
+                )->orderBy('created_at', 'DESC');
         if ($search_key != null) {
             $query->where('title', 'LIKE', '%' . $search_key . '%');
         }
@@ -34,7 +34,23 @@ class ResourceService
 
         return $dataSet;
     }
+    
+    public function getResource ($id){
+       
 
+        $dataSet = Resource::connect(config('database.secondary'))
+                    ->where('id','=',$id)
+                    ->select(
+                        'id',
+                        'title',
+                        'weight',
+                        'content',
+                        'category_id',
+                        'created_at'
+                )->first();
+       
+        return $dataSet;
+    }
     public function create(array $data){
         $resource = Resource::connect(config('database.default'))
                     ->create([

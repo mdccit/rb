@@ -42,12 +42,12 @@ class TranscriptController extends Controller
                 );
             }
 
-            $this->transcriptService->createTranscript($request->all());
-            $transcript = $this->transcriptService->getTranscript();
+            $transcript = $this->transcriptService->createTranscript($request->all());
             $media = $this->transcriptService->uploadTranscript($request->file('file'), $transcript->id);
 
             $filename = 'transcript.pdf';
-            $transcriptPath = tempnam(TemporaryDirectory::make()->path(), $filename);
+            $tempFolder = TemporaryDirectory::make(storage_path('transcript_temp'));
+            $transcriptPath = tempnam($tempFolder->path(), $filename);
             copy($media['url'], $transcriptPath);
 
             $country = Country::connect(config('database.secondary'))
@@ -59,7 +59,7 @@ class TranscriptController extends Controller
             $player = $this->transcriptService->getPlayer();
             ProcessTranscript::dispatchSync($player, $transcript, $transcriptPath, $country->name, $transcript->language, $languageName);
 
-            $tmp = TemporaryDirectory::make();
+            $tmp = TemporaryDirectory::make(storage_path('transcript_temp'));
             $pdf = (new PdfToImage($transcriptPath))
                 ->setOutputFormat('png');
             $path = $tmp->path("page-1.png");
@@ -67,6 +67,9 @@ class TranscriptController extends Controller
                 ->saveImage($path);
             $image = base64_encode(file_get_contents($path));
             $transcript->preview = $image;
+
+            $tempFolder->delete();
+            $tmp->delete();
 
             return CommonResponse::getResponse(
                 200,
@@ -97,9 +100,10 @@ class TranscriptController extends Controller
             }
             $media = $this->transcriptService->getTranscriptPath($transcript->id);
             $filename = 'transcript.pdf';
-            $transcriptPath = tempnam(TemporaryDirectory::make()->path(), $filename);
+            $tempFolder = TemporaryDirectory::make(storage_path('transcript_temp'));
+            $transcriptPath = tempnam($tempFolder->path(), $filename);
             copy($media['url'], $transcriptPath);
-            $tmp = TemporaryDirectory::make();
+            $tmp = TemporaryDirectory::make(storage_path('transcript_temp'));
             $pdf = (new PdfToImage($transcriptPath))
                 ->setOutputFormat('png');
             $path = $tmp->path("page-1.png");
@@ -110,6 +114,9 @@ class TranscriptController extends Controller
             $transcript->path = $media['url'];
             $player = $this->transcriptService->getPlayer();
             $transcript->gpa = $player->gpa;
+
+            $tempFolder->delete();
+            $tmp->delete();
 
             return CommonResponse::getResponse(
                 200,
