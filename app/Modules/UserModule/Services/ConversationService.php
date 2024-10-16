@@ -5,9 +5,12 @@ namespace App\Modules\UserModule\Services;
 
 use App\Models\Conversation;
 use App\Models\ChatMessage;
-
+use  App\Services\AzureBlobStorageService;
+use App\Traits\AzureBlobStorage;
 class ConversationService
 {
+    use AzureBlobStorage;
+
     public function createConversation (array $data){
         $conversations = Conversation::connect(config('database.secondary'))
                         ->where(function ($query) use ($data) {
@@ -59,12 +62,19 @@ class ConversationService
                           ->orWhere('conversations.user2_id', auth()->id());
                 });
 
-        $dataSet = array();
-        // if($per_page_items != 0 ){
-        //     $dataSet = $query->paginate($per_page_items);
-        // }else{
-            $dataSet = $query->get();
-       // }
+      
+          //  $dataSet = $query->get();
+
+       $dataSet = $query->get()->map(function ($conversation) {
+               
+                $user_id_1_profile_picture = $this->getSingleFileByEntityId($conversation->user1_id,'user_profile_picture');
+                $conversation->user_1_profile_picture = $user_id_1_profile_picture;
+
+                $user_id_2_profile_picture = $this->getSingleFileByEntityId($conversation->user2_id,'user_profile_picture');
+                $conversation->user_2_profile_picture = $user_id_2_profile_picture;
+    
+                return $conversation;
+            });
         
         return $dataSet;
 
