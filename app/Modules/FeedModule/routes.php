@@ -2,17 +2,34 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::group(['namespace' => 'App\Modules\FeedModule\Controllers','prefix' => 'api/'.config('app.version'), 'middleware' => ['api','access.key','locale','cors', 'json.response']], function() {
+Route::group(['namespace' => 'App\Modules\FeedModule\Controllers', 'prefix' => 'api/' . config('app.version'), 'middleware' => ['api', 'access.key', 'locale', 'cors', 'json.response']], function () {
 
     //TODO All PublicModule routes define here
     Route::prefix('feed')->group(function () {
 
-        //TODO whatever not need to authenticate
+        Route::get('/index', 'PostController@index')->name('posts.index');
+        Route::get('/posts/{id}', 'PostController@show')->name('posts.show');
+   
+
 
 
         Route::middleware('auth:api')->group(function () {
             //TODO all authenticated users can be access
             //Route::post('/user-register', 'UsersController@registerUser')->name('admin.users.register');
+
+            Route::get('/posts', 'PostController@getLoggedInUserPosts')->name('posts.logged_user_index');
+            Route::post('/post', 'PostController@store')->name('posts.store');
+            Route::put('/posts/{id}', 'PostController@update')->name('posts.update');
+            Route::post('/posts/{id}/comment', 'PostController@addComment')->name('posts.add_comment');
+            Route::put('/comments/{id}', 'PostController@updateComment')->name('posts.update_comment');
+            Route::get('/post/{id}', 'PostController@showSinglePost')->name('posts.show_singale_post');
+
+            Route::get('/postcomments/{id}', 'PostController@getCommentsByPostId')->name('posts.get_all_comments');
+            Route::get('/comments/{id}', 'PostController@getComment')->name('posts.get_comment');
+            Route::delete('/comments/{id}', 'PostController@deleteComment')->name('posts.delete_comment');
+            Route::post('/posts/{id}/like', 'PostController@addLike')->name('posts.add_like');
+            Route::delete('/posts/{id}/like', 'PostController@removeLike')->name('posts.remove_like');
+            Route::delete('/posts/{id}', 'PostController@destroy')->name('posts.destroy');
 
             //TODO only authenticated default users can be access
             Route::middleware('auth.is_default')->group(function () {

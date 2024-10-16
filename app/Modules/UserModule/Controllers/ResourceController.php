@@ -43,5 +43,29 @@ class ResourceController extends Controller
         }
     }
 
+    public function getAllCategories(Request $request)
+    {
+        try{
+            $dataSets = $this->resourceService->getAllCategories($request->all());
+
+            $responseData = [
+                'dataSets' => $dataSets,
+            ];
+
+            return CommonResponse::getResponse(
+                200,
+                'Successfully fetched',
+                'Successfully fetched',
+                $responseData
+            );
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    }
+
     
 }

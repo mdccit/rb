@@ -55,7 +55,21 @@ return [
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
             'throw' => false,
         ],
-
+        'azure' => [
+            'driver'    => 'azure',
+            'name'      => env('AZURE_STORAGE_ACCOUNT_NAME'),
+            'key'       => env('AZURE_STORAGE_ACCOUNT_KEY'),
+            'container' => env('AZURE_STORAGE_CONTAINER_NAME'),
+            'url'       => env('AZURE_STORAGE_URL'),
+            'prefix'    => null,
+            'connection_string' => null,
+            'endpoint'  => env('AZURE_STORAGE_ENDPOINT'),
+            'retry'     => [
+                'tries' => 3,                   // number of retries, default: 3
+                'interval' => 500,              // wait interval in ms, default: 1000ms
+                'increase' => 'exponential'     // how to increase the wait interval, options: linear, exponential, default: linear
+            ]
+        ],
     ],
 
     /*

@@ -30,6 +30,7 @@
       margin: auto;
       background-color: rgb(223, 233, 241);
       font-family: Figtree, sans-serif;
+	  padding: 20px;
     "
 >
 <div
@@ -45,68 +46,80 @@
         alt="Recruited Logo"
         class="CToWUd"
         data-bit="iit"
-        style="width: 200px;"
+        style="width: 200px; margin-top: 10px;"
     />
 
-    <div style="margin:20px">
+    <div style="margin: 20px">
         <div
             style="
-          background-color: white;
-          width: 450px;
-          height: auto;
-          margin: auto;
-          border-radius: 8px;
-          padding: 30px;
-        "
+            background-color: white;
+            width: 450px;
+            height: auto;
+            margin: auto;
+            border-radius: 8px;
+            padding: 30px;
+          "
         >
             <h3>Hi {{$user->display_name}},</h3>
-            <p style="margin-bottom: 30px;">Thank you for signing up with Recruited!.</p>
-            <p style="font-size: 14px; color: #4d4949;">
-                Thank you for signing up with Recruited!. To ensure the security of
+            <p style="margin-bottom: 30px">
+                Thank you for signing up with Recruited!.
+            </p>
+            <p style="font-size: 14px; color: #4d4949">
+                To ensure the security of
                 your account, we need to verify your email address. Please click on
                 the button below to confirm your email.
             </p>
             <br />
-            <a href="{{ $actionUrl }}"
-                style="
-            background-color: black;
-            color: white;
-            height: 40px;
-            width: 65%;
-            border: none;
-            border-radius: 7px;
-            text-align: center;
-            cursor: pointer;
-            margin-bottom: 15px;
-          "
-            >
-                {{ $actionText }}
-            </a>
+            <div style="height: 35px;">
+                <a
+                    href="{{ $actionUrl }}"
+                    style="
+              background-color: black;
+              color: white;
+              border: none;
+              border-radius: 7px;
+              text-align: center;
+              padding-left: 20px;
+              padding-right: 20px;
+              padding-top: 10px;
+              padding-bottom: 10px;
+              text-decoration: none;
+              margin-bottom: 32px;
+              font-size: 14px;
+            "
+                >
+                    {{ $actionText }}
+                </a>
+            </div>
 
-            <p style="font-size: 14px; color: #4d4949;">
-                If you did not sign up for an account with Recruited, please disregard
-                this email.
+            <p style="font-size: 14px; color: #4d4949">
+                If you did not sign up for an account with Recruited, please
+                disregard this email.
             </p>
 
             <p>
-                Best regards,
-                <b>Recruited</b>
+                Best  regards,
             </p>
+            <p><b>Recruited</b></p>
 
             <hr />
 
-            <p style="font-size: 14px; color: #4d4949;">
+            <p style="font-size: 14px; color: #4d4949">
                 If you're having trouble clicking the "Verify Email Address" button,
                 copy and paste the URL below into your web browser:
             </p>
-            <a href="{{$actionUrl}}"  style="font-size: 14px; color: blue">
+            <a
+                href="{{$actionUrl}}"
+                style="font-size: 14px; color: blue"
+            >
                 {{$actionUrl}}
             </a>
-
         </div>
     </div>
-
 </div>
-<p  style="font-size: 14px; text-align: center;"> © {{ date('Y') }} Recruited. All rights reserved.</p>
+<p style="font-size: 14px; text-align: center; margin-bottom: 15px; padding-bottom: 10px;">
+    © {{ date('Y') }} Recruited. All rights reserved.
+</p>
+<br>
 </body>
 </html>

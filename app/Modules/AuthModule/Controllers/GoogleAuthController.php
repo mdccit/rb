@@ -5,7 +5,10 @@ namespace App\Modules\AuthModule\Controllers;
 use App\Extra\CommonResponse;
 use App\Extra\ThirdPartyAPI\GoogleAuthAPI;
 use App\Http\Controllers\Controller;
+use App\Models\BusinessManager;
+use App\Models\Coach;
 use App\Modules\AuthModule\Services\AuthService;
+use App\Traits\AzureBlobStorage;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -17,6 +20,8 @@ use function Illuminate\Validation\message;
 
 class GoogleAuthController extends Controller
 {
+    use AzureBlobStorage;
+
     private $googleAuthApi;
     private $authService;
 
@@ -60,7 +65,7 @@ class GoogleAuthController extends Controller
             if ($validator->fails()) {
                 return CommonResponse::getResponse(
                     422,
-                    $validator->errors()->all(),
+                    $validator->errors(),
                     'Input validation failed'
                 );
             }
@@ -87,9 +92,18 @@ class GoogleAuthController extends Controller
                 $user = $this->authService->createUser($data,true,$request->ip());
                 $token = $user->createToken(config('app.name'))->accessToken;
 
+                $media_info = [
+                    'profile_picture' => null,
+                    'cover_picture' => null,
+                ];
+
                 $responseData = [
                     'token' => $token,
                     'user_role' => $user->getUserRole->short_name,
+                    'user_id' => $user->id,
+                    'user_slug' => $user->slug,
+                    'user_name' => $user->display_name,
+                    'media_info' => $media_info,
                 ];
 
                 return CommonResponse::getResponse(
@@ -123,7 +137,7 @@ class GoogleAuthController extends Controller
             if ($validator->fails()) {
                 return CommonResponse::getResponse(
                     422,
-                    $validator->errors()->all(),
+                    $validator->errors(),
                     'Input validation failed'
                 );
             }
@@ -141,9 +155,40 @@ class GoogleAuthController extends Controller
             if ($user) {
                 $this->authService->setLoggedUser($user->id,$request->ip());
                 $token = $user->createToken(config('app.name'))->accessToken;
+                $user_permission_type = 'none';
+                //Coach
+                if($user->getUserRole->id == config('app.user_roles.coach')) {
+                    $coach = Coach::connect(config('database.secondary'))
+                        ->where('user_id', $user->id)->first();
+                    if($coach){
+                        $user_permission_type = $coach->type;
+                    }
+                }
+                //Business Manager
+                if($user->getUserRole->id == config('app.user_roles.business_manager')) {
+                    $business_manager = BusinessManager::connect(config('database.secondary'))
+                        ->where('user_id', $user->id)->first();
+                    if($business_manager){
+                        $user_permission_type = $business_manager->type;
+                    }
+                }
+
+                $profile_picture = $this->getSingleFileByEntityId($user->id,'user_profile_picture');
+                $cover_picture = $this->getSingleFileByEntityId($user->id,'user_profile_cover');
+
+                $media_info = [
+                    'profile_picture' => $profile_picture,
+                    'cover_picture' => $cover_picture,
+                ];
+
                 $responseData = [
                     'token' => $token,
                     'user_role' => $user->getUserRole->short_name,
+                    'user_permission_type' => $user_permission_type,
+                    'user_id' => $user->id,
+                    'user_slug' => $user->slug,
+                    'user_name' => $user->display_name,
+                    'media_info' => $media_info,
                 ];
 
                 return CommonResponse::getResponse(

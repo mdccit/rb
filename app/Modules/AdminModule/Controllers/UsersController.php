@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Modules\AdminModule\Services\UserService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use App\Models\User;
 
 class UsersController extends Controller
 {
@@ -73,13 +74,13 @@ class UsersController extends Controller
                 'password' => 'required|string|min:6',
                 'user_role' => 'required|numeric',
                 'phone_code_country' => 'required|numeric',
-                'phone_number' => 'required|string|max:15|unique:user_phones',
+                'phone_number' => 'required|string|max:15',
             ]);
             if ($validator->fails())
             {
                 return CommonResponse::getResponse(
                     422,
-                    $validator->errors()->all(),
+                    $validator->errors(),
                     'Input validation failed'
                 );
             }
@@ -119,7 +120,7 @@ class UsersController extends Controller
             {
                 return CommonResponse::getResponse(
                     422,
-                    $validator->errors()->all(),
+                    $validator->errors(),
                     'Input validation failed'
                 );
             }
@@ -130,6 +131,218 @@ class UsersController extends Controller
                 200,
                 'Successfully Updated',
                 'Successfully Updated'
+            );
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    }
+
+    public function userAccountDelete($user_id){
+        try{
+            $user =User::connect(config('database.secondary'))->where('id',$user_id)->first();
+
+            if($user->user_role_id !=2){
+
+                $this->userService->userDelete($user_id);
+                
+                return CommonResponse::getResponse(
+                    200,
+                    'Successfully Account Deleted',
+                    'Successfully Account Deleted',
+                );
+
+            }else{
+                return CommonResponse::getResponse(
+                    422,
+                    'Admin Account Can Not Delete',
+                    'Admin Account Can Not Delete'
+                ); 
+            }
+            
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    
+    }
+
+    public function userSessionDelete($user_id){
+        try{
+            $user =User::connect(config('database.secondary'))->where('id',$user_id)->first();
+
+            if($user->user_role_id !=2){
+
+                $token =$this->userService->userSessionDelete($user_id);
+                
+                return CommonResponse::getResponse(
+                    200,
+                    'Successfully Sessions Deleted',
+                    'Successfully Sessions Deleted',
+                );
+
+            }else{
+                return CommonResponse::getResponse(
+                    422,
+                    'Admin Session Can Not Delete',
+                    'Admin Session Can Not Delete'
+                ); 
+            }
+            
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    
+    }
+
+    public function uploadProfilePicture(Request $request,$user_id)
+    {
+        try{
+            $validator = Validator::make($request->all(), [
+                'file.*' => 'required|mimes:jpg,jpeg,png|max:51200',
+            ]);
+            if ($validator->fails())
+            {
+                return CommonResponse::getResponse(
+                    422,
+                    $validator->errors(),
+                    'Input validation failed'
+                );
+            }
+
+            $user = User::connect(config('database.secondary'))
+                ->where('id', $user_id)
+                ->first();
+            if(!$user) {
+                return CommonResponse::getResponse(
+                    401,
+                    'No account associated with this user id',
+                    'No account associated with this user id'
+                );
+            }
+
+            $responseData = $this->userService->uploadProfilePicture($request->file('file'),$user_id);
+
+            return CommonResponse::getResponse(
+                200,
+                'Successfully Uploaded',
+                'Successfully Uploaded',
+                $responseData
+            );
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    }
+
+    public function uploadCoverPicture(Request $request,$user_id)
+    {
+        try{
+            $validator = Validator::make($request->all(), [
+                'file.*' => 'required|mimes:jpg,jpeg,png|max:51200',
+            ]);
+            if ($validator->fails())
+            {
+                return CommonResponse::getResponse(
+                    422,
+                    $validator->errors(),
+                    'Input validation failed'
+                );
+            }
+
+            $user = User::connect(config('database.secondary'))
+                ->where('id', $user_id)
+                ->first();
+            if(!$user) {
+                return CommonResponse::getResponse(
+                    401,
+                    'No account associated with this user id',
+                    'No account associated with this user id'
+                );
+            }
+
+            $responseData = $this->userService->uploadCoverPicture($request->file('file'),$user_id);
+
+            return CommonResponse::getResponse(
+                200,
+                'Successfully Uploaded',
+                'Successfully Uploaded',
+                $responseData
+            );
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    }
+
+    public function uploadMedia(Request $request,$user_id)
+    {
+        try{
+            $validator = Validator::make($request->all(), [
+                'files.*' => 'required|mimes:jpg,jpeg,png,mp4|max:51200',
+            ]);
+            if ($validator->fails())
+            {
+                return CommonResponse::getResponse(
+                    422,
+                    $validator->errors(),
+                    'Input validation failed'
+                );
+            }
+
+            $user = User::connect(config('database.secondary'))
+                ->where('id', $user_id)
+                ->first();
+            if(!$user) {
+                return CommonResponse::getResponse(
+                    401,
+                    'No account associated with this user id',
+                    'No account associated with this user id'
+                );
+            }
+
+            $responseData = $this->userService->uploadMedia($request->file('files'),$user_id);
+
+            return CommonResponse::getResponse(
+                200,
+                'Successfully Uploaded',
+                'Successfully Uploaded',
+                $responseData
+            );
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    }
+
+    public function removeMedia($media_id)
+    {
+        try{
+            $this->userService->removeMedia($media_id);
+
+            return CommonResponse::getResponse(
+                200,
+                'Successfully Removed Media',
+                'Successfully Removed Media',
             );
         }catch (\Exception $e){
             return CommonResponse::getResponse(
