@@ -121,7 +121,8 @@ class MigrateInOrder extends Command
             '2024_10_16_030122_add_has_used_trial_to_users_table.php',
             '2024_10_16_130522_drop_foreign_key_in_resources_table.php',
             '2024_10_16_130030_update_id_to_uuid_in_resource_categories_table.php',
-            '2024_10_16_131907_update_id_to_uuid_in_resources_table.php'
+            '2024_10_16_131907_update_id_to_uuid_in_resources_table.php',
+            '2024_10_16_112412_update_status_enum_in_subscriptions_table.php'
 
         ];
 
