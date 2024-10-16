@@ -77,7 +77,7 @@ Route::group(['namespace' => 'App\Modules\UserModule\Controllers','prefix' => 'a
             //TODO only authenticated coach users can be access
             Route::middleware('auth.is_coach')->group(function () {
                 //get transfer player
-                Route::get('/transfer-player', 'TransferPlayerController@getAllUsers')->name('user.transfer.get-all');
+                Route::get('/transfer-players', 'TransferPlayerController@getAllUsers')->name('user.transfer.get-all');
 
             });
 

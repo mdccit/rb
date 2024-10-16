@@ -4,32 +4,37 @@
 namespace App\Modules\UserModule\Services;
 
 use App\Models\TransferPlayer;
-use DB;
+use App\Traits\AzureBlobStorage;
+use Illuminate\Support\Facades\DB;
 
 class TransferPlayerService
 {
-    public function getAllUsers (array $data){
+    use AzureBlobStorage;
 
-        $per_page_items = array_key_exists("per_page_items",$data)?$data['per_page_items']:0;
-        $utr_min = array_key_exists("utr_min",$data)?$data['utr_min']:null;
-        $utr_max = array_key_exists("utr_max",$data)?$data['utr_max']:null;
-        $gender = array_key_exists("gender",$data)?$data['gender']:null;
+    public function getAllUsers(array $data)
+    {
 
-       
-       $year = config('app.year');
-       $junior = $year['junior'];
-       $senior = $year['senior'];
-       $freshman = $year['freshman'];
-       $sophomore = $year['sophomore'];
+        $per_page_items = array_key_exists("per_page_items", $data) ? $data['per_page_items'] : 0;
+        $search_key = array_key_exists("search_key", $data) ? $data['search_key'] : null;
+        $utr_min = array_key_exists("utr_min", $data) ? $data['utr_min'] : null;
+        $utr_max = array_key_exists("utr_max", $data) ? $data['utr_max'] : null;
+
+
+        $year = config('app.year');
+        $junior = $year['junior'];
+        $senior = $year['senior'];
+        $freshman = $year['freshman'];
+        $sophomore = $year['sophomore'];
 
         $query = TransferPlayer::connect(config('database.secondary'))
-                ->select(
-                   'id',
-                   'name',
-                   'school',
-                   'utr_score_manual',
-                    DB::raw("
-                        CASE 
+            ->join('sports', 'sports.id', '=', 'transfer_players.sport_id')
+            ->select(
+                'transfer_players.id as id',
+                'first_name',
+                'last_name',
+                'school',
+                DB::raw("
+                        CASE
                             WHEN year = 'junior' THEN '$junior'
                             WHEN year = 'senior' THEN '$senior'
                             WHEN year = 'freshman' THEN '$freshman'
@@ -37,43 +42,52 @@ class TransferPlayerService
                             ELSE year
                             END as year
                  "),
-                   'win',
-                   'loss',
-                   'profile_photo_path',
-                   'handedness',
-                   'email',
-                   'phone_code',
-                   'phone_number',
-                   'height',
-                   'gender',
-                   'created_by',
-                );
+                'win',
+                'loss',
+                'profile_photo_path',
+                'email',
+                'phone_code',
+                'phone_number',
+                'height',
+                'gender',
+                'created_by',
+                'other_data->utr_score_manual as utr_score_manual',
+                'other_data->handedness as handedness',
+                'sports.name as sport_name',
+            );
 
-       
+
+        if ($search_key != null) {
+            $query->where(function ($q) use ($search_key) {
+                $q->where('first_name', 'LIKE', '%' . $search_key . '%')
+                    ->orWhere('last_name', 'LIKE', '%' . $search_key . '%');
+            });
+        }
+
         if ($utr_min != null) {
-            $query->where('utr_score_manual', '>=', $utr_min);
+            $query->where('other_data->utr_score_manual', '>=', $utr_min);
         }
 
         if ($utr_max != null) {
-            $query->where('utr_score_manual', '<=', $utr_max);
+            $query->where('other_data->utr_score_manual', '<=', $utr_max);
         }
 
-        if ($gender != null) {
-            $query->where('gender','=', $gender);
-        }
 
         $dataSet = array();
-        
-        if($per_page_items != 0 ){
+        if ($per_page_items != 0) {
             $dataSet = $query->paginate($per_page_items);
-        }else{
+        } else {
             $dataSet = $query->get();
         }
 
-        return $dataSet;
+        foreach ($dataSet as $key => $value) {
+            $dataSet[$key]['media'] = $this->getSingleFileByEntityId($value['id'], 'transfer_user_profile_picture');
+        }
 
+        return $dataSet;
     }
 
-    
-
+    public function getMedia ($transfer_id){
+        return $this->getSingleFileByEntityId( $transfer_id, 'transfer_user_profile_picture');
+    }
 }
