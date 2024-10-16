@@ -252,7 +252,7 @@ class UserService
         $user = User::connect(config('database.secondary'))
             ->join('user_roles', 'user_roles.id', '=' ,'users.user_role_id')
             ->join('user_types', 'user_types.id', '=' ,'users.user_type_id')
-            ->leftJoin('nationalities', 'nationalities.id', '=' ,'users.nationality_id')
+            //->leftJoin('nationalities', 'nationalities.id', '=' ,'users.nationality_id')
             ->where('users.slug', $user_slug)
             ->where('users.user_role_id', config('app.user_roles.player'))
             ->select(
@@ -267,7 +267,7 @@ class UserService
                 'users.date_of_birth',
                 'users.gender',
                 'users.nationality_id',
-                'nationalities.name as nationality',
+                //'nationalities.name as nationality',
                 'users.country_id',
                 'users.is_approved',
                 'users.is_first_login',
@@ -279,7 +279,7 @@ class UserService
                 'users.email_verified_at',
                 'users.last_logged_at as last_seen_at',
             )
-           // ->addSelect(DB::raw('IF((SELECT name as nationality FROM nationalities WHERE id = users.nationality_id ) IS NULL,NULL,(SELECT name FROM countries WHERE id = users.country_id )) as country'))
+            ->addSelect(DB::raw('IF((SELECT name as nationality FROM nationalities WHERE id = users.nationality_id ) IS NULL,NULL,(SELECT name FROM nationalities WHERE id = users.nationality_id )) as nationality'))
             ->first();
 
         $user_phone = null;
