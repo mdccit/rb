@@ -16,6 +16,7 @@ Route::group(['namespace' => 'App\Modules\UserModule\Controllers','prefix' => 'a
 
             //resource
             Route::get('/resource', 'ResourceController@index')->name('user.resources.index');
+            Route::get('/resource-category', 'ResourceController@getAllCategories')->name('user.resources.categoru');
 
             Route::get('/players/{user_id}', 'UsersController@getPlayerProfile')->name('user.players.view');
             Route::get('/coaches/{user_id}', 'UsersController@getCoachProfile')->name('user.coaches.view');
