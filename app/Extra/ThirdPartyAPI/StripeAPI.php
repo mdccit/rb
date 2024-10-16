@@ -25,7 +25,7 @@ class StripeAPI
   {
     return Subscription::all([
       'customer' => $stripeCustomerId,
-      'status' => 'active',
+      'status' => 'trialing',
     ]);
   }
 
