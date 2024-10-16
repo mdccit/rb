@@ -245,34 +245,46 @@ class SubscriptionController extends Controller
       if ($user->subscription) {
         throw new \Exception('User already has an active subscription.');
       }
+      // Check if the subscription type is 'trial'
+      if ($subscriptionType === 'trial') {
+        // Create a trial subscription using the Stripe API
+        $stripeSubscription = $this->stripeAPI->createSubscriptionWithTrial($user->stripe_id, $paymentMethodId, 30); // 30 days trial
 
-      // Determine the Stripe price ID based on subscription type
-      $priceId = $this->getPriceIdFromSubscriptionType($subscriptionType);
+        // Save the trial subscription to the database
+        $userSubscription = new Subscription();
+        $userSubscription->user_id = $user->id;
+        $userSubscription->subscription_type = 'trial';
+        $userSubscription->status = 'trial'; // Set status to 'trial'
+        $userSubscription->start_date = Carbon::now();
+        $userSubscription->end_date = Carbon::now()->addMonth(); // 1-month trial
+        $userSubscription->save();
 
-      // Create the subscription with the payment method
-      $stripeSubscription = $this->stripeAPI->createSubscription($user->stripe_id, $priceId, $paymentMethodId);
+        return response()->json(['status' => 'success', 'message' => 'Trial subscription created successfully']);
+      } else {
 
+        // Create the subscription with the payment method
+        $stripeSubscription = $this->stripeAPI->createSubscription($user->stripe_id, $subscriptionType, $paymentMethodId, true);
+        // Save the subscription details to the database
+        $userSubscription = new Subscription();
+        $userSubscription->user_id = $user->id;
+        $userSubscription->subscription_type = $subscriptionType;
+        $userSubscription->status = 'active';
+        $userSubscription->start_date = Carbon::now();
+        $userSubscription->end_date = $subscriptionType === 'monthly' ? Carbon::now()->addMonth() : Carbon::now()->addYear();
+        $userSubscription->save();
 
+        if ($stripeSubscription) {
+          $amount = $stripeSubscription->amount;
+          $currency = strtoupper($stripeSubscription->currency);
 
-      // Save the subscription details to the database
-      $userSubscription = new Subscription();
-      $userSubscription->user_id = $user->id;
-      $userSubscription->subscription_type = $subscriptionType;
-      $userSubscription->status = 'active';
-      $userSubscription->start_date = Carbon::now();
-      $userSubscription->end_date = $subscriptionType === 'monthly' ? Carbon::now()->addMonth() : Carbon::now()->addYear();
-      $userSubscription->save();
+          // Trigger the payment success email notification
+          $user->notify(new PaymentSuccessEmail($stripeSubscription, $amount, $currency, $displayName));
+        }
 
-      if ($stripeSubscription) {
-        $amount = $stripeSubscription->amount;
-        $currency = strtoupper($stripeSubscription->currency);
-
-        // Trigger the payment success email notification
-        $user->notify(new PaymentSuccessEmail($stripeSubscription, $amount, $currency, $displayName));
+        return response()->json(['status' => 'success', 'message' => 'Subscription created successfully']);
       }
 
 
-      return response()->json(['status' => 'success', 'message' => 'Subscription created successfully']);
 
     } catch (\Exception $e) {
       Log::error('Error creating subscription: ' . $e->getMessage());
@@ -530,33 +542,33 @@ class SubscriptionController extends Controller
   }
   public function updatePaymentMethod(Request $request)
   {
-      try {
-          $user = $request->user();
-          $stripeCustomerId = $user->stripe_id;
-  
-          if (!$stripeCustomerId) {
-              return CommonResponse::getResponse(404, 'Stripe customer ID not found', 'User does not have a Stripe customer ID.');
-          }
-  
-          $validatedData = $request->validate([
-              'payment_method_id' => 'required|string',
-          ]);
-  
-          $paymentMethodId = $validatedData['payment_method_id'];
-  
-          // Call StripeAPI service to attach the payment method
-          $result = $this->stripeAPI->attachPaymentMethodToCustomer($paymentMethodId, $stripeCustomerId);
-  
-          if ($result['status'] === 'error') {
-              return CommonResponse::getResponse(500, $result['message'], 'Failed to update payment method.');
-          }
-  
-          return CommonResponse::getResponse(200, 'Payment method updated successfully', 'Stripe payment method updated successfully.');
-      } catch (\Exception $e) {
-          return CommonResponse::getResponse(500, $e->getMessage(), 'Failed to update payment method');
+    try {
+      $user = $request->user();
+      $stripeCustomerId = $user->stripe_id;
+
+      if (!$stripeCustomerId) {
+        return CommonResponse::getResponse(404, 'Stripe customer ID not found', 'User does not have a Stripe customer ID.');
       }
+
+      $validatedData = $request->validate([
+        'payment_method_id' => 'required|string',
+      ]);
+
+      $paymentMethodId = $validatedData['payment_method_id'];
+
+      // Call StripeAPI service to attach the payment method
+      $result = $this->stripeAPI->attachPaymentMethodToCustomer($paymentMethodId, $stripeCustomerId);
+
+      if ($result['status'] === 'error') {
+        return CommonResponse::getResponse(500, $result['message'], 'Failed to update payment method.');
+      }
+
+      return CommonResponse::getResponse(200, 'Payment method updated successfully', 'Stripe payment method updated successfully.');
+    } catch (\Exception $e) {
+      return CommonResponse::getResponse(500, $e->getMessage(), 'Failed to update payment method');
+    }
   }
-  
+
 
 
 }

@@ -187,8 +187,8 @@ class StripeAPI
       }
 
       // Determine the price ID based on subscription type (monthly, annually, etc.)
-      // $priceId = $this->getPriceIdFromSubscriptionType($subscriptionType);
-      $priceId = 'price_1Q5LsbB1aCt3RRcc6eRGc3wo';
+      $priceId = $this->getPriceIdFromSubscriptionType($subscriptionType);
+      // $priceId = 'price_1Q5LsbB1aCt3RRcc6eRGc3wo';
 
       // Create a subscription with auto-renewal
       $subscription = Subscription::create([
@@ -208,15 +208,30 @@ class StripeAPI
   }
 
 
-
-  public function createSubscriptionWithTrial($customerId, $priceId, $trialDays = 30)
+  public function createSubscriptionWithTrial($customerId, $subscriptionType, $paymentMethodId, $trialDays = 30)
   {
-    // Create a subscription with a trial period
-    return Subscription::create([
-      'customer' => $customerId,
-      'items' => [['price' => $priceId]],
-      'trial_period_days' => $trialDays, // Set the trial period (default is 30 days)
-    ]);
+      try {
+          // Attach the payment method to the customer if not already attached
+          $this->attachPaymentMethodToCustomer($customerId, $paymentMethodId);
+  
+          // Determine the price ID for the trial (typically, this is the same as the monthly/annual plan)
+          $priceId = $this->getPriceIdFromSubscriptionType($subscriptionType);
+  
+          // Create a subscription with a trial period
+          $subscription = Subscription::create([
+              'customer' => $customerId,
+              'items' => [['price' => $priceId]], // Price ID for the subscription plan
+              'trial_period_days' => $trialDays,  // Set the trial period duration (e.g., 30 days)
+              'default_payment_method' => $paymentMethodId,
+              'expand' => ['latest_invoice.payment_intent'],
+          ]);
+  
+          return $subscription;
+  
+      } catch (\Exception $e) {
+          Log::error('Stripe Subscription Trial Creation Error: ' . $e->getMessage());
+          throw new \Exception('Failed to create trial subscription: ' . $e->getMessage());
+      }
   }
 
   // Create a payment intent (useful for one-time charges)
