@@ -83,10 +83,13 @@ Route::group(['namespace' => 'App\Modules\AdminModule\Controllers', 'prefix' => 
                 Route::put('/user-update/{user_id}', 'UsersController@updateUser')->name('admin.users.update');
                 Route::get('/resource-get/{id}', 'ResourceController@getResource')->name('admin.resource.get');
 
+                Route::get('/transfer-player/{id}', 'TransferPlayerController@getUser')->name('admin.transfer.get');
                 Route::get('/transfer-player', 'TransferPlayerController@getAllUsers')->name('admin.transfer.get-all');
                 Route::post('/transfer-player-register', 'TransferPlayerController@store')->name('admin.transfer.register');
                 Route::put('/transfer-player-update/{id}', 'TransferPlayerController@update')->name('admin.transfer.update');
                 Route::delete('/transfer-player-delete/{id}', 'TransferPlayerController@destory')->name('admin.transfer.delete');
+                Route::post('/transfer-player/upload-profile-picture/{user_id}', 'TransferPlayerController@uploadProfilePicture')->name('admin.transfer.upload.profile-picture');
+                Route::delete('/transfer-player/remove-media/{media_id}', 'TransferPlayerController@removeMedia')->name('admin.transfer.remove.media');
 
 
                 //player
