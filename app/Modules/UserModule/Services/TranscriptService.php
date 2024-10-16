@@ -16,7 +16,7 @@ class TranscriptService
         $player = Player::connect(config('database.default'))
             ->where('user_id', auth()->id())
             ->first();
-        Transcript::connect(config('database.default'))
+        return Transcript::connect(config('database.default'))
             ->create([
                 'user_id' => auth()->id(),
                 'player_id' => $player->id,

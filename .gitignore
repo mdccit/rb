@@ -21,3 +21,4 @@ yarn-error.log
 setup.sh
 .rnd
 composer.lock
+/storage/transcript_temp
