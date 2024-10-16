@@ -247,15 +247,24 @@ class SubscriptionController extends Controller
       // Check if the subscription type is 'trial'
       if ($subscriptionType === 'trial') {
         // Create a trial subscription using the Stripe API
-        $stripeSubscription = $this->stripeAPI->createSubscriptionWithTrial($user->stripe_id, $paymentMethodId, 30); // 30 days trial
+        $stripeSubscription = $this->stripeAPI->createSubscriptionWithTrial($user->stripe_id,$subscriptionType, $paymentMethodId, 30); // 30 days trial
+
+        $subscriptionId = $stripeSubscription->id;
+        $startDate = Carbon::createFromTimestamp($stripeSubscription->current_period_start);
+        $endDate = Carbon::createFromTimestamp($stripeSubscription->current_period_end);
+        $paymentStatus = $stripeSubscription->status;
+
+
 
         // Save the trial subscription to the database
         $userSubscription = new Subscription();
         $userSubscription->user_id = $user->id;
-        $userSubscription->subscription_type = 'monthly';
+        $userSubscription->subscription_type = 'trial';
         $userSubscription->status = 'active'; // Set status to 'trial'
-        $userSubscription->start_date = Carbon::now();
-        $userSubscription->end_date = Carbon::now()->addMonth(); // 1-month trial
+        $userSubscription->start_date = $startDate;
+        $userSubscription->end_date = $endDate;
+        $userSubscription->payment_status = $paymentStatus;
+        $userSubscription->stripe_subscription_id = $subscriptionId; 
         $userSubscription->save();
 
         if ($stripeSubscription) {
@@ -271,10 +280,10 @@ class SubscriptionController extends Controller
 
 
         return response()->json(['status' => 'success', 'message' => 'Trial subscription created successfully']);
-      } else if ($subscriptionType === 'monthly') {
+      } else if ($subscriptionType === 'premium') {
 
         // Create the subscription with the payment method
-        $stripeSubscription = $this->stripeAPI->createSubscription($user->stripe_id, $subscriptionType, $paymentMethodId, true);
+        $stripeSubscription = $this->stripeAPI->createSubscription($user->stripe_id, 'monthly', $paymentMethodId, true);
 
         $subscriptionId = $stripeSubscription->id;
         $startDate = Carbon::createFromTimestamp($stripeSubscription->current_period_start);

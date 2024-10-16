@@ -120,7 +120,7 @@ class SubscriptionService
 
             $userSubscription = new Subscription();
             $userSubscription->user_id = $user->id;
-            $userSubscription->subscription_type = $data['subscription_type']; // 'monthly' or 'annually'
+            $userSubscription->subscription_type = 'monthly'; // 'monthly' or 'annually'
             $userSubscription->status = 'active'; // Set status to active for paid subscriptions
             $userSubscription->start_date = Carbon::now();
             $userSubscription->end_date = $data['subscription_type'] === 'monthly' ? Carbon::now()->addMonth() : Carbon::now()->addYear();
@@ -171,7 +171,7 @@ class SubscriptionService
             }
 
             // Mark the subscription as canceled or inactive in the local database
-            $subscription->status = 'inactive';  // or 'canceled'
+            $subscription->status = 'cancelled';  // or 'cancelled'
             $subscription->save();
 
         } catch (\Exception $e) {
