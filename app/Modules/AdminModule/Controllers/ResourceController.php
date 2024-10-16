@@ -158,4 +158,39 @@ class ResourceController extends Controller
         
     }
 
+    public function getResource($resource_id){
+        try{
+           
+            $resources = Resource::connect(config('database.secondary'))->where('id', $resource_id)->first();
+
+            if($resources){
+
+                $data =$this->resourceService->getResource($resource_id);
+                $responseData = [
+                    'dataSets' => $data,
+                ];
+                return CommonResponse::getResponse(
+                        200,
+                        'Successfully Resource Fetch',
+                        'Successfully Resource Fetch',
+                        $responseData
+                    );
+            }else{
+
+                return CommonResponse::getResponse(
+                    422,
+                    'Resource does not exist',
+                    'Resource does not exist'
+                );
+
+            }   
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    }
+
 }

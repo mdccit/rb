@@ -33,6 +33,7 @@ class ResourceService
         $search_key = array_key_exists("search_key",$data)?$data['search_key']:null;
 
         $query = ResourceCategory::connect(config('database.secondary'))
+                   ->with('resources')
                     ->select(
                         'id',
                         'title',
