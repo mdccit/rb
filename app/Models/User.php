@@ -51,7 +51,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'is_approved',
         'date_of_birth',
         'email_verified_at',
-        'last_logged_at'
+        'last_logged_at',
+        'has_used_trial'
     ];
 
     /**
