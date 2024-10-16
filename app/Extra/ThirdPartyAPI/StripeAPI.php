@@ -253,6 +253,7 @@ class StripeAPI
 
     // Log the subscription type and price ID for debugging purposes
     Log::info('Retrieving price ID for subscription type: ' . $subscriptionType);
+    Log::info(' price ID for subscription : ' . $priceIds[$subscriptionType]);
 
     // Check if the price ID is available
     if (!isset($priceIds[$subscriptionType]) || empty($priceIds[$subscriptionType])) {

@@ -10,6 +10,7 @@ use App\Extra\ThirdPartyAPI\StripeAPI;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 use App\Notifications\Subscription\PaymentSuccessEmail;
+use Illuminate\Support\Facades\Log;
 
 use Stripe\Subscription as StripeSubscription;
 
@@ -82,6 +83,7 @@ class SubscriptionService
 
         // If payment method is already confirmed, proceed with subscription
         $paymentMethodId = $data['payment_method_id'];
+        $subscriptionType = $data['subscription_type'];
         $paymentMethod = PaymentMethod::retrieve($paymentMethodId);
         $paymentMethod->attach(['customer' => $stripeCustomerId]);
 
@@ -91,15 +93,11 @@ class SubscriptionService
                 'default_payment_method' => $paymentMethodId,
             ],
         ]);
-
-
-        // Determine the Stripe price ID based on subscription type
-        $priceId = $this->getPriceIdFromSubscriptionType($data['subscription_type']);
-
+        
         // Check if it's a trial subscription
         if ($data['subscription_type'] === 'trial') {
             // Create a Stripe subscription with a 1-month trial period
-            $stripeSubscription = $this->stripeAPI->createSubscriptionWithTrial($stripeCustomerId, $priceId, 30); // 30 days trial
+            $stripeSubscription = $this->stripeAPI->createSubscriptionWithTrial($stripeCustomerId, $subscriptionType, 30); // 30 days trial
 
             // Save trial details
             $userSubscription = new Subscription();
@@ -113,7 +111,7 @@ class SubscriptionService
             return $userSubscription;
         } else {
             // If it's a paid subscription (monthly or annually), create the subscription using the payment method
-            $stripeSubscription = $this->stripeAPI->createSubscription($stripeCustomerId, $priceId, $paymentMethodId);
+            $stripeSubscription = $this->stripeAPI->createSubscription($stripeCustomerId, $subscriptionType, $paymentMethodId);
 
             if ($stripeSubscription) {
                 $amount = $stripeSubscription->amount;
@@ -220,7 +218,7 @@ class SubscriptionService
     {
         // Retrieve the price IDs from the config/services.php file
         $priceIds = [
-            'trial' => null, // Optional, depending on how you manage trials in Stripe
+            'trial' => config('services.stripe.monthly_price_id'),
             'monthly' => config('services.stripe.monthly_price_id'), // Retrieve monthly price ID from config
             'annually' => config('services.stripe.annual_price_id'), // Retrieve annual price ID from config
         ];
