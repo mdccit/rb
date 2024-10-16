@@ -406,8 +406,6 @@ class StripeAPI
       'status' => 'active', // Only active subscriptions
     ]);
 
-    Log::info('active payment');
-    Log::info($subscriptions);
     if (count($subscriptions->data) > 0) {
       // Assume the customer has one active subscription. You can adjust logic for multiple subscriptions.
       $subscription = $subscriptions->data[0];

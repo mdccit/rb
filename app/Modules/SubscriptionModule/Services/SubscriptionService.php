@@ -42,10 +42,18 @@ class SubscriptionService
 
         // Get the first active subscription (assuming the user only has one active subscription)
         $activeSubscription = $stripeSubscriptions->data[0];
+        
 
         // Check if the subscription contains items and retrieve the price
         if (!empty($activeSubscription->items->data) && isset($activeSubscription->items->data[0]->price)) {
             $priceObject = $activeSubscription->items->data[0]->price;
+            $is_cancel_at_period_end = false;
+
+            $stripeSubscription = StripeSubscription::retrieve($activeSubscription->id);
+            if ($stripeSubscription->cancel_at_period_end) {
+
+                $is_cancel_at_period_end = true;
+            }
 
             // Prepare subscription data with price and currency
             $subscription = [
@@ -55,6 +63,7 @@ class SubscriptionService
                 'status' => $activeSubscription->status,
                 'price' => isset($priceObject->unit_amount) ? $priceObject->unit_amount / 100 : null,  // Convert to dollars
                 'currency' => isset($priceObject->currency) ? strtoupper($priceObject->currency) : null,
+                'cancel_at_period_end' => $is_cancel_at_period_end,
             ];
 
             return $subscription;
@@ -137,6 +146,7 @@ class SubscriptionService
     {
         $stripeCustomerId = $user->stripe_id;
 
+        Log::info('Cancelling Subscription');
         // Check if the user has a Stripe customer ID
         if (!$stripeCustomerId) {
             throw new \Exception('No Stripe customer ID found.');
@@ -160,7 +170,8 @@ class SubscriptionService
 
             // Cancel the subscription on Stripe (you can add options here like `cancel_at_period_end`)
             $stripeSubscription = StripeSubscription::retrieve($activeSubscription->id);
-            $stripeSubscription->cancel();  // If you want to cancel at the end of the period, use cancel(['at_period_end' => true])
+            $stripeSubscription->cancel_at_period_end = true;
+            $stripeSubscription->save();
 
             // Now update the local database
             $subscription = Subscription::where('user_id', $user->id)->first();
