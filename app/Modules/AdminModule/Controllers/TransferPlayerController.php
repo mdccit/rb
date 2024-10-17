@@ -8,6 +8,7 @@ use App\Modules\AdminModule\Services\TransferPlayerService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\TransferPlayer;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 
 class TransferPlayerController extends Controller
@@ -20,9 +21,41 @@ class TransferPlayerController extends Controller
         $this->transferPlayerService = new TransferPlayerService();
     }
 
+    public function getUser($id)
+    {
+        try {
+            $data = $this->transferPlayerService->getUser($id);
+
+            if (!$data) {
+                return CommonResponse::getResponse(
+                    422,
+                    'Transfer player does not exist',
+                    'Transfer player does not exist'
+                );
+            }
+
+            $data->other_data = json_decode($data->other_data);
+            $media = $this->transferPlayerService->getMedia($id);
+            $data->media = $media;
+
+            return CommonResponse::getResponse(
+                200,
+                'Successfully fetched',
+                'Successfully fetched',
+                $data
+            );
+        } catch (\Exception $e) {
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    }
+
     public function getAllUsers(Request $request)
     {
-        try{
+        try {
             $dataSets = $this->transferPlayerService->getAllUsers($request->all());
 
             $responseData = [
@@ -35,7 +68,7 @@ class TransferPlayerController extends Controller
                 'Successfully fetched',
                 $responseData
             );
-        }catch (\Exception $e){
+        } catch (\Exception $e) {
             return CommonResponse::getResponse(
                 422,
                 $e->getMessage(),
@@ -44,42 +77,34 @@ class TransferPlayerController extends Controller
         }
     }
 
-    
+
     public function store(Request $request)
     {
-        try{
+        try {
             $validator = Validator::make($request->all(), [
-                'name' => 'required|string|max:75',
+                'first_name' => 'required|string|max:75',
+                'last_name' => 'required|string|max:75',
                 'school' => 'required|string',
-                'email' => 'nullable|string|email|max:255|unique:transfer_players',
+                'email' => 'required|string|email|max:255|unique:transfer_players',
                 'utr_score_manual' => 'required|numeric',
-                'year' => 'nullable|string|in:freshman,sophomore,junior,senior',
-                'win' => 'nullable|numeric',
-                'loss' => 'nullable|numeric',
-                'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg|max:4096',
-                'handedness' => 'nullable|string|in:right,left,both',
-                'phone_code_country' => 'nullable|numeric',
-                'phone_number' => 'nullable|string|max:15|unique:transfer_players',
-                'height_in_cm' => 'nullable|boolean',
+                'year' => 'required|string|in:freshman,sophomore,junior,senior',
+                'win' => 'required|numeric',
+                'loss' => 'required|numeric',
+                'handedness' => 'required|string|in:right,left,both',
+                'phone_code_country' => 'required|numeric',
+                'phone_number' => 'required|string|max:15|unique:transfer_players',
+                'height_in_cm' => 'required|boolean',
                 'height_cm' => 'nullable|numeric',
                 'height_ft' => 'nullable|numeric',
                 'height_in' => 'nullable|numeric',
-                'gender' => 'nullable|string|in:male,female,other',
+                'gender' => 'required|string|in:male,female,other',
             ]);
-            if ($validator->fails())
-            {
+            if ($validator->fails()) {
                 return CommonResponse::getResponse(
                     422,
                     $validator->errors(),
                     'Input validation failed'
                 );
-            }
-            
-            if ($image =$request->file('profile_photo')) {
-                $file = $request->file('profile_photo');
-                $filename = time() . '.' . $file->getClientOriginalExtension();
-                $file->storeAs('public/Transfer_user_profile_photo', $filename);
-                $request['profile_photo_path'] ='Transfer_user_profile_photo/' . $filename;
             }
 
             $this->transferPlayerService->store($request->all());
@@ -89,7 +114,7 @@ class TransferPlayerController extends Controller
                 'Successfully Registered',
                 'Successfully Registered'
             );
-        }catch (\Exception $e){
+        } catch (\Exception $e) {
             return CommonResponse::getResponse(
                 422,
                 $e->getMessage(),
@@ -98,26 +123,99 @@ class TransferPlayerController extends Controller
         }
     }
 
-    public function update(Request $request,$transfer_id)
+    public function update(Request $request, $transfer_id)
     {
-        try{
+        try {
             $validator = Validator::make($request->all(), [
-                'name' => 'required|string|max:75',
+                'first_name' => 'required|string|max:75',
+                'last_name' => 'required|string|max:75',
                 'school' => 'required|string',
-                'email' => ['nullable', 'email', 'max:255', Rule::unique('transfer_players')->ignore($transfer_id)],
+                'email' => ['required', 'email', 'max:255', Rule::unique('transfer_players')->ignore($transfer_id)],
                 'utr_score_manual' => 'required|numeric',
-                'year' => 'nullable|string|in:freshman,sophomore,junior,senior',
-                'win' => 'nullable|numeric',
-                'loss' => 'nullable|numeric',
-                'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg|max:4096',
-                'handedness' => 'nullable|string|in:right,left,both',
-                'phone_code_country' => 'nullable|numeric',
-                'phone_number' => ['nullable','string','max:15',Rule::unique('transfer_players')->ignore($transfer_id)],
-                'height_in_cm' => 'boolean',
+                'year' => 'required|string|in:freshman,sophomore,junior,senior',
+                'win' => 'required|numeric',
+                'loss' => 'required|numeric',
+                'handedness' => 'required|string|in:right,left,both',
+                'phone_code_country' => 'required|numeric',
+                'phone_number' => ['required','string','max:15',Rule::unique('transfer_players')->ignore($transfer_id)],
+                'height_in_cm' => 'required|boolean',
                 'height_cm' => 'nullable|numeric',
                 'height_ft' => 'nullable|numeric',
                 'height_in' => 'nullable|numeric',
-                'gender' => 'nullable|string|in:male,female,other',
+                'gender' => 'required|string|in:male,female,other',
+            ]);
+            if ($validator->fails()) {
+                return CommonResponse::getResponse(
+                    422,
+                    $validator->errors(),
+                    'Input validation failed'
+                );
+            }
+            $transfer_player = TransferPlayer::connect(config('database.secondary'))->where('id', $transfer_id)->first();
+
+            if ($transfer_player) {
+
+                $this->transferPlayerService->update($request->all(), $transfer_id);
+
+                return CommonResponse::getResponse(
+                    200,
+                    'Successfully Updated',
+                    'Successfully Updated'
+                );
+            } else {
+
+                return CommonResponse::getResponse(
+                    422,
+                    'Transfer player does not exist',
+                    'Transfer player does not exist'
+                );
+            }
+        } catch (\Exception $e) {
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    }
+
+    public function destory($transfer_id)
+    {
+        try {
+
+            $transfer_player = TransferPlayer::connect(config('database.secondary'))->where('id', $transfer_id)->first();
+
+            if ($transfer_player) {
+
+                $this->transferPlayerService->destroy($transfer_id);
+
+                return CommonResponse::getResponse(
+                    200,
+                    'Successfully Resource Deleted',
+                    'Successfully Resource Deleted'
+                );
+            } else {
+
+                return CommonResponse::getResponse(
+                    422,
+                    'Resource does not exist',
+                    'Resource does not exist'
+                );
+            }
+        } catch (\Exception $e) {
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    }
+
+    public function uploadProfilePicture(Request $request, $id)
+    {
+        try{
+            $validator = Validator::make($request->all(), [
+                'file.*' => 'required|mimes:jpg,jpeg,png|max:51200',
             ]);
             if ($validator->fails())
             {
@@ -127,37 +225,26 @@ class TransferPlayerController extends Controller
                     'Input validation failed'
                 );
             }
-            $transfer_player = TransferPlayer::connect(config('database.secondary'))->where('id', $transfer_id)->first();
-             
-            if($transfer_player){
 
-                if ($image =$request->file('profile_photo')) {
-                    $file = $request->file('profile_photo');
-                    $filename = time() . '.' . $file->getClientOriginalExtension();
-                    $file->storeAs('public/Transfer_user_profile_photo', $filename);
-                    $request['profile_photo_path'] ='Transfer_user_profile_photo/' . $filename;
-                }else{
-                    $request['profile_photo_path'] =$transfer_player->profile_photo_path;
-
-                }
-    
-                $this->transferPlayerService->update($request->all(),$transfer_id);
-    
+            $user = TransferPlayer::connect(config('database.secondary'))
+                ->where('id', $id)
+                ->first();
+            if(!$user) {
                 return CommonResponse::getResponse(
-                    200,
-                    'Successfully Updated',
-                    'Successfully Updated'
+                    401,
+                    'No account associated with this user id',
+                    'No account associated with this user id'
                 );
-            }else{
-
-                return CommonResponse::getResponse(
-                    422,
-                    'Transfer player does not exist',
-                    'Transfer player does not exist'
-                ); 
             }
-            
-            
+
+            $responseData = $this->transferPlayerService->uploadProfilePicture($request->file('file'),$id);
+
+            return CommonResponse::getResponse(
+                200,
+                'Successfully Uploaded',
+                'Successfully Uploaded',
+                $responseData
+            );
         }catch (\Exception $e){
             return CommonResponse::getResponse(
                 422,
@@ -167,29 +254,16 @@ class TransferPlayerController extends Controller
         }
     }
 
-    public function destory($transfer_id){
+    public function removeMedia($media_id)
+    {
         try{
-           
-            $transfer_player = TransferPlayer::connect(config('database.secondary'))->where('id', $transfer_id)->first();
+            $this->transferPlayerService->removeMedia($media_id);
 
-            if($transfer_player){
-
-                $this->transferPlayerService->destroy($transfer_id);
-
-                return CommonResponse::getResponse(
-                        200,
-                        'Successfully Resource Deleted',
-                        'Successfully Resource Deleted'
-                    );
-            }else{
-
-                return CommonResponse::getResponse(
-                    422,
-                    'Resource does not exist',
-                    'Resource does not exist'
-                );
-
-            }   
+            return CommonResponse::getResponse(
+                200,
+                'Successfully Removed Media',
+                'Successfully Removed Media',
+            );
         }catch (\Exception $e){
             return CommonResponse::getResponse(
                 422,
@@ -198,6 +272,4 @@ class TransferPlayerController extends Controller
             );
         }
     }
-
-
 }

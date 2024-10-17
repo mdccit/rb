@@ -24,7 +24,9 @@ class PDFManager
             return new PDFText($directText, false);
         }
 
-        $imageFiles = $this->fileToImages($file);
+        $tmp = TemporaryDirectory::make(storage_path('transcript_temp'));
+
+        $imageFiles = $this->fileToImages($file,$tmp);
 
         $ocrOutput = collect($imageFiles)->map(fn ($imageFile) => (
             (new TesseractOCR($imageFile))
@@ -34,6 +36,8 @@ class PDFManager
                 ->lang($ocrLanguage)
                 ->run()
         ))->filter()->join("\n");
+
+        $tmp->delete();
 
         return new PDFText(
             Str::remove(config('transcripts.ocr_blacklist'), $ocrOutput),
@@ -56,19 +60,20 @@ class PDFManager
     /**
      * Convert a PDF to images.
      */
-    public function fileToImages(string $file): array
+    public function fileToImages(string $file,$tmp): array
     {
-        $tmp = TemporaryDirectory::make();
 
         $pdf = (new PdfToImage($file))
             ->setOutputFormat('png');
 
         $paths = [];
 
-        for ($i = 1; $i < $pdf->getNumberOfPages(); $i++) {
+        $pdfPagesCount = $pdf->getNumberOfPages();
+
+
+        for ($i = 1; $i < $pdfPagesCount; $i++) {
             $path = $tmp->path("page-$i.png");
             $paths[] = $path;
-
             $pdf->setPage($i)
                 ->saveImage($path);
         }

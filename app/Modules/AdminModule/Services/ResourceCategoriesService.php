@@ -17,7 +17,8 @@ class ResourceCategoriesService
                         'title',
                         'description',
                         'icon',
-                );
+                        'created_at'
+                )->orderBy('created_at', 'DESC');
         if ($search_key != null) {
             $query->where('title', 'LIKE', '%' . $search_key . '%');
         }
@@ -41,7 +42,7 @@ class ResourceCategoriesService
                         ]);
     }
 
-    public function updateCategory(array $data, int $category_id){
+    public function updateCategory(array $data, $category_id){
         ResourceCategory::connect(config('database.default'))
                 ->where('id', $category_id)
                 ->update([
@@ -52,9 +53,24 @@ class ResourceCategoriesService
         
     }
 
-    public function destroyCategory(int $category_id){
+    public function destroyCategory( $category_id){
         
         ResourceCategory::connect(config('database.default'))->destroy($category_id);
         
+    }
+
+    public function getCategories ($id){
+       
+        $dataSet = ResourceCategory::connect(config('database.secondary'))
+                     ->where('id','=',$id)
+                     ->select(
+                        'id',
+                        'title',
+                        'description',
+                        'icon',
+                        'created_at'
+                )->first();
+       
+        return $dataSet;
     }
 }
