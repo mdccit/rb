@@ -26,6 +26,7 @@ Route::group(['namespace' => 'App\Modules\SubscriptionModule\Controllers', 'pref
 
         // Recurring Subscriptions
         Route::post('/recurring/create', 'SubscriptionController@createRecurringSubscription')->name('subscription.createRecurring');
+        Route::put('/stop_cancel', 'SubscriptionController@stopSubscriptionCancellation')->name('subscription.stop.cancel');
 
 
          // New added routes

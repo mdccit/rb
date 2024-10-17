@@ -15,6 +15,7 @@ use Carbon\Carbon;
 use App\Notifications\Subscription\PaymentSuccessEmail;
 use Stripe\PaymentMethod;
 use Stripe\Customer;
+use Stripe\Subscription as StripeSubscription;
 
 
 class SubscriptionController extends Controller
@@ -582,6 +583,42 @@ class SubscriptionController extends Controller
     }
   }
 
+
+  public function stopSubscriptionCancellation(Request $request)
+{
+    $user = $request->user();  // Get the authenticated user
+
+    try {
+        // Retrieve the user's active subscription
+        $subscription = $user->subscription;
+        if (!$subscription || !$subscription->stripe_subscription_id) {
+            return CommonResponse::getResponse(404, 'No active subscription found.', 'User does not have an active subscription.');
+        }
+
+        // Retrieve the subscription from Stripe
+        $stripeSubscription = StripeSubscription::retrieve($subscription->stripe_subscription_id);
+
+        // Check if the subscription is set to cancel at the end of the period
+        if ($stripeSubscription->cancel_at_period_end) {
+            // Stop the cancellation
+            $stripeSubscription->cancel_at_period_end = false;
+            $stripeSubscription->save();
+
+            // Optionally update local subscription status (if needed)
+            $subscription->status = 'active';  // Mark it as active in the local database
+            $subscription->save();
+
+            return CommonResponse::getResponse(200, 'Subscription cancellation stopped.', 'Your subscription will continue beyond the current period.');
+        } else {
+            // If the subscription is not set to cancel, return a response
+            return CommonResponse::getResponse(200, 'Subscription is already active.', 'No cancellation was scheduled.');
+        }
+
+    } catch (\Exception $e) {
+        Log::error('Failed to stop subscription cancellation: ' . $e->getMessage());
+        return CommonResponse::getResponse(500, $e->getMessage(), 'Failed to stop subscription cancellation.');
+    }
+}
 
 
 }
