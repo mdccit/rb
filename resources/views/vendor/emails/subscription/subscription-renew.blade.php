@@ -64,23 +64,20 @@
 		<path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clip-rule="evenodd" />
 	  </svg>
 
-        <h3>Your Subscription Has Been <br> Successfully Renewed!</h3>
-		<p style="font-size: 14px; color: #4d4949;"><b>Hi Lahiru</b></p>
-        <p style="font-size: 16px; color: #4d4949;">Great news! Your subscription to Recruited has been successfully renewed. 
-        </p>
-        <p style="font-size: 14px; color: #4d4949;"><b>Here are the details of your renewal</b></p>
-		<p style="font-size: 14px; color: #4d4949;">Plan: Premium </p>
-		<p style="font-size: 14px; color: #4d4949;">Renewal Date: 2024 11 05</p>
-		<p style="font-size: 14px; color: #4d4949;">Next Billing Date: 2024 12 05</p>
-		<p style="font-size: 14px; color: #4d4949;">Amount Charged : $100.00</p>
-      
-        <br>
-		
-        <p  style="font-size: 12px; color: #4d4949;">
-         Thank you for your continued trust in Recruited. We’re here to ensure you have the best experience possible.
+    <h3>Your Subscription Has Been <br> Successfully Renewed!</h3>
+    <p style="font-size: 14px; color: #4d4949;"><b>Hi {{$user->display_name}}</b></p>
+    <p style="font-size: 16px; color: #4d4949;">Great news! Your subscription to Recruited has been successfully renewed.</p>
+    <p style="font-size: 14px; color: #4d4949;"><b>Here are the details of your renewal</b></p>
+    <p style="font-size: 14px; color: #4d4949;">Plan: {{$plan_name}}</p>
+    <p style="font-size: 14px; color: #4d4949;">Renewal Date: {{$renewal_date}}</p>
+    <p style="font-size: 14px; color: #4d4949;">Next Billing Date: {{$next_billing_date}}</p>
+    <p style="font-size: 14px; color: #4d4949;">Amount Charged: {{$amount_charged}}</p>
 
-			If you have any questions or need assistance with your account, feel free to contact us.
-        </p>
+    <p  style="font-size: 12px; color: #4d4949;">
+        Thank you for your continued trust in Recruited. We’re here to ensure you have the best experience possible.
+        If you have any questions or need assistance with your account, feel free to contact us.
+    </p>
+
       </div>
       
     </div>

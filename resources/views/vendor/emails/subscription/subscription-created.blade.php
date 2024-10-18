@@ -68,19 +68,19 @@
 		</svg>
 
 
-        <h3>Welcome to Recruited! <br> Your Subscription is Confirmed</h3>
-		<p style="font-size: 14px; color: #4d4949;"><b>Hi Lahiru</b></p>
-        <p style="font-size: 16px; color: #4d4949;">Welcome to Recruited! We’re excited to have you on board and look forward to helping you make the most of your subscription.</p>
-		
-			<p style="font-size: 14px; color: #4d4949;"><b>Here are your subscription details</b></p>
-			<p style="font-size: 14px; color: #4d4949;">Plan Name: [Plan Name]</p>
-			<p style="font-size: 14px; color: #4d4949;">Start Date: [Start Date]</p>
-			<p style="font-size: 14px; color: #4d4949;">Price: [Price]</p>
-			<p style="font-size: 14px; color: #4d4949;">Billing Cycle: [Monthly/Annual]</p>
-			<p style="font-size: 14px; color: #4d4949;">Next Charge Date: [Next Billing Date]</p>
-			<p style="font-size: 14px; color: #4d4949; margin-bottom:30px; margin-top:20px">You now have full access to REcr as part of your [Plan Name] plan. Be sure to explore everything we offer and get the most out of your subscription!</p>
-			
-	
+    <h3>Welcome to Recruited! <br> Your Subscription is Confirmed</h3>
+    <p style="font-size: 14px; color: #4d4949;"><b>Hi {{$user->display_name}}</b></p>
+    <p style="font-size: 16px; color: #4d4949;">Welcome to Recruited! We’re excited to have you on board and look forward to helping you make the most of your subscription.</p>
+
+    <p style="font-size: 14px; color: #4d4949;"><b>Here are your subscription details</b></p>
+    <p style="font-size: 14px; color: #4d4949;">Plan Name: {{$plan_name}}</p>
+    <p style="font-size: 14px; color: #4d4949;">Start Date: {{$start_date}}</p>
+    <p style="font-size: 14px; color: #4d4949;">Price: {{$price}}</p>
+    <p style="font-size: 14px; color: #4d4949;">Billing Cycle: {{$billing_cycle}}</p>
+    <p style="font-size: 14px; color: #4d4949;">Next Charge Date: {{$next_billing_date}}</p>
+
+    <p style="font-size: 14px; color: #4d4949; margin-bottom:30px; margin-top:20px">You now have full access to REcr as part of your {{$plan_name}} plan. Be sure to explore everything we offer and get the most out of your subscription!</p>
+
         <p  style="font-size: 12px; color: #4d4949;">
          
 				If you have any questions or need assistance, feel free to contact us

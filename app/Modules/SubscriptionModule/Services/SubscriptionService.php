@@ -9,7 +9,7 @@ use Carbon\Carbon;
 use App\Extra\ThirdPartyAPI\StripeAPI;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
-use App\Notifications\Subscription\PaymentSuccessEmail;
+use App\Notifications\Subscription\SubscriptionCancelEmail;
 use Illuminate\Support\Facades\Log;
 
 use Stripe\Subscription as StripeSubscription;
@@ -175,6 +175,8 @@ class SubscriptionService
 
             // Now update the local database
             $subscription = Subscription::where('user_id', $user->id)->first();
+
+            $user->notify(new SubscriptionCancelEmail($user, $subscription, $subscription->end_date));
 
             // Ensure the local subscription exists
             if (!$subscription) {
