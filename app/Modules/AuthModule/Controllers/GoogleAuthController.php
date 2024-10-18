@@ -104,6 +104,7 @@ class GoogleAuthController extends Controller
                     'user_slug' => $user->slug,
                     'user_name' => $user->display_name,
                     'media_info' => $media_info,
+                    'user_type_id' => $user->user_type_id,
                 ];
 
                 return CommonResponse::getResponse(
@@ -189,6 +190,7 @@ class GoogleAuthController extends Controller
                     'user_slug' => $user->slug,
                     'user_name' => $user->display_name,
                     'media_info' => $media_info,
+                    'user_type_id' => $user->user_type_id,
                 ];
 
                 return CommonResponse::getResponse(
