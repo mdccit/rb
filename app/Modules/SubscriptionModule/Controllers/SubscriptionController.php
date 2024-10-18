@@ -127,9 +127,6 @@ class SubscriptionController extends Controller
     }
   }
 
-
-
-
   /**
    * Create a SetupIntent to get client_secret for payment method confirmation.
    */
