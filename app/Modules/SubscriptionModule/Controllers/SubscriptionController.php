@@ -98,31 +98,36 @@ class SubscriptionController extends Controller
 
   public function getStripeCustomerId(Request $request)
   {
-      try {
-          // Retrieve the authenticated user
-          $user = $request->user();  // Assuming you are using token-based authentication like JWT or Laravel Passport
-  
-          // Check if the user already has a Stripe customer ID
-          if (!$user->stripe_id) {
-              // If not, create a new Stripe customer and save the stripe_id
-              $stripeCustomerId = $this->stripeAPI->createCustomer($user);
-              $user->stripe_id = $stripeCustomerId;
-              $user->save();
-          } else {
-              // If the user already has a Stripe customer ID
-              $stripeCustomerId = $user->stripe_id;
-          }
-  
-          // Return a success response using CommonResponse
-          return CommonResponse::getResponse(200, ['stripe_customer_id' => $stripeCustomerId], 'Stripe customer ID retrieved successfully.');
-  
-      } catch (\Exception $e) {
-          Log::error('Error retrieving Stripe customer ID: ' . $e->getMessage());
-  
-          // Return an error response using CommonResponse
-          return CommonResponse::getResponse(500,  ['error' => $e->getMessage()], 'Failed to retrieve Stripe customer ID.');
+    try {
+      // Retrieve the authenticated user
+      $user = $request->user();  // Assuming you are using token-based authentication like JWT or Laravel Passport
+
+      // Check if the user already has a Stripe customer ID
+      if (!$user->stripe_id) {
+        // If not, create a new Stripe customer and save the stripe_id
+        $stripeCustomerId = $this->stripeAPI->createCustomer($user);
+        $user->stripe_id = $stripeCustomerId;
+        $user->save();
+      } else {
+        // If the user already has a Stripe customer ID
+        $stripeCustomerId = $user->stripe_id;
       }
+
+      return response()->json([
+        'status' => 'success',
+        'stripe_customer_id' => $stripeCustomerId
+      ], 200);
+
+    } catch (\Exception $e) {
+      Log::error('Error retrieving Stripe customer ID: ' . $e->getMessage());
+      return response()->json([
+        'status' => 'error',
+        'message' => 'Failed to retrieve Stripe customer ID'
+      ], 500);
+    }
   }
+
+
 
 
   /**
