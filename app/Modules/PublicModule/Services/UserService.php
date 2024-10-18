@@ -140,6 +140,8 @@ class UserService
                             'sports.name as sport_name'
                         )
                         ->first();
+                        $school_profile_picture = $this->getSingleFileByEntityId($profile_info->school_id,'school_profile_picture');
+                        $profile_info->school_profile_picture = $school_profile_picture??null;
                     break;
                 case config('app.user_roles.business_manager'):
                     $profile_info = BusinessManager::connect(config('database.secondary'))
@@ -460,6 +462,8 @@ class UserService
                     'sports.name as sport_name'
                 )
                 ->first();
+            $school_profile_picture = $this->getSingleFileByEntityId($coach->school_id,'school_profile_picture');
+            $coach->school_profile_picture = $school_profile_picture??null;
         }
 
         return [
