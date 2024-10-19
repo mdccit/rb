@@ -245,7 +245,7 @@ class SubscriptionController extends Controller
       // Check if the subscription type is 'trial'
       if ($subscriptionType === 'trial') {
         // Create a trial subscription using the Stripe API
-        $stripeSubscription = $this->stripeAPI->createSubscriptionWithTrial($user->stripe_id,$subscriptionType, $paymentMethodId, 30); // 30 days trial
+        $stripeSubscription = $this->stripeAPI->createSubscriptionWithTrial($user->stripe_id, $subscriptionType, $paymentMethodId, 30); // 30 days trial
 
         $subscriptionId = $stripeSubscription->id;
         $startDate = Carbon::createFromTimestamp($stripeSubscription->current_period_start);
@@ -262,7 +262,7 @@ class SubscriptionController extends Controller
         $userSubscription->start_date = $startDate;
         $userSubscription->end_date = $endDate;
         $userSubscription->payment_status = $paymentStatus;
-        $userSubscription->stripe_subscription_id = $subscriptionId; 
+        $userSubscription->stripe_subscription_id = $subscriptionId;
         $userSubscription->save();
 
         if ($stripeSubscription) {
@@ -296,7 +296,7 @@ class SubscriptionController extends Controller
         $userSubscription->start_date = $startDate;
         $userSubscription->end_date = $endDate;
         $userSubscription->payment_status = $paymentStatus;
-        $userSubscription->stripe_subscription_id = $subscriptionId; 
+        $userSubscription->stripe_subscription_id = $subscriptionId;
         $userSubscription->save();
 
         if ($stripeSubscription) {
@@ -582,40 +582,82 @@ class SubscriptionController extends Controller
 
 
   public function stopSubscriptionCancellation(Request $request)
-{
+  {
     $user = $request->user();  // Get the authenticated user
 
     try {
-        // Retrieve the user's active subscription
-        $subscription = $user->subscription;
-        if (!$subscription || !$subscription->stripe_subscription_id) {
-            return CommonResponse::getResponse(404, 'No active subscription found.', 'User does not have an active subscription.');
-        }
+      // Retrieve the user's active subscription
+      $subscription = $user->subscription;
+      if (!$subscription || !$subscription->stripe_subscription_id) {
+        return CommonResponse::getResponse(404, 'No active subscription found.', 'User does not have an active subscription.');
+      }
 
-        // Retrieve the subscription from Stripe
-        $stripeSubscription = StripeSubscription::retrieve($subscription->stripe_subscription_id);
+      // Retrieve the subscription from Stripe
+      $stripeSubscription = StripeSubscription::retrieve($subscription->stripe_subscription_id);
 
-        // Check if the subscription is set to cancel at the end of the period
-        if ($stripeSubscription->cancel_at_period_end) {
-            // Stop the cancellation
-            $stripeSubscription->cancel_at_period_end = false;
-            $stripeSubscription->save();
+      // Check if the subscription is set to cancel at the end of the period
+      if ($stripeSubscription->cancel_at_period_end) {
+        // Stop the cancellation
+        $stripeSubscription->cancel_at_period_end = false;
+        $stripeSubscription->save();
 
-            // Optionally update local subscription status (if needed)
-            $subscription->status = 'active';  // Mark it as active in the local database
-            $subscription->save();
+        // Optionally update local subscription status (if needed)
+        $subscription->status = 'active';  // Mark it as active in the local database
+        $subscription->save();
 
-            return CommonResponse::getResponse(200, 'Subscription cancellation stopped.', 'Your subscription will continue beyond the current period.');
-        } else {
-            // If the subscription is not set to cancel, return a response
-            return CommonResponse::getResponse(200, 'Subscription is already active.', 'No cancellation was scheduled.');
-        }
+        return CommonResponse::getResponse(200, 'Subscription cancellation stopped.', 'Your subscription will continue beyond the current period.');
+      } else {
+        // If the subscription is not set to cancel, return a response
+        return CommonResponse::getResponse(200, 'Subscription is already active.', 'No cancellation was scheduled.');
+      }
 
     } catch (\Exception $e) {
-        Log::error('Failed to stop subscription cancellation: ' . $e->getMessage());
-        return CommonResponse::getResponse(500, $e->getMessage(), 'Failed to stop subscription cancellation.');
+      Log::error('Failed to stop subscription cancellation: ' . $e->getMessage());
+      return CommonResponse::getResponse(500, $e->getMessage(), 'Failed to stop subscription cancellation.');
     }
-}
+  }
+
+
+  public function setDefaultPaymentMethod($user, $paymentMethodId)
+  {
+    // Retrieve the Stripe customer ID from the user
+    $stripeCustomerId = $user->stripe_id;
+
+    if (!$stripeCustomerId) {
+      return CommonResponse::getResponse(404, null, 'No Stripe customer ID found for this user.');
+    }
+
+    try {
+      // Retrieve the payment method from Stripe
+      $paymentMethod = PaymentMethod::retrieve($paymentMethodId);
+
+
+      // Attach the payment method to the customer (if not already attached)
+      $paymentMethod->attach([
+        'customer' => $stripeCustomerId,
+      ]);
+
+      // Update the customer’s invoice settings to use this payment method as the default
+      Customer::update($stripeCustomerId, [
+        'invoice_settings' => [
+          'default_payment_method' => $paymentMethodId
+        ]
+      ]);
+
+      // Optionally, update the local database with the default payment method ID
+      $user->default_payment_method_id = $paymentMethodId; // Assuming you have this column in your users table
+      $user->save();
+
+      // Return a success response using the CommonResponse structure
+      return CommonResponse::getResponse(200, null, 'Default payment method updated successfully.');
+
+    } catch (\Exception $e) {
+      // Log the error and return an error response using CommonResponse
+      Log::error('Error setting default payment method: ' . $e->getMessage());
+      return CommonResponse::getResponse(500, null, 'Failed to set default payment method: ' . $e->getMessage());
+    }
+  }
+
 
 
 }
