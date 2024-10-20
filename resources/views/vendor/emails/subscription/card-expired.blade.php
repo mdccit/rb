@@ -42,10 +42,8 @@
       "
     >
       <img
-        src="https://ci3.googleusercontent.com/meips/ADKq_NbVf3Ie0ahLBPf_ZQHizIMwn5bO-Jwjb5EKYLwIY_sF9YC0WT3PnOtnOY5fzizX-9Y2S3YM5n9FSEClp0y6yAyN=s0-d-e1-ft#https://recruited.pro/static/logo-black.png"
+        src="https://recruited.pro/static/logo-black.png"
         alt="Recruited Logo"
-        class="CToWUd"
-        data-bit="iit"
         style="width: 200px;"
       />
 
@@ -60,42 +58,28 @@
           padding: 30px;
         "
       >
-	
-
-		
 		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 90px; color: #ff9720;">
 			<path fill-rule="evenodd" d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003ZM12 8.25a.75.75 0 0 1 .75.75v3.75a.75.75 0 0 1-1.5 0V9a.75.75 0 0 1 .75-.75Zm0 8.25a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z" clip-rule="evenodd" />
 		</svg>
 
-
-
-
-
         <h3> Your Credit Card is About to Expire </h3>
-		<p style="font-size: 14px; color: #4d4949;"><b>Hi Lahiru</b></p>
-        <p style="font-size: 16px; color: #4d4949;">We noticed that the credit card linked to your Recruited subscription is set to expire soon on [Card Expiry Date]. <br><br>
+		<p style="font-size: 14px; color: #4d4949;"><b>Hi {{$user->display_name}}</b></p>
+        <p style="font-size: 16px; color: #4d4949;">We noticed that the credit card linked to your Recruited subscription is set to expire soon on {{$card_expiry_date}}. <br><br>
 		To avoid any interruptions to your service, please update your payment method before your next billing cycle.
         </p>
 		
 		 <p style="font-size: 14px; color: #4d4949;"><b>How to update your payment details</b></p>
-		<p style="font-size: 14px; color: #4d4949;">Log in to your account <span style="color: blue">Here</span>
-					</p>
+		<p style="font-size: 14px; color: #4d4949;">Log in to your account <span style="color: blue">Here</span></p>
 		<p style="font-size: 14px; color: #4d4949;">Go to the Billing section.</p>
 		<p style="font-size: 14px; color: #4d4949;">Update your credit card information.</p>
-		<p style="font-size: 14px; color: #4d4949;">By ensuring your payment details are up to date, you can continue enjoying uninterrupted access to recruited.</p>
-	
-      
-        <br>
-		
+		<p style="font-size: 14px; color: #4d4949;">By ensuring your payment details are up to date, you can continue enjoying uninterrupted access to Recruited.</p>
+      <br>
         <p  style="font-size: 12px; color: #4d4949;">
-         
-				If you have any questions or need assistance, feel free to contact us
+         If you have any questions or need assistance, feel free to contact us.
         </p>
       </div>
-      
     </div>
 
-    <p  style="font-size: 14px; text-align: center;"> © 2024 Recruited. All rights reserved.</p>
-      </div>
+    <p  style="font-size: 14px; text-align: center;"> © {{ date('Y') }} Recruited. All rights reserved.</p>
   </body>
 </html>

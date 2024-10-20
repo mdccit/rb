@@ -48,6 +48,10 @@ Route::group(['namespace' => 'App\Modules\SubscriptionModule\Controllers', 'pref
         Route::get('/stripe/customer-payment-methods', 'SubscriptionController@getCustomerPaymentMethods')->name('subscription.get.customer.payment.methods');
         Route::get('/stripe/customer-active-payment-method', 'SubscriptionController@getSubscriptionPaymentMethod')->name('subscription.get.customer.active.payment.method');
 
+        // Webhooks 
+        Route::post('/webhook', 'WebhookController@handleWebhook')->name('subscription.handleWebhook');
+
+
       });
     });
   });
