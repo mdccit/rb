@@ -8,18 +8,14 @@
         href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&display=swap"
         rel="stylesheet"
     />
-
-    <title></title>
+    <title>Subscription Canceled</title>
     <style>
         h1 {
             display: block;
             font-size: 2em;
             margin-block-start: 0.67em;
             margin-block-end: 0.67em;
-            margin-inline-start: 0px;
-            margin-inline-end: 0px;
             font-weight: bold;
-            unicode-bidi: isolate;
         }
     </style>
 </head>
@@ -30,7 +26,7 @@
       margin: auto;
       background-color: rgb(223, 233, 241);
       font-family: Figtree, sans-serif;
-	  padding: 30px;
+      padding: 30px;
     "
 >
 <div
@@ -42,10 +38,8 @@
       "
 >
     <img
-        src="https://ci3.googleusercontent.com/meips/ADKq_NbVf3Ie0ahLBPf_ZQHizIMwn5bO-Jwjb5EKYLwIY_sF9YC0WT3PnOtnOY5fzizX-9Y2S3YM5n9FSEClp0y6yAyN=s0-d-e1-ft#https://recruited.pro/static/logo-black.png"
+        src="https://recruited.pro/static/logo-black.png"
         alt="Recruited Logo"
-        class="CToWUd"
-        data-bit="iit"
         style="width: 200px;"
     />
 
@@ -61,27 +55,20 @@
         "
         >
             <h3>Hello {{$user->display_name}},</h3>
-            <p style="font-size: 14px; color: #4d4949;">We received a request to reset your password. Please use the OTP (One-Time Password) below to reset your password. This OTP is valid for the next 10 minutes.
+            <p style="font-size: 14px; color: #4d4949;">
+                We are sorry to see you go! Your subscription has been successfully canceled. You will continue to have access to your subscription until {{$subscription->end_date}}.
             </p>
-            <p style="font-size: 14px; color: #4d4949;"><b>Your OTP.</b></p>
-
-            <p style="font-size: 35px; color: #000000; letter-spacing: 7px;"><b>
-                    {{$password_reset->recovery_code}}
-                </b></p>
+            <p style="font-size: 14px; color: #4d4949;">
+                If you have any questions or need further assistance, feel free to contact our support team.
+            </p>
             <br>
-            <a
-                href="{{config('app.frontend_url').'reset-password'}}"
-                style="font-size: 14px; color: blue"
-            >{{config('app.frontend_url').'reset-password'}}</a>
-
-            <p  style="font-size: 12px; color: #4d4949;">
-                If you did not request a password reset, please ignore this email or contact our support team immediately.
+            <p style="font-size: 14px; color: #4d4949;">
+                Thank you for being a valued member!
             </p>
         </div>
-
     </div>
 
-    <p  style="font-size: 14px; text-align: center;"> © {{ date('Y') }} Recruited. All rights reserved.</p>
+    <p style="font-size: 14px; text-align: center;"> © {{ date('Y') }} Recruited. All rights reserved.</p>
 </div>
 </body>
 </html>

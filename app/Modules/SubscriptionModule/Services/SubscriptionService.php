@@ -9,7 +9,8 @@ use Carbon\Carbon;
 use App\Extra\ThirdPartyAPI\StripeAPI;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
-use App\Notifications\Subscription\PaymentSuccessEmail;
+use App\Notifications\Subscription\SubscriptionCancelEmail;
+use App\Notifications\Subscription\SubscriptionRenewedEmail;
 use Illuminate\Support\Facades\Log;
 
 use Stripe\Subscription as StripeSubscription;
@@ -176,6 +177,8 @@ class SubscriptionService
             // Now update the local database
             $subscription = Subscription::where('user_id', $user->id)->first();
 
+            $user->notify(new SubscriptionCancelEmail($user, $subscription, $subscription->end_date));
+
             // Ensure the local subscription exists
             if (!$subscription) {
                 throw new \Exception('No active subscription found in the local database.');
@@ -195,15 +198,46 @@ class SubscriptionService
     // Renew the current subscription if it's active and supports auto-renewal
     public function renewSubscription($user)
     {
+        // Retrieve the user's current subscription from the local database
         $subscription = $user->subscription;
-
-        if (!$subscription || !$subscription->is_auto_renewal) {
-            throw new \Exception('No renewable subscription found.');
+    
+        if (!$subscription || !$subscription->stripe_subscription_id) {
+            throw new \Exception('No active subscription found to renew.');
         }
-
-        $subscription->renewSubscription();
+    
+        try {
+            // Retrieve the subscription from Stripe using its Stripe ID
+            $stripeSubscription = Subscription::retrieve($subscription->stripe_subscription_id);
+    
+            // Check if the subscription is set to cancel at the end of the period
+            if ($stripeSubscription->cancel_at_period_end) {
+                // Reactivate the subscription by setting cancel_at_period_end to false
+                $stripeSubscription->cancel_at_period_end = false;
+                $stripeSubscription->save();
+    
+                // Optionally update the local subscription status if necessary
+                $subscription->status = 'active'; // Ensure the status is active
+                $subscription->save();
+            }
+    
+            // Retrieve required details to pass to the email
+            $plan_name = $stripeSubscription->items->data[0]->plan->nickname; // Plan name
+            $renewal_date = Carbon::createFromTimestamp($stripeSubscription->current_period_start); // Renewal date (current period start)
+            $next_billing_date = Carbon::createFromTimestamp($stripeSubscription->current_period_end); // Next billing date (current period end)
+            $amount_charged = $stripeSubscription->items->data[0]->plan->amount / 100; // Amount charged in dollars (Stripe stores amounts in cents)
+    
+            // Send renewal email to the user with the details
+            $user->notify(new SubscriptionRenewedEmail($user, $plan_name, $renewal_date, $next_billing_date, $amount_charged));
+    
+            // Optionally, return success response if everything went well
+            return $subscription;
+    
+        } catch (\Exception $e) {
+            throw new \Exception('Failed to renew subscription: ' . $e->getMessage());
+        }
     }
-
+    
+    
     // Retrieve a subscription by user ID
     public function getSubscriptionByUserId($userId)
     {

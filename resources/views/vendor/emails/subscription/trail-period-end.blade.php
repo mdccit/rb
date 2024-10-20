@@ -60,35 +60,25 @@
           padding: 30px;
         "
       >
-	
-
-		
-		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 90px; color: #ff9720;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 90px; color: #ff9720;">
 			<path fill-rule="evenodd" d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003ZM12 8.25a.75.75 0 0 1 .75.75v3.75a.75.75 0 0 1-1.5 0V9a.75.75 0 0 1 .75-.75Zm0 8.25a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z" clip-rule="evenodd" />
 		</svg>
 
-
-
-
-
         <h3> Your Free Trial is Ending Soon </h3>
-		<p style="font-size: 14px; color: #4d4949;"><b>Hi Lahiru</b></p>
-        <p style="font-size: 16px; color: #4d4949;">We hope you’ve been enjoying your free trial of Recruited! Just a quick reminder that your trial will end in [X days] on [Trial End Date].
+        <p style="font-size: 14px; color: #4d4949;"><b>Hi {{$user->display_name}}</b></p>
+        <p style="font-size: 16px; color: #4d4949;">We hope you’ve been enjoying your free trial of Recruited! Just a quick reminder that your trial will end in {{$days_left}} days on {{$trial_end_date}}.
         </p>
-		
-			<p style="font-size: 14px; color: #4d4949;"><b>Ready to upgrade now?</b></p>
-			<p style="font-size: 14px; color: #4d4949;">Upgrade your plan today and continue enjoying Recruited with exclusive benefits!
-			👉 <span style="color: blue">Here</span> </p>
-	
+        
+        <p style="font-size: 14px; color: #4d4949;"><b>Ready to upgrade now?</b></p>
+        <p style="font-size: 14px; color: #4d4949;">Upgrade your plan today and continue enjoying Recruited with exclusive benefits! 👉 <span style="color: blue">Here</span> </p>
+    
         <p  style="font-size: 12px; color: #4d4949;">
-         
-				If you have any questions or need assistance, feel free to contact us
+          If you have any questions or need assistance, feel free to contact us.
         </p>
       </div>
       
     </div>
 
     <p  style="font-size: 14px; text-align: center;"> © 2024 Recruited. All rights reserved.</p>
-      </div>
   </body>
 </html>
