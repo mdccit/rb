@@ -258,6 +258,8 @@ class UserService
             ->join('user_roles', 'user_roles.id', '=' ,'users.user_role_id')
             ->join('user_types', 'user_types.id', '=' ,'users.user_type_id')
             //->leftJoin('nationalities', 'nationalities.id', '=' ,'users.nationality_id')
+            ->join('countries', 'countries.id', '=' ,'users.country_id')
+
             ->where('users.slug', $user_slug)
             ->where('users.user_role_id', config('app.user_roles.player'))
             ->select(
@@ -274,6 +276,7 @@ class UserService
                 'users.nationality_id',
                 //'nationalities.name as nationality',
                 'users.country_id',
+                'countries.name as country',
                 'users.is_approved',
                 'users.is_first_login',
                 'user_roles.id as user_role_id',
