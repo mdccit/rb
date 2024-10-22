@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Notifications\Subscription;
 
 use Illuminate\Bus\Queueable;
@@ -11,6 +10,10 @@ use Illuminate\Support\Facades\Log;
 class SubscriptionExpiredEmail extends Notification implements ShouldQueue
 {
     use Queueable;
+
+    // Set the number of retry attempts and delay between retries
+    public $tries = 3;  // Retry 3 times
+    public $backoff = 60;  // Delay of 60 seconds between retries
 
     protected $user;
     protected $expiration_date;
@@ -35,12 +38,11 @@ class SubscriptionExpiredEmail extends Notification implements ShouldQueue
         // Log email sending attempt
         Log::info('Attempting to send Subscription Expired Email', [
             'email' => $notifiable->email,
-            'user_name' => $this->user->display_name,
+            'user_name' => $this->user->name,
             'expiration_date' => $this->expiration_date,
         ]);
 
         try {
-            // Send the email using the 'subscription-expired' Blade template
             return (new MailMessage)
                 ->subject('Your Subscription Has Expired')
                 ->view('vendor.emails.subscription.subscription-expired', [
@@ -57,7 +59,6 @@ class SubscriptionExpiredEmail extends Notification implements ShouldQueue
                 'error' => $e->getMessage(),
             ]);
 
-            // Optionally rethrow if further handling is required
             throw $e;
         }
     }
@@ -70,8 +71,4 @@ class SubscriptionExpiredEmail extends Notification implements ShouldQueue
             'amount_paid' => $this->amount_paid,
         ];
     }
-
-
-    // $user->notify(new SubscriptionExpiredEmail($user, $expiration_date, $last_billing_date, $amount_paid));
-
 }
