@@ -17,6 +17,26 @@ class UsersController extends Controller
         $this->userService = new UserService();
     }
 
+    public function getUserProfile(Request $request,$user_slug)
+    {
+        try{
+            $responseData = $this->userService->getUserProfile($user_slug);
+
+            return CommonResponse::getResponse(
+                200,
+                'Successfully fetched',
+                'Successfully fetched',
+                $responseData
+            );
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    }
+
     public function getPlayerProfile(Request $request,$user_slug)
     {
         try{

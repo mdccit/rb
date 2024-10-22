@@ -25,11 +25,16 @@ class ChatMessage extends Model
 
     public function conversations()
     {
-        return $this->belongsTo(Conversation::class, 'conversation_id');
+        return $this->belongsTo(Conversation::class, 'conversation_id','id');
     }
 
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
+    // public function conversation()
+    // {
+    //     return $this->belongsTo(Conversation::class, 'conversation_id', 'id');
+    // }
 }

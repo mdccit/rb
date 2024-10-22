@@ -46,6 +46,7 @@ class ModerationRequestController extends Controller
     public function get($morderation_id)
     {
         try{
+            
             $morderation =ModerationRequest::connect(config('database.secondary'))->where('id',$morderation_id)->first();
 
             if($morderation){
@@ -171,6 +172,110 @@ class ModerationRequestController extends Controller
         }
     
     }
+
+    public function userApprove($morderation_id, Request $request){
+        try{
+            $morderation =ModerationRequest::connect(config('database.secondary'))->where('id',$morderation_id)->first();
+
+            if($morderation){
+
+                $validator = Validator::make($request->all(), [
+                    'user_id' => 'required'
+                ]);
+
+                if ($validator->fails())
+                {
+                    return CommonResponse::getResponse(
+                        422,
+                        $validator->errors(),
+                        'Input validation failed'
+                    );
+                }
+    
+
+                $this->moderationRequestService->userApprove($request->all());
+                
+                return CommonResponse::getResponse(
+                    200,
+                    'Successfully Moderation Approved',
+                    'Successfully Moderation Approved',
+                );
+
+            }else{
+                return CommonResponse::getResponse(
+                    422,
+                    'morderation does not exit',
+                    'morderation does not exit'
+                ); 
+            }
+            
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    
+    }
+
+    public function getAllModerationLog($morderation_id)
+    {
+        try{
+            $morderation =ModerationRequest::connect(config('database.secondary'))->where('id',$morderation_id)->first();
+
+            if($morderation){
+
+                $dataSets = $this->moderationRequestService->getAllModerationLog($morderation_id);
+                
+                return CommonResponse::getResponse(
+                    200,
+                    'Successfully morderation logs fetched',
+                    'Successfully morderation logs fetched',
+                    $dataSets
+                );
+
+            }else{
+                return CommonResponse::getResponse(
+                    422,
+                    'morderation does not exit',
+                    'morderation does not exit'
+                ); 
+            }
+            
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    }
+
+    public function getAllModerationOpenCount()
+    {
+        try{
+            $dataSets = $this->moderationRequestService->getAllModerationOpenCount();
+
+            $responseData = [
+                'dataSets' => $dataSets,
+            ];
+
+            return CommonResponse::getResponse(
+                200,
+                'Successfully fetched',
+                'Successfully fetched',
+                $responseData
+            );
+        }catch (\Exception $e){
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went to wrong'
+            );
+        }
+    }
+
 
     
 }

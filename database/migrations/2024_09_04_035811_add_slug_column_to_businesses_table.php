@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('businesses', function (Blueprint $table) {
-            $table->string('slug')->unique()->default(\Illuminate\Support\Facades\DB::raw('(UUID())'))->after('bio');
+//            $table->string('slug')->unique()->default(\Illuminate\Support\Facades\DB::raw('(UUID())'))->after('bio');
+            $table->string('slug')->unique()->after('bio');
         });
     }
 

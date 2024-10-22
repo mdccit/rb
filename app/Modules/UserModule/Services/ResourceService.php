@@ -28,4 +28,30 @@ class ResourceService
         return $dataSet;
     }
 
+      public function getAllCategories (array $data){
+        $per_page_items = array_key_exists("per_page_items",$data)?$data['per_page_items']:0;
+        $search_key = array_key_exists("search_key",$data)?$data['search_key']:null;
+
+        $query = ResourceCategory::connect(config('database.secondary'))
+                   ->with('resources')
+                    ->select(
+                        'id',
+                        'title',
+                        'description',
+                        'icon',
+                );
+        if ($search_key != null) {
+            $query->where('title', 'LIKE', '%' . $search_key . '%');
+        }
+        
+        $dataSet = array();
+        if($per_page_items != 0 ){
+            $dataSet = $query->paginate($per_page_items);
+        }else{
+             $dataSet = $query->get();
+        }
+
+        return $dataSet;
+    }
+
 }

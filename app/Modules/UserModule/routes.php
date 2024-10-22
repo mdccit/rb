@@ -16,6 +16,12 @@ Route::group(['namespace' => 'App\Modules\UserModule\Controllers','prefix' => 'a
 
             //resource
             Route::get('/resource', 'ResourceController@index')->name('user.resources.index');
+            Route::get('/resource-category', 'ResourceController@getAllCategories')->name('user.resources.categoru');
+
+            Route::get('/players/{user_id}', 'UsersController@getPlayerProfile')->name('user.players.view');
+            Route::get('/coaches/{user_id}', 'UsersController@getCoachProfile')->name('user.coaches.view');
+            Route::get('/business-managers/{user_id}', 'UsersController@getBusinessManagerProfile')->name('user.business-managers.view');
+            Route::get('/parents/{user_id}', 'UsersController@getParentProfile')->name('user.parents.view');
 
             //connections
             Route::post('/connections-request', 'ConnectionController@requestConnection')->name('connections.connect.request');
@@ -24,6 +30,9 @@ Route::group(['namespace' => 'App\Modules\UserModule\Controllers','prefix' => 'a
             Route::put('/connections-reject/{id}', 'ConnectionController@connectionReject')->name('connections.connect.reject');
             Route::put('/connections-remove/{id}', 'ConnectionController@connectionRemove')->name('connections.connect.remove');
             Route::get('/connections-list', 'ConnectionController@userinivitationAndConnectedList')->name('connections.connect.connection-list');
+            Route::get('/connections-list-with-compare/{id}', 'ConnectionController@connectionList')->name('connections.connect.connection-list-with-compare');
+            Route::get('/connections-check/{id}', 'ConnectionController@checkConnectionType')->name('connections.connect.check');
+            Route::get('/connections-list', 'ConnectionController@invitationSendList')->name('connections.list');
 
             //conversation
             Route::post('/create-conversation', 'ConversationController@createConversation')->name('user.conversation.create');
@@ -35,10 +44,17 @@ Route::group(['namespace' => 'App\Modules\UserModule\Controllers','prefix' => 'a
              Route::get('/get-message/{id}', 'ChatController@getMessages')->name('chat.message.get');
              Route::get('/get-message-unread-count', 'ChatController@unreadMessageCount')->name('chat.message.unread-count');
 
+            //search
+            Route::get('/search', 'SearchController@search')->name('user.search.search');
+            Route::get('/recent-search', 'SearchController@getRecentSearch')->name('user.search.recent');
+            Route::post('/save-search', 'SearchController@saveSearch')->name('user.search.save');
+            Route::get('/get-save-search', 'SearchController@getSaveSearch')->name('user.search.get');
+            Route::delete('/delete-search/{id}', 'SearchController@deleteSaveSearch')->name('user.search.delete');
+
             //TODO only authenticated default users can be access
             Route::middleware('auth.is_default')->group(function () {
 
-                
+
 
             });
 
@@ -55,13 +71,15 @@ Route::group(['namespace' => 'App\Modules\UserModule\Controllers','prefix' => 'a
 
             //TODO only authenticated player users can be access
             Route::middleware('auth.is_player')->group(function () {
-
+                Route::get('/transcript/get-transcript', 'TranscriptController@getTranscript')->name('user.transcript.get');
+                Route::post('/transcript/create-transcript', 'TranscriptController@createTranscript')->name('user.transcript.create');
+                Route::delete('/transcript/delete-transcript/{id}', 'TranscriptController@deleteTranscript')->name('user.transcript.delete');
             });
 
             //TODO only authenticated coach users can be access
             Route::middleware('auth.is_coach')->group(function () {
                 //get transfer player
-                Route::get('/transfer-player', 'TransferPlayerController@getAllUsers')->name('user.transfer.get-all');
+                Route::get('/transfer-players', 'TransferPlayerController@getAllUsers')->name('user.transfer.get-all');
 
             });
 

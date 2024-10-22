@@ -9,10 +9,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Laravel\Cashier\Billable;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, Billable;
     use HasUuids;
 
     /**
@@ -36,6 +37,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'other_names',
         'display_name',
         'email',
+        'stripe_id',
+        'bio',
         'password',
         'provider_id',
         'provider_name',
@@ -46,9 +49,11 @@ class User extends Authenticatable implements MustVerifyEmail
         'nationality_id',
         'slug',
         'gender',
+        'is_approved',
         'date_of_birth',
         'email_verified_at',
-        'last_logged_at'
+        'last_logged_at',
+        'has_used_trial'
     ];
 
     /**
@@ -122,6 +127,21 @@ class User extends Authenticatable implements MustVerifyEmail
     public function conversation()
     {
         return $this->hasMany(Conversation::class);
+    }
+
+    public function subscription()
+    {
+        return $this->hasOne(Subscription::class, 'user_id', 'id');
+    }
+
+    public function isPremium()
+    {
+        return $this->user_type_id === 3; // Check if the user is premium
+    }
+
+    public function activeSubscription()
+    {
+        return $this->subscription()->where('status', 'active')->first();
     }
 
 }

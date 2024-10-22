@@ -10,14 +10,19 @@ use App\Models\Country;
 use App\Models\Player;
 use App\Models\PlayerBudget;
 use App\Models\PlayerParent;
+use App\Models\Sport;
 use App\Models\User;
 use App\Models\UserPhone;
+use App\Traits\GeneralHelpers;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use App\Models\Subscription;
 
 class RegisterService
 {
+    use GeneralHelpers;
+
     public function createPlayer(array $data, $user){
         User::connect(config('database.default'))
             ->where('id', $user->id)
@@ -55,9 +60,12 @@ class RegisterService
             ];
             $graduation_month_year = Carbon::createFromFormat('Y-m', $data['graduation_month_year']);
 
+            $sport = Sport::connect(config('database.secondary'))->first();
+
             Player::connect(config('database.default'))
                 ->create([
                     'user_id' => $user->id,
+                    'sport_id' => $sport->id,
                     'player_budget_id' => $data['player_budget'],
                     'graduation_month_year' => $graduation_month_year,
                     'gpa' => $data['gpa'],
@@ -93,9 +101,12 @@ class RegisterService
         $coach = Coach::connect(config('database.secondary'))
             ->where('user_id', $user->id)->first();
         if(!$coach){
+            $sport = Sport::connect(config('database.secondary'))->first();
+
             Coach::connect(config('database.default'))
                 ->create([
                     'user_id' => $user->id,
+                    'sport_id' => $sport->id,
                 ]);
         }
     }
@@ -175,6 +186,7 @@ class RegisterService
                 'last_name' => $data['player_last_name'],
                 'display_name' => $data['player_first_name'].' '.$data['player_last_name'],
                 'email' => $data['email'],
+                'slug' => $this->generateSlug(new User(), $data['player_first_name'].' '.$data['player_last_name'],'slug'),
                 'user_role_id' => config('app.user_roles.player'),
                 'user_type_id' => config('app.user_types.free'),
                 'country_id' => $data['player_country'],
@@ -208,9 +220,12 @@ class RegisterService
             ];
             $graduation_month_year = Carbon::createFromFormat('Y-m', $data['player_graduation_month_year']);
 
+            $sport = Sport::connect(config('database.secondary'))->first();
+
             Player::connect(config('database.default'))
                 ->create([
                     'user_id' => $player_user->id,
+                    'sport_id' => $sport->id,
                     'player_budget_id' => $data['player_budget'],
                     'player_parent_id' => $player_parent->id,
                     'has_parent' => true,
@@ -219,6 +234,53 @@ class RegisterService
                     'height' => $height,
                     'other_data' => $other_data
                 ]);
+        }
+    }
+    public function createSubscription($data, $user)
+    {
+        $subscriptionType = $data['subscription_type']; // trial, monthly, or annually
+        $autoRenewal = $data['is_auto_renewal'] ?? false;
+
+        // Check if the user already has a subscription
+        if ($user->subscription) {
+            return response()->json(['message' => 'User already has a subscription.'], 400);
+        }
+
+        // Create a new subscription
+        $subscription = new Subscription();
+        $subscription->user_id = $user->id;
+
+        if ($subscriptionType === 'trial') {
+            // Start a trial subscription
+            $subscription->startTrial();
+        } else {
+            // Start a paid subscription (monthly or annually)
+            $subscription->startPaid($subscriptionType, $autoRenewal);
+        }
+
+        return $subscription;
+    }
+
+    public function handleSubscriptionExpiration()
+    {
+        // Find all subscriptions that are expired but within the grace period
+        $subscriptions = Subscription::where('status', 'expired')
+            ->orWhere(function ($query) {
+                $query->where('status', 'expired')
+                      ->whereDate('end_date', '>', Carbon::now()->subDays(Subscription::GRACE_PERIOD_DAYS));
+            })
+            ->get();
+
+        foreach ($subscriptions as $subscription) {
+            // If the subscription is still within the grace period, allow access
+            if ($subscription->isInGracePeriod()) {
+                // If in grace period, you can notify the user or keep the status as 'expired'
+                // but allow access to services until grace period ends
+                continue;
+            }
+
+            // If grace period is over, end it and mark the subscription as fully expired
+            $subscription->endGracePeriod();
         }
     }
 }

@@ -34,6 +34,10 @@ class Business extends Model
         'is_approved',
         'url',
         'other_data',
+
+        'other_data->total_members',
+        'other_data->editors',
+        'other_data->viewers',
     ];
 
     /**

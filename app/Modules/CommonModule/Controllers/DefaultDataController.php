@@ -29,6 +29,7 @@ class DefaultDataController extends Controller
                 'divisions' => $this->defaultDataService->getDivisions(),
                 'countries' => $this->defaultDataService->getCountries(),
                 'nationalities' => $this->defaultDataService->getNationalities(),
+                'languages' => $this->defaultDataService->getLanguages(),
             ];
 
             return CommonResponse::getResponse(

@@ -39,6 +39,17 @@ class School extends Model
         'conference_id',
         'division_id',
         'other_data',
+
+        'other_data->teams_count',
+        'other_data->total_members',
+        'other_data->editors',
+        'other_data->viewers',
+        'other_data->academics',//array
+        'other_data->average_utr',
+        'other_data->tuition_in_of_state',
+        'other_data->tuition_out_of_state',
+        'other_data->cost_of_attendance',
+        'other_data->graduation_rate',
     ];
 
     /**
@@ -49,4 +60,10 @@ class School extends Model
     protected $casts = [
         'other_data' => 'array',
     ];
+
+    public function syncLogs()
+    {
+        return $this->hasMany(SyncLog::class);
+    }
+
 }
