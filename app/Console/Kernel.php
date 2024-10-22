@@ -12,6 +12,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
+
+        // $schedule->command('subscriptions:check-expired')->everyMinute();
         // $schedule->command('inspire')->hourly();
         // $schedule->call(function () {
         //     // Handle subscription expiration and grace period
