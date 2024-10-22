@@ -49,7 +49,7 @@ Route::group(['namespace' => 'App\Modules\SubscriptionModule\Controllers', 'pref
         Route::get('/stripe/customer-active-payment-method', 'SubscriptionController@getSubscriptionPaymentMethod')->name('subscription.get.customer.active.payment.method');
 
         // Webhooks 
-        Route::post('/webhook', 'WebhookController@handleWebhook')->name('subscription.handleWebhook');
+     
 
 
       });
@@ -58,6 +58,8 @@ Route::group(['namespace' => 'App\Modules\SubscriptionModule\Controllers', 'pref
 
 
   Route::prefix('stripe')->group(function () {
+
+    Route::post('/webhook', 'WebhookController@handleWebhook')->name('subscription.handleWebhook');
 
     //TODO All routes that are required access key
     Route::middleware('access.key')->group(function () {
