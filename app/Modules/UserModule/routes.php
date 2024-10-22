@@ -32,6 +32,7 @@ Route::group(['namespace' => 'App\Modules\UserModule\Controllers','prefix' => 'a
             Route::get('/connections-list', 'ConnectionController@userinivitationAndConnectedList')->name('connections.connect.connection-list');
             Route::get('/connections-list-with-compare/{id}', 'ConnectionController@connectionList')->name('connections.connect.connection-list-with-compare');
             Route::get('/connections-check/{id}', 'ConnectionController@checkConnectionType')->name('connections.connect.check');
+            Route::get('/connections-list', 'ConnectionController@invitationSendList')->name('connections.list');
 
             //conversation
             Route::post('/create-conversation', 'ConversationController@createConversation')->name('user.conversation.create');
