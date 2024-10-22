@@ -127,13 +127,11 @@ class WebhookController extends Controller
     // Update subscription status to canceled in your system
   }
 
-
   protected function handleSubscriptionUpdated($subscription)
   {
       // Retrieve the user based on the Stripe customer ID
       $user = User::where('stripe_id', $subscription['customer'])->first();
   
-      // If no user is found, log an error and return
       if (!$user) {
           Log::error('No user found with Stripe customer ID: ' . $subscription['customer']);
           return;
@@ -159,13 +157,12 @@ class WebhookController extends Controller
           if ($dbSubscription) {
               $dbSubscription->status = 'grace';  // Set status to grace
               $dbSubscription->grace_period_end_date = $grace_period_end;  // Set grace period end date
+              $dbSubscription->last_billing_date = $last_billing_date;  // Set last billing date
               $dbSubscription->save();
           }
-  
-          // Schedule a job to check for the grace period expiry and send expiration email
-          $this->scheduleGracePeriodCheck($dbSubscription, $grace_period_end, $user, $last_billing_date);
       }
   }
+  
   
 
   protected function handleUpcomingInvoice($invoice)
