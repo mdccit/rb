@@ -7,6 +7,7 @@ namespace App\Modules\UserModule\Services;
 use App\Models\ConnectionRequest;
 use App\Models\User;
 use App\Traits\AzureBlobStorage;
+use Illuminate\Support\Facades\DB;
 
 class ConnectionService
 {
@@ -236,6 +237,94 @@ class ConnectionService
                 'connection' => $existing,
                 'type' => $type
             ];
+        }
+
+        public function invitationSendList(){
+            $invitation_list = ConnectionRequest::connect(config('database.secondary'))
+                            ->join('users','users.id','=','connection_requests.receiver_id')
+                            ->join('countries', 'countries.id', '=' ,'users.country_id')
+                            ->whereIn('connection_status',['pending'])
+                            ->where('sender_id', auth()->id())
+                            ->select([
+                                'connection_requests.id as id',
+                                'users.id as user_id',
+                                'users.display_name as name',
+                                'countries.name as country',
+                                'users.slug as 	slug',
+                                'users.user_role_id as role_id',
+                              
+                            ])
+                            ->addSelect(DB::raw('IF((SELECT other_data FROM players WHERE user_id = connection_requests.receiver_id ) IS NULL,NULL,(SELECT other_data FROM players WHERE user_id = connection_requests.receiver_id )) as other_data'))
+                            ->addSelect(DB::raw('IF((SELECT city FROM user_addresses WHERE user_id = connection_requests.receiver_id ) IS NULL,NULL,(SELECT city FROM user_addresses WHERE user_id = connection_requests.receiver_id)) as city'))
+                            ->get();
+                        
+            foreach( $invitation_list as $key=> $data){
+                $profile_picture = $this->getSingleFileByEntityId($data->user_id,'user_profile_picture');
+                $invitation_list[$key]['profile_picture'] =$profile_picture;
+            }
+
+            $acccept_list = ConnectionRequest::connect(config('database.secondary'))
+                           ->join('users','users.id','=','connection_requests.receiver_id')
+                           ->join('countries', 'countries.id', '=' ,'users.country_id')
+                           ->join('users as sender_users','sender_users.id','=','connection_requests.sender_id')
+                           ->join('countries as sender_countries', 'sender_countries.id', '=' ,'users.country_id')
+                           ->whereIn('connection_status',['accepted'])
+                                ->where(function ($query) {
+                                    $query->where('receiver_id', auth()->id())
+                                    ->orWhere('sender_id', auth()->id());
+                            })
+                            ->select([
+                                'connection_requests.id as id',
+                                'users.id as receiver_id',
+                                'users.display_name as receiver_name',
+                                'countries.name as receiver_country',
+                                'users.slug as 	receiver_slug',
+                                'users.user_role_id as receiver_role_id',
+                                'sender_users.id as sender_id',
+                                'sender_countries.name as sender_country',
+                                'sender_users.slug as 	sender_slug',
+                                'sender_users.display_name as 	sender_name',
+                                'sender_users.user_role_id as sender_role_id',
+                            ])
+                            ->addSelect(DB::raw('IF((SELECT other_data FROM players WHERE user_id = connection_requests.sender_id ) IS NULL,NULL,(SELECT other_data FROM players WHERE user_id = connection_requests.sender_id )) as sender_other_data'))
+                            ->addSelect(DB::raw('IF((SELECT city FROM user_addresses WHERE user_id = connection_requests.sender_id ) IS NULL,NULL,(SELECT city FROM user_addresses WHERE user_id = connection_requests.sender_id)) as sender_city'))
+                            ->addSelect(DB::raw('IF((SELECT other_data FROM players WHERE user_id = connection_requests.receiver_id ) IS NULL,NULL,(SELECT other_data FROM players WHERE user_id = connection_requests.receiver_id )) as receiver_other_data'))
+                            ->addSelect(DB::raw('IF((SELECT city FROM user_addresses WHERE user_id = connection_requests.receiver_id ) IS NULL,NULL,(SELECT city FROM user_addresses WHERE user_id = connection_requests.receiver_id)) as receiver_city'))
+                           ->get();
+            foreach( $acccept_list as $key=> $data){
+                $receiver_profile_picture = $this->getSingleFileByEntityId($data->receiver_id,'user_profile_picture');
+                $sender_profile_picture = $this->getSingleFileByEntityId($data->sender_id,'user_profile_picture');
+
+                $acccept_list[$key]['receiver_profile_picture'] =$receiver_profile_picture;
+                $acccept_list[$key]['sender_profile_picture'] =$sender_profile_picture;
+
+            }
+            $invite_liste = ConnectionRequest::connect(config('database.secondary'))
+                            ->join('users','users.id','=','connection_requests.sender_id')
+                            ->leftJoin('countries', 'countries.id', '=' ,'users.country_id')
+                            ->whereIn('connection_status',['pending'])
+                            ->where('receiver_id', auth()->id())
+                            ->select([
+                               'connection_requests.id as id',
+                               'users.id as user_id',
+                               'users.display_name as name',
+                               'countries.name as country',
+                               'users.slug as 	slug',
+                               'users.user_role_id as role_id',
+                           ])
+                           ->addSelect(DB::raw('IF((SELECT other_data FROM players WHERE user_id = connection_requests.sender_id ) IS NULL,NULL,(SELECT other_data FROM players WHERE user_id = connection_requests.sender_id )) as other_data'))
+                           ->addSelect(DB::raw('IF((SELECT city FROM user_addresses WHERE user_id = connection_requests.sender_id ) IS NULL,NULL,(SELECT city FROM user_addresses WHERE user_id = connection_requests.sender_id)) as city'))
+                          ->get();
+            foreach( $invite_liste as $key=> $data){
+                $profile_picture = $this->getSingleFileByEntityId($data->user_id,'user_profile_picture');
+                $invite_liste[$key]['profile_picture'] =$profile_picture;
+            }
+
+            return [
+                    'invite_list' => $invitation_list,
+                    'acccept_list' => $acccept_list,
+                    'invitation_list' => $invite_liste 
+                ];
         }
     }
 
