@@ -140,9 +140,11 @@ class UserService
                             'sports.name as sport_name'
                         )
                         ->first();
-                        $profile_info->school_profile_picture= null;
-                        if($profile_info != null){
+                        
+                        if($profile_info != null && $profile_info->school_id ){
                             $profile_info->school_profile_picture = $this->getSingleFileByEntityId($profile_info->school_id,'school_profile_picture');
+                        }else{
+                            $profile_info->school_profile_picture= null;
                         }
                        
                     break;
