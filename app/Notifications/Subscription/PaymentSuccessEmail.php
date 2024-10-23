@@ -76,7 +76,7 @@ class PaymentSuccessEmail extends Notification implements ShouldQueue
   {
     return [
       'subscription_id' => $this->subscription->id,
-      'amount' => $this->amount,
+      'amount' => $this->price,
       'currency' => $this->currency,
     ];
   }
