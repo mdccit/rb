@@ -204,6 +204,22 @@ class FeedService
                      ->findOrFail($id);
 
             $post->user_has_liked = $post->likes->contains('user_id', $userId);
+            
+            
+            $data = $post->comments;
+            foreach($data as $comment){
+                $profile_picture_comment_user = $this->getSingleFileByEntityId($comment->user_id,'user_profile_picture');
+                $comment->user_profile_picture = $profile_picture_comment_user;
+            }
+            $post->comments= $data;
+            $profile_picture_user = $this->getSingleFileByEntityId($post->user_id,'user_profile_picture');
+            $post->user_profile_picture =$profile_picture_user;
+
+            $school_profile_picture = $this->getSingleFileByEntityId($post->school_id,'school_profile_picture');
+            $post->school_profile_picture =$school_profile_picture;
+
+
+            
 
             // Return a success response with the retrieved post
             return CommonResponse::getResponse(
@@ -612,7 +628,7 @@ class FeedService
                 $profile_picture = $this->getSingleFileByEntityId($post->user_id,'user_profile_picture');
                 $post->user_profile_picture = $profile_picture;
 
-                $school_profile_picture = $this->getSingleFileByEntityId($post->user_id,'school_profile_picture');
+                $school_profile_picture = $this->getSingleFileByEntityId($post->school_id,'school_profile_picture');
                 $post->school_profile_picture = $school_profile_picture;
                  
                 foreach($post->comments as $comment){
