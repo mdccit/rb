@@ -140,9 +140,11 @@ class UserService
                             'sports.name as sport_name'
                         )
                         ->first();
-                        $profile_info->school_profile_picture= null;
-                        if($profile_info != null){
+                        
+                        if($profile_info != null && $profile_info->school_id ){
                             $profile_info->school_profile_picture = $this->getSingleFileByEntityId($profile_info->school_id,'school_profile_picture');
+                        }else{
+                            $profile_info->school_profile_picture= null;
                         }
                        
                     break;
@@ -257,7 +259,6 @@ class UserService
         $user = User::connect(config('database.secondary'))
             ->join('user_roles', 'user_roles.id', '=' ,'users.user_role_id')
             ->join('user_types', 'user_types.id', '=' ,'users.user_type_id')
-            //->leftJoin('nationalities', 'nationalities.id', '=' ,'users.nationality_id')
             ->where('users.slug', $user_slug)
             ->where('users.user_role_id', config('app.user_roles.player'))
             ->select(
@@ -272,7 +273,6 @@ class UserService
                 'users.date_of_birth',
                 'users.gender',
                 'users.nationality_id',
-                //'nationalities.name as nationality',
                 'users.country_id',
                 'users.is_approved',
                 'users.is_first_login',
@@ -285,6 +285,8 @@ class UserService
                 'users.last_logged_at as last_seen_at',
             )
             ->addSelect(DB::raw('IF((SELECT name as nationality FROM nationalities WHERE id = users.nationality_id ) IS NULL,NULL,(SELECT name FROM nationalities WHERE id = users.nationality_id )) as nationality'))
+            ->addSelect(DB::raw('IF((SELECT name as country FROM countries WHERE id = users.country_id ) IS NULL,NULL,(SELECT name FROM countries WHERE id = users.country_id  )) as country'))
+
             ->first();
 
         $user_phone = null;

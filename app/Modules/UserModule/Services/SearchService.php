@@ -81,7 +81,13 @@ class SearchService
             if ($search_key != null) {
                 $query->where('users.display_name', 'LIKE', '%' . $search_key . '%');
             }
+            if($city != null){
+                $query->where('user_addresses.city', $city);
+            }
 
+            if($state != null){
+                $query->where('user_addresses.state_province', $state);
+            }
             if($country_id != null){
                 $query->where('user_addresses.country_id', $country_id);
             }

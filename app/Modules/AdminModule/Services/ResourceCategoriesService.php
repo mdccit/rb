@@ -4,6 +4,7 @@
 namespace App\Modules\AdminModule\Services;
 
 use App\Models\ResourceCategory;
+use App\Models\Resource;
 
 class ResourceCategoriesService
 {
@@ -54,7 +55,14 @@ class ResourceCategoriesService
     }
 
     public function destroyCategory( $category_id){
-        
+        $resource = Resource::connect(config('database.secondary'))
+                ->where('category_id',$category_id)
+                ->get();
+        foreach($resource as $resource){
+            Resource::connect(config('database.default'))->destroy($resource->id);
+        }
+
+
         ResourceCategory::connect(config('database.default'))->destroy($category_id);
         
     }

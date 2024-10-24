@@ -7,7 +7,7 @@ namespace App\Modules\AdminModule\Services;
 use App\Models\Player;
 use App\Models\User;
 use App\Models\UserAddress;
-
+use Carbon\Carbon;
 class PlayerService
 {
     
@@ -82,8 +82,15 @@ class PlayerService
         //Player
         $player = Player::connect(config('database.default'))
                     ->where('user_id', $user->id)->first();
+          
+        $graduation_month_year=null;
+        if(isset($data['graduation_month_year'])) {
+            $graduation_month_year = Carbon::createFromFormat('Y-m', $data['graduation_month_year']);
+
+        }           
+       
         $player->update([
-            'graduation_month_year' =>isset($data['graduation_month_year']) ? $data['graduation_month_year'] : null,
+            'graduation_month_year' => $graduation_month_year,
             'gpa' => isset($data['gpa']) ? $data['gpa'] : null,
             'height' => isset($data['height_cm']) ? $data['height_cm'] : null,
             'weight' => isset($data['weight']) ? $data['weight'] : null,

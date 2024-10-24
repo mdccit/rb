@@ -12,6 +12,7 @@ class ModerationRequestService
     public function getAll (array $data){
         $per_page_items = array_key_exists("per_page_items",$data)?$data['per_page_items']:0;
         $status = array_key_exists("status",$data)?$data['status']:'';
+        $search_key = array_key_exists("search_key",$data)?$data['search_key']:null;
 
         $query = ModerationRequest::connect(config('database.secondary'))
                    ->join('users', 'users.id', '=', 'moderation_requests.moderatable_id')
@@ -35,6 +36,14 @@ class ModerationRequestService
 
         if($status == 'close'){
             $query->where('is_closed', true);
+        }
+
+        if ($search_key != null) {
+            //$query->where('name', 'LIKE', '%' . $search_key . '%');
+            $query->where(function($query) use ($search_key) {
+                $query->where('display_name', 'LIKE', '%' . $search_key . '%')
+                      ->orWhere('email', 'LIKE', '%' . $search_key . '%');
+            });
         }
         $dataSet = array();
         if($per_page_items != 0 ){
