@@ -658,6 +658,156 @@ class FeedService
         }
     }
     
+    public function getAllPostsSchool($type = null, $sortBy = 'created_at', $sortOrder = 'desc', $school_id)
+    {
+        try {
+            $userId = Auth::id();
+            $azureBlobStorageService = app()->make(AzureBlobStorageService::class); // Make an instance of the AzureBlobStorageService
     
+            $query = Post::connect(config('database.secondary'))
+                ->where('school_id',$school_id)
+                ->withCount('likes')
+                ->withCount('comments')
+                ->with([
+                    'comments' => function ($query) {
+                        $query->with('user')
+                              ->orderBy('created_at', 'DESC');  // Eager load the user relationship for each comment
+                    }
+                ])
+                ->with([
+                    'likes' => function ($query) use ($userId) {
+                        $query->where('user_id', $userId);
+                    }
+                ])
+                ->with('school')
+                ->with('user');
+    
+            // If a type is provided, filter the posts by the specified type
+            if ($type) {
+                $query->where('type', $type);
+            }
+            
+            // Sort posts by the specified sort column and order
+            $query->orderBy($sortBy, $sortOrder);
+    
+            $posts = $query->paginate(10)->through(function ($post) use ($userId, $azureBlobStorageService) {
+                // Add the user's like status to each post
+                $post->user_has_liked = $post->likes->contains('user_id', $userId);
+                unset($post->likes); // Remove the likes relationship
+            
+                // Conditionally call getMediaByEntity if has_media is 1
+                if ($post->has_media === 1) {
+                    $mediaItems = $azureBlobStorageService->getMediaByEntity($post->id, 'post'); // Assuming entity_type is 'post'
+                    $post->media = $mediaItems; // Attach media items to the post
+                } else {
+                    $post->media = null; // Set media to null if no media
+                }
+                $profile_picture = $this->getSingleFileByEntityId($post->user_id,'user_profile_picture');
+                $post->user_profile_picture = $profile_picture;
+
+                $school_profile_picture = $this->getSingleFileByEntityId($post->school_id,'school_profile_picture');
+                $post->school_profile_picture = $school_profile_picture;
+                 
+                foreach($post->comments as $comment){
+                    $profile_picture_comment_user = $this->getSingleFileByEntityId($comment->user_id,'user_profile_picture');
+                    $comment->user_profile_picture = $profile_picture_comment_user;
+    
+                }
+            
+                return $post;
+            });
+
+            
+            return CommonResponse::getResponse(
+                200,
+                $posts,
+                'Posts for loggedin School retrieved successfully'
+            );
+    
+        } catch (\Exception $e) {
+            // Return an error response if something goes wrong
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went wrong'
+            );
+        }
+    }
+    
+    public function getAllPostsBusiness($type = null, $sortBy = 'created_at', $sortOrder = 'desc', $business_id)
+    {
+        try {
+            $userId = Auth::id();
+            $azureBlobStorageService = app()->make(AzureBlobStorageService::class); // Make an instance of the AzureBlobStorageService
+    
+            $query = Post::connect(config('database.secondary'))
+                ->where('business_id',$business_id)
+                ->withCount('likes')
+                ->withCount('comments')
+                ->with([
+                    'comments' => function ($query) {
+                        $query->with('user')
+                              ->orderBy('created_at', 'DESC');  // Eager load the user relationship for each comment
+                    }
+                ])
+                ->with([
+                    'likes' => function ($query) use ($userId) {
+                        $query->where('user_id', $userId);
+                    }
+                ])
+                ->with('business')
+                ->with('user');
+    
+            // If a type is provided, filter the posts by the specified type
+            if ($type) {
+                $query->where('type', $type);
+            }
+            
+            // Sort posts by the specified sort column and order
+            $query->orderBy($sortBy, $sortOrder);
+    
+            $posts = $query->paginate(10)->through(function ($post) use ($userId, $azureBlobStorageService) {
+                // Add the user's like status to each post
+                $post->user_has_liked = $post->likes->contains('user_id', $userId);
+                unset($post->likes); // Remove the likes relationship
+            
+                // Conditionally call getMediaByEntity if has_media is 1
+                if ($post->has_media === 1) {
+                    $mediaItems = $azureBlobStorageService->getMediaByEntity($post->id, 'post'); // Assuming entity_type is 'post'
+                    $post->media = $mediaItems; // Attach media items to the post
+                } else {
+                    $post->media = null; // Set media to null if no media
+                }
+                $profile_picture = $this->getSingleFileByEntityId($post->user_id,'user_profile_picture');
+                $post->user_profile_picture = $profile_picture;
+
+                $business_profile_picture = $this->getSingleFileByEntityId($post->business_id,'business_profile_picture');
+                $post->business_profile_picture = $business_profile_picture;
+                 
+                foreach($post->comments as $comment){
+                    $profile_picture_comment_user = $this->getSingleFileByEntityId($comment->user_id,'user_profile_picture');
+                    $comment->user_profile_picture = $profile_picture_comment_user;
+    
+                }
+            
+                return $post;
+            });
+
+            
+            return CommonResponse::getResponse(
+                200,
+                $posts,
+                'Posts for loggedin School retrieved successfully'
+            );
+    
+        } catch (\Exception $e) {
+            // Return an error response if something goes wrong
+            return CommonResponse::getResponse(
+                422,
+                $e->getMessage(),
+                'Something went wrong'
+            );
+        }
+    }
 
 }
