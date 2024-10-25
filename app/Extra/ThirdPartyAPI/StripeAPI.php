@@ -382,17 +382,39 @@ class StripeAPI
 
   public function getCustomerPaymentMethods($customerId)
   {
-    try {
-      // Retrieve payment methods for the customer
-      $paymentMethods = PaymentMethod::all([
-        'customer' => $customerId,
-        'type' => 'card', // Only retrieve card payment methods
-      ]);
-
-      return $paymentMethods->data;
-    } catch (\Exception $e) {
-      return response()->json(['error' => $e->getMessage()], 500);
-    }
+      try {
+          // Set up Stripe with your secret key
+          Stripe::setApiKey(config('services.stripe.secret'));
+          
+          // Retrieve the customer object to get the default payment method ID
+          $customer = Customer::retrieve($customerId);
+          $defaultPaymentMethodId = $customer->invoice_settings->default_payment_method;
+  
+          // Retrieve all payment methods for the customer
+          $paymentMethods = PaymentMethod::all([
+              'customer' => $customerId,
+              'type' => 'card',
+          ]);
+  
+          // Append 'is_default' flag to each payment method
+          $paymentMethodsWithDefaultStatus = collect($paymentMethods->data)->map(function ($method) use ($defaultPaymentMethodId) {
+              return [
+                  'id' => $method->id,
+                  'brand' => $method->card->brand,
+                  'last4' => $method->card->last4,
+                  'exp_month' => $method->card->exp_month,
+                  'exp_year' => $method->card->exp_year,
+                  'is_default' => $method->id === $defaultPaymentMethodId, // Set default status
+              ];
+          });
+  
+          return response()->json([
+              'success' => true,
+              'data' => $paymentMethodsWithDefaultStatus,
+          ]);
+      } catch (\Exception $e) {
+          return response()->json(['error' => $e->getMessage()], 500);
+      }
   }
 
   /**
