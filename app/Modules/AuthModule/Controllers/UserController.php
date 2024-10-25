@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Modules\AuthModule\Services\UserService;
 use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
@@ -18,9 +19,20 @@ class UserController extends Controller
         $this->userService = new UserService();
     }
 
-    public function userDelete()
+    public function userDelete(Request $request)
     {
         try{
+            $validator = Validator::make($request->all(), [
+                'current_password' => 'required|string|current_password',
+            ]);
+
+            if ($validator->fails()) {
+                return CommonResponse::getResponse(
+                    422,
+                    $validator->errors(),
+                    'Input validation failed'
+                );
+            }
             $user =User::connect(config('database.secondary'))->where('id',auth()->id())->first();
 
             if($user->user_role_id !=2){
