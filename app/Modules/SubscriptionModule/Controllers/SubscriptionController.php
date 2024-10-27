@@ -669,6 +669,51 @@ class SubscriptionController extends Controller
     }
   }
 
+  /**
+   * Attach a new card to a Stripe customer and optionally set it as default.
+   *
+   * @param string $paymentMethodId
+   * @param string $customerId
+   * @param bool $setAsDefault
+   * @return \Illuminate\Http\JsonResponse
+   */
+  public function addNewCardToCustomer($paymentMethodId, $customerId, $setAsDefault = false)
+  {
+    try {
+      // Retrieve the payment method from Stripe
+      $paymentMethod = PaymentMethod::retrieve($paymentMethodId);
 
+      // Attach the payment method to the customer
+      $paymentMethod->attach([
+        'customer' => $customerId,
+      ]);
+
+      // Optionally set this payment method as the default for invoices
+      if ($setAsDefault) {
+        Customer::update($customerId, [
+          'invoice_settings' => [
+            'default_payment_method' => $paymentMethodId,
+          ],
+        ]);
+      }
+
+      // Return a success response using CommonResponse
+      return CommonResponse::getResponse(
+        200,
+        null,
+        'Card added successfully.',
+        ['payment_method' => $paymentMethod]
+      );
+
+    } catch (\Exception $e) {
+      // Log the error and return a structured error response
+      Log::error('Error adding card to customer: ' . $e->getMessage());
+      return CommonResponse::getResponse(
+        500,
+        null,
+        'Failed to add card: ' . $e->getMessage()
+      );
+    }
+  }
 
 }
