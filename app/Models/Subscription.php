@@ -18,6 +18,17 @@ class Subscription extends Model
 
     const GRACE_PERIOD_DAYS = 7;
 
+    /**
+     * Connect the relevant database
+     *
+     */
+    public static function connect($connection =null)
+    {
+        $connection = $connection ?:config('database.default');
+        return (new static)->setConnection($connection);
+    }
+
+
     protected $fillable = [
         'user_id',
         'subscription_type',

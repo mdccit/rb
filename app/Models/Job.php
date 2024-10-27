@@ -20,6 +20,18 @@ class Job extends Model
      */
     public $timestamps = false;
 
+
+    /**
+     * Connect the relevant database
+     *
+     */
+    public static function connect($connection = null)
+    {
+        $connection = $connection ?: config('database.default');
+        return (new static)->setConnection($connection);
+    }
+
+
     /**
      * The attributes that are mass assignable.
      *

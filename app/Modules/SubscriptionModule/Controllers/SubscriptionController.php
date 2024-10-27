@@ -618,9 +618,20 @@ class SubscriptionController extends Controller
   }
 
 
-  public function setDefaultPaymentMethod($user, $paymentMethodId)
+  public function setDefaultPaymentMethod(Request $request)
   {
-    // Retrieve the Stripe customer ID from the user
+
+
+    $validatedData = $request->validate([
+      'payment_method_id' => 'required|string',
+    ]);
+
+    $paymentMethodId = $validatedData['payment_method_id'];
+
+    if (empty($paymentMethodId)) {
+      return CommonResponse::getResponse(422, null, 'Payment method ID is required.');
+    }
+    $user = $request->user();
     $stripeCustomerId = $user->stripe_id;
 
     if (!$stripeCustomerId) {
