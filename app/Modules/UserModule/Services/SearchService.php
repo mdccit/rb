@@ -97,7 +97,7 @@ class SearchService
             }
 
             if($graduation_year != null){
-                $query->whereMonth('players.graduation_year', $graduation_year);
+                $query->whereYear('players.graduation_month_year', $graduation_year);
             }
         
             if($gender != null){
@@ -137,17 +137,29 @@ class SearchService
             }
 
             if($atp_ranking != null){
-                $query->whereJsonContains('players.other_data->atp_ranking', $atp_ranking);
+               // $query->whereJsonContains('players.other_data->atp_ranking', $atp_ranking);
+                $query->whereRaw(
+                    'CAST(JSON_UNQUOTE(JSON_EXTRACT(players.other_data, "$.atp_ranking")) AS DECIMAL(10, 2)) >= ?',
+                    [$atp_ranking]
+                );
 
             }
 
             if($itf_ranking != null){
-                $query->whereJsonContains('players.other_data->itf_ranking', $itf_ranking);
+                //$query->whereJsonContains('players.other_data->itf_ranking', $itf_ranking);
+                $query->whereRaw(
+                    'CAST(JSON_UNQUOTE(JSON_EXTRACT(players.other_data, "$.itf_ranking")) AS DECIMAL(10, 2)) >= ?',
+                    [$itf_ranking]
+                );
 
             }
 
             if($national_ranking != null){
-                $query->whereJsonContains('players.other_data->national_ranking', $$national_ranking);
+                //$query->whereJsonContains('players.other_data->national_ranking', $$national_ranking);
+                $query->whereRaw(
+                    'CAST(JSON_UNQUOTE(JSON_EXTRACT(players.other_data, "$.national_ranking")) AS DECIMAL(10, 2)) >= ?',
+                    [$national_ranking]
+                );
             }
 
     
