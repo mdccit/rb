@@ -4,13 +4,17 @@ namespace App\Extra\ThirdPartyAPI;
 
 use Stripe\Stripe;
 use Stripe\Customer;
+use Stripe\Price;
+use Stripe\Charge;
 use Stripe\Subscription;
 use Stripe\PaymentIntent;
 use Stripe\PaymentMethod;
 use Stripe\Invoice;
 use Stripe\SetupIntent;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
+use App\Models\Subscription AS SubscriptionLocal;
 
 class StripeAPI
 {
@@ -206,6 +210,59 @@ class StripeAPI
   }
 
 
+  public function createOneTimeSubscription($customerId, $subscriptionType, $paymentMethodId)
+  {
+      try {
+          // Get the price and amount based on the subscription type
+          $priceId = $this->getPriceIdFromSubscriptionType($subscriptionType);
+          $amount = $this->getAmountForPriceId($priceId);
+          Log::debug('One-time Payment Amount: ' . $priceId . ' ' . $amount);
+  
+          // At this point, the payment method is already confirmed and attached to the customer
+          // Charge the customer directly for a one-time amount using Invoice or Charge
+          $charge = Charge::create([
+              'customer' => $customerId,
+              'amount' => $amount,
+              'currency' => 'usd',
+              'payment_method' => $paymentMethodId,
+              'off_session' => true, // Indicates the payment can happen without user interaction
+              'confirm' => true,
+          ]);
+  
+          // Check if $charge is actually an object with an `id` property
+          if (!isset($charge->id)) {
+              Log::error('Charge creation failed. Response: ' . json_encode($charge));
+              throw new \Exception('Failed to create one-time charge.');
+          }
+  
+          // Calculate subscription period locally
+          $startDate = Carbon::now();
+          $endDate = ($subscriptionType === 'monthly') ? $startDate->copy()->addMonth() : $startDate->copy()->addYear();
+  
+          Log::debug('One-time Charge ID: ' . $charge->id);
+  
+          // Store the one-time subscription details in the local database
+          $oneTimeSubscription = new SubscriptionLocal();
+          $oneTimeSubscription->user_id = $customerId;
+          $oneTimeSubscription->subscription_type = $subscriptionType;
+          $oneTimeSubscription->status = 'active';
+          $oneTimeSubscription->is_auto_renewal = false;
+          $oneTimeSubscription->start_date = $startDate;
+          $oneTimeSubscription->end_date = $endDate;
+          $oneTimeSubscription->payment_status = 'paid';
+          $oneTimeSubscription->stripe_charge_id = $charge->id; // Store the charge ID for reference
+          $oneTimeSubscription->save();
+  
+          // Return the subscription data or response as needed
+          return response()->json(['status' => 'success', 'message' => 'One-time subscription created successfully']);
+  
+      } catch (\Exception $e) {
+          Log::error('One-Time Subscription Creation Error: ' . $e->getMessage());
+          return response()->json(['status' => 'error', 'message' => 'Failed to create one-time subscription: ' . $e->getMessage()], 500);
+      }
+  }
+  
+
   public function createSubscriptionWithTrial($customerId, $subscriptionType, $paymentMethodId, $trialDays = 30)
   {
       try {
@@ -234,13 +291,21 @@ class StripeAPI
   }
 
   // Create a payment intent (useful for one-time charges)
-  public function createPaymentIntent($amount, $currency = 'usd')
+  public function createOneTimePaymentIntent($amount, $currency = 'usd', $paymentMethodId = null, $confirm = false)
   {
-    return PaymentIntent::create([
-      'amount' => $amount,
-      'currency' => $currency,
-    ]);
+      $intentData = [
+          'amount' => $amount,
+          'currency' => $currency,
+      ];
+  
+      if ($paymentMethodId) {
+          $intentData['payment_method'] = $paymentMethodId;
+          $intentData['confirm'] = $confirm;
+      }
+  
+      return PaymentIntent::create($intentData);
   }
+  
 
   // Get the price ID based on the subscription type (trial, monthly, annually)
   private function getPriceIdFromSubscriptionType($subscriptionType)
@@ -469,8 +534,26 @@ class StripeAPI
 
   public function cancelRecurringSubscription($stripeSubscriptionId)
   {
-    $subscription = \Stripe\Subscription::retrieve($stripeSubscriptionId);
+    $subscription = Subscription::retrieve($stripeSubscriptionId);
     $subscription->cancel();  // Optionally, use cancel_at_period_end to delay cancellation until the end of the billing cycle
   }
+
+
+
+  private function getAmountForPriceId($priceId)
+{
+    try {
+        // Retrieve the price from Stripe using the price ID
+        $price =  Price::retrieve($priceId);
+
+        // Return the amount in cents (Stripe uses smallest currency unit)
+        return $price->unit_amount;
+    } catch (\Exception $e) {
+        Log::error('Error retrieving amount for price ID: ' . $priceId . ' - ' . $e->getMessage());
+        throw new \Exception('Failed to retrieve amount for price ID: ' . $e->getMessage());
+    }
+}
+
+
 
 }

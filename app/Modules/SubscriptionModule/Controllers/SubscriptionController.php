@@ -212,8 +212,18 @@ class SubscriptionController extends Controller
   {
     $user = $request->user(); // Assuming the user is authenticated
     $displayName = $user->display_name;
-    $paymentMethodId = $request->input('payment_method_id');
-    $subscriptionType = $request->input('subscription_type'); // monthly, annually, or trial
+
+    // Validate the required inputs
+    $validatedData = $request->validate([
+      'payment_method_id' => 'required|string',
+      'subscription_type' => 'required|in:trial,premium', // Accept only 'trial' or 'premium'
+      'is_auto_renewal' => 'required|boolean', // Boolean: true or false
+    ]);
+
+
+    $paymentMethodId = $validatedData['payment_method_id'];
+    $subscriptionType = $validatedData['subscription_type'];
+    $isRecurring = $validatedData['is_auto_renewal'];
 
     try {
       // Check if user already has an active subscription
@@ -280,8 +290,13 @@ class SubscriptionController extends Controller
         return response()->json(['status' => 'success', 'message' => 'Trial subscription created successfully']);
       } else if ($subscriptionType === 'premium') {
 
-        // Create the subscription with the payment method
-        $stripeSubscription = $this->stripeAPI->createSubscription($user->stripe_id, 'monthly', $paymentMethodId, true);
+       
+        if ($isRecurring) {
+          $stripeSubscription = $this->stripeAPI->createSubscription($stripeCustomerId, 'monthly', $paymentMethodId, true);
+        } else {
+          $stripeSubscription = $this->stripeAPI->createOneTimeSubscription($stripeCustomerId, 'monthly', $paymentMethodId);
+        }
+
 
         $subscriptionId = $stripeSubscription->id;
         $startDate = Carbon::createFromTimestamp($stripeSubscription->current_period_start);
@@ -655,16 +670,22 @@ class SubscriptionController extends Controller
         'customer' => $stripeCustomerId,
       ]);
 
-      // Update the customer’s invoice settings to use this payment method as the default
+      // Step 1: Update the customer's default payment method
       Customer::update($stripeCustomerId, [
         'invoice_settings' => [
           'default_payment_method' => $paymentMethodId
         ]
       ]);
 
-      // Optionally, update the local database with the default payment method ID
-      // $user->default_payment_method_id = $paymentMethodId; // Assuming you have this column in your users table
-      // $user->save();
+      // Step 2: Retrieve active subscriptions and update them with the new payment method
+
+      $subscriptions = StripeSubscription::all(['customer' => $stripeCustomerId, 'status' => 'active']);
+
+      foreach ($subscriptions->data as $subscription) {
+        StripeSubscription::update($subscription->id, [
+          'default_payment_method' => $paymentMethodId,
+        ]);
+      }
 
       // Return a success response using the CommonResponse structure
       return CommonResponse::getResponse(200, null, 'Default payment method updated successfully.');
@@ -700,13 +721,6 @@ class SubscriptionController extends Controller
 
       // Attach the payment method to the authenticated user's Stripe customer ID
       $paymentMethod->attach(['customer' => $user->stripe_id]);
-
-      // Optionally set this payment method as the default for future invoices
-      Customer::update($user->stripe_id, [
-        'invoice_settings' => [
-          'default_payment_method' => $paymentMethodId,
-        ],
-      ]);
 
       // Return a success response using CommonResponse
       return CommonResponse::getResponse(
