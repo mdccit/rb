@@ -261,7 +261,9 @@ class ConnectionController extends Controller
                             ->exists();
 
             if($existing){
-
+                
+                $this->connectionService->conversationRemove($connection_id);
+                
                 $responseData = $this->connectionService->connectionStatusUpdate($request->all(),$connection_id);
                 
                 return CommonResponse::getResponse(

@@ -8,6 +8,7 @@ use App\Models\ConnectionRequest;
 use App\Models\User;
 use App\Traits\AzureBlobStorage;
 use Illuminate\Support\Facades\DB;
+use App\Models\Conversation;
 
 class ConnectionService
 {
@@ -325,6 +326,37 @@ class ConnectionService
                     'acccept_list' => $acccept_list,
                     'invitation_list' => $invite_liste 
                 ];
+        }
+
+        public function conversationRemove($connection_id){
+            $conection  = ConnectionRequest::connect(config('database.secondary'))
+                            ->where('id',$connection_id)
+                           ->first();
+
+          $existing =  Conversation::connect(config('database.secondary'))
+                    ->where(function ($query) use ($conection) {
+                        $query->where('conversations.user1_id', $conection->sender_id)
+                         ->where('conversations.user2_id',$conection->receiver_id);
+                    })
+                    ->orWhere(function ($query) use ($conection) {
+                        $query->where('conversations.user1_id',$conection->receiver_id)
+                        ->Where('conversations.user2_id', $conection->sender_id);
+                    })
+                   ->exists();
+          if($existing){
+            $conversation =  Conversation::connect(config('database.secondary'))
+                        ->where(function ($query) use ($conection) {
+                            $query->where('conversations.user1_id', $conection->sender_id)
+                            ->where('conversations.user2_id',$conection->receiver_id);
+                        })
+                        ->orWhere(function ($query) use ($conection) {
+                            $query->where('conversations.user1_id',$conection->receiver_id)
+                           ->Where('conversations.user2_id', $conection->sender_id);
+                        })
+                        ->first();
+              Conversation::connect(config('database.default'))->destroy($conversation->id);    
+
+            }
         }
     }
 
