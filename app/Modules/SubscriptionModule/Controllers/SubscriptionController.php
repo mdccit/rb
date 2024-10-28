@@ -628,8 +628,15 @@ class SubscriptionController extends Controller
 
     $paymentMethodId = $validatedData['payment_method_id'];
 
+
     if (empty($paymentMethodId)) {
       return CommonResponse::getResponse(422, null, 'Payment method ID is required.');
+    }
+
+
+    // Check if paymentMethodId is correctly formatted as a Stripe Payment Method ID
+    if (strpos($paymentMethodId, 'pm_') !== 0) {
+      return CommonResponse::getResponse(422, null, 'Invalid payment method ID format.');
     }
     $user = $request->user();
     $stripeCustomerId = $user->stripe_id;
@@ -656,8 +663,8 @@ class SubscriptionController extends Controller
       ]);
 
       // Optionally, update the local database with the default payment method ID
-      $user->default_payment_method_id = $paymentMethodId; // Assuming you have this column in your users table
-      $user->save();
+      // $user->default_payment_method_id = $paymentMethodId; // Assuming you have this column in your users table
+      // $user->save();
 
       // Return a success response using the CommonResponse structure
       return CommonResponse::getResponse(200, null, 'Default payment method updated successfully.');
@@ -669,33 +676,37 @@ class SubscriptionController extends Controller
     }
   }
 
-  /**
-   * Attach a new card to a Stripe customer and optionally set it as default.
-   *
-   * @param string $paymentMethodId
-   * @param string $customerId
-   * @param bool $setAsDefault
-   * @return \Illuminate\Http\JsonResponse
-   */
-  public function addNewCardToCustomer($paymentMethodId, $customerId, $setAsDefault = false)
+  public function addNewCardToCustomer(Request $request)
   {
+    // Validate the incoming request to ensure payment_method_id is present
+    $validatedData = $request->validate([
+      'payment_method_id' => 'required|string', // Payment method ID from Stripe
+    ]);
+
+    $paymentMethodId = $validatedData['payment_method_id'];
+    $user = $request->user(); // Retrieve the authenticated user
+
+    if (!$user->stripe_id) {
+      return CommonResponse::getResponse(
+        404,
+        null,
+        'No Stripe customer ID found for this user.'
+      );
+    }
+
     try {
-      // Retrieve the payment method from Stripe
+      // Retrieve the payment method from Stripe using the payment method ID
       $paymentMethod = PaymentMethod::retrieve($paymentMethodId);
 
-      // Attach the payment method to the customer
-      $paymentMethod->attach([
-        'customer' => $customerId,
-      ]);
+      // Attach the payment method to the authenticated user's Stripe customer ID
+      $paymentMethod->attach(['customer' => $user->stripe_id]);
 
-      // Optionally set this payment method as the default for invoices
-      if ($setAsDefault) {
-        Customer::update($customerId, [
-          'invoice_settings' => [
-            'default_payment_method' => $paymentMethodId,
-          ],
-        ]);
-      }
+      // Optionally set this payment method as the default for future invoices
+      Customer::update($user->stripe_id, [
+        'invoice_settings' => [
+          'default_payment_method' => $paymentMethodId,
+        ],
+      ]);
 
       // Return a success response using CommonResponse
       return CommonResponse::getResponse(
@@ -706,7 +717,7 @@ class SubscriptionController extends Controller
       );
 
     } catch (\Exception $e) {
-      // Log the error and return a structured error response
+      // Log the error and return an error response using CommonResponse
       Log::error('Error adding card to customer: ' . $e->getMessage());
       return CommonResponse::getResponse(
         500,
@@ -715,5 +726,6 @@ class SubscriptionController extends Controller
       );
     }
   }
+
 
 }

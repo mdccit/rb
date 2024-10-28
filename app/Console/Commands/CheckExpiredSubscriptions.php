@@ -31,6 +31,11 @@ class CheckExpiredSubscriptions extends Command
             $subscription->status = 'expired';
             $subscription->save();
 
+            // Update the user's type to 2
+            $user->user_type = 2;
+            $user->save();
+
+
             // Log that the subscription has expired
             Log::info('Subscription expired for user: ' . $user->id . ' after grace period.');
 
