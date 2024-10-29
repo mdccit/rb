@@ -11,8 +11,8 @@ return new class extends Migration {
             $table->timestamp('trial_ends_at')->nullable()->after('status');
             $table->boolean('is_one_time')->default(false)->after('trial_ends_at');
             $table->timestamp('last_renewal_date')->nullable()->after('is_one_time');
-            $table->string('stripe_charge_id')->nullable()->after('stripe_subscription_id');
-            $table->string('stripe_invoice_id')->nullable()->after('stripe_charge_id');
+            $table->string('stripe_payment_intent_id')->nullable()->after('stripe_subscription_id');
+            $table->string('stripe_invoice_id')->nullable()->after('stripe_payment_intent_id');
             $table->json('metadata')->nullable()->after('last_payment_amount');
         });
     }
@@ -24,7 +24,7 @@ return new class extends Migration {
                 'trial_ends_at',
                 'is_one_time',
                 'last_renewal_date',
-                'stripe_charge_id',
+                'stripe_payment_intent_id',
                 'stripe_invoice_id',
                 'metadata',
             ]);

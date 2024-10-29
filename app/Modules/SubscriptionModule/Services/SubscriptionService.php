@@ -327,8 +327,8 @@ class SubscriptionService
 
         // Check if the payment method is being used in any active subscription
         foreach ($subscriptions->data as $subscription) {
-            if ($subscription->default_payment_method === $paymentMethodId) {
-                throw new \Exception('Cannot remove payment method as it is attached to an active subscription.');
+            if ($subscription->default_payment_method === $paymentMethodId && !$subscription->cancel_at_period_end) {
+                throw new \Exception('Cannot remove payment method as it is attached to an active subscription .');
             }
         }
 

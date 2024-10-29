@@ -290,11 +290,11 @@ class SubscriptionController extends Controller
         return response()->json(['status' => 'success', 'message' => 'Trial subscription created successfully']);
       } else if ($subscriptionType === 'premium') {
 
-       
+
         if ($isRecurring) {
           $stripeSubscription = $this->stripeAPI->createSubscription($stripeCustomerId, 'monthly', $paymentMethodId, true);
         } else {
-          $stripeSubscription = $this->stripeAPI->createOneTimeSubscription($stripeCustomerId, 'monthly', $paymentMethodId);
+          $stripeSubscription = $this->stripeAPI->createOneTimeSubscription($stripeCustomerId, 'monthly_onetime', $paymentMethodId);
         }
 
 
@@ -740,6 +740,73 @@ class SubscriptionController extends Controller
       );
     }
   }
+
+
+  public function addNewDefaultCardToCustomer(Request $request)
+  {
+    // Validate the incoming request to ensure payment_method_id is present
+    $validatedData = $request->validate([
+      'payment_method_id' => 'required|string', // Payment method ID from Stripe
+    ]);
+
+    $paymentMethodId = $validatedData['payment_method_id'];
+    $user = $request->user(); // Retrieve the authenticated user
+
+    if (!$user->stripe_id) {
+      return CommonResponse::getResponse(
+        404,
+        null,
+        'No Stripe customer ID found for this user.'
+      );
+    }
+
+    try {
+      // Retrieve the payment method from Stripe using the payment method ID
+      $paymentMethod = PaymentMethod::retrieve($paymentMethodId);
+
+      // Attach the payment method to the authenticated user's Stripe customer ID
+      $paymentMethod->attach(['customer' => $user->stripe_id]);
+
+      // Set the payment method as the default for future invoices
+      Customer::update($user->stripe_id, [
+        'invoice_settings' => [
+          'default_payment_method' => $paymentMethodId,
+        ],
+      ]);
+
+      // Retrieve active subscriptions for the customer and set each to use the new default payment method
+      $subscriptions = StripeSubscription::all([
+        'customer' => $user->stripe_id,
+        'status' => 'active',
+      ]);
+
+      foreach ($subscriptions->data as $subscription) {
+        // Update the subscription's default payment method
+        StripeSubscription::update($subscription->id, [
+          'default_payment_method' => $paymentMethodId,
+        ]);
+      }
+
+      // Return a success response using CommonResponse
+      return CommonResponse::getResponse(
+        200,
+        null,
+        'Card added successfully and set as default payment method for subscriptions and invoices.',
+        ['payment_method' => $paymentMethod]
+      );
+
+    } catch (\Exception $e) {
+      // Log the error and return an error response using CommonResponse
+      Log::error('Error adding card to customer: ' . $e->getMessage());
+      return CommonResponse::getResponse(
+        500,
+        null,
+        'Failed to add card: ' . $e->getMessage()
+      );
+    }
+  }
+
+
 
 
 }

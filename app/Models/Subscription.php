@@ -42,7 +42,9 @@ class Subscription extends Model
         'payment_status',
         'stripe_subscription_id',
         'last_payment_date',
-        'last_payment_amount'
+        'last_payment_amount',
+        'stripe_payment_intent_id',
+        'trial_ends_at'
     ];
 
     public function user()
