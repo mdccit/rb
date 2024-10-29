@@ -50,6 +50,10 @@ Route::group(['namespace' => 'App\Modules\UserModule\Controllers','prefix' => 'a
             Route::post('/save-search', 'SearchController@saveSearch')->name('user.search.save');
             Route::get('/get-save-search', 'SearchController@getSaveSearch')->name('user.search.get');
             Route::delete('/delete-search/{id}', 'SearchController@deleteSaveSearch')->name('user.search.delete');
+            
+            //get transfer player
+            Route::get('/transfer-players', 'TransferPlayerController@getAllUsers')->name('user.transfer.get-all');
+
 
             //TODO only authenticated default users can be access
             Route::middleware('auth.is_default')->group(function () {
@@ -79,7 +83,7 @@ Route::group(['namespace' => 'App\Modules\UserModule\Controllers','prefix' => 'a
             //TODO only authenticated coach users can be access
             Route::middleware('auth.is_coach')->group(function () {
                 //get transfer player
-                Route::get('/transfer-players', 'TransferPlayerController@getAllUsers')->name('user.transfer.get-all');
+                // Route::get('/transfer-players', 'TransferPlayerController@getAllUsers')->name('user.transfer.get-all');
 
             });
 
