@@ -9,6 +9,7 @@ use Database\Seeders\DivisionSeeder;
 use Database\Seeders\NationalitySeeder;
 use Database\Seeders\PlayerBudgetSeeder;
 use Database\Seeders\SportSeeder;
+use Database\Seeders\SyncSettingSeeder;
 use Database\Seeders\UserRoleSeeder;
 use Database\Seeders\UserSeeder;
 use Database\Seeders\UserTypeSeeder;
