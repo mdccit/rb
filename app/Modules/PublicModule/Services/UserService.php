@@ -164,6 +164,11 @@ class UserService
                             'businesses.other_data as business_other_data'
                         )
                         ->first();
+                    if($profile_info != null && $profile_info->business_id ){
+                        $profile_info->business_profile_picture = $this->getSingleFileByEntityId($profile_info->business_id,'business_profile_picture');
+                    }else{
+                        $profile_info->business_profile_picture= null;
+                    }
                     break;
                 case config('app.user_roles.parent'):
                     $profile_info = PlayerParent::connect(config('database.secondary'))
@@ -579,6 +584,11 @@ class UserService
                     'businesses.other_data as business_other_data'
                 )
                 ->first();
+                if($business_manager != null && $business_manager->business_id ){
+                    $business_manager->business_profile_picture = $this->getSingleFileByEntityId($business_manager->business_id,'business_profile_picture');
+                }else{
+                    $business_manager->business_profile_picture= null;
+                }
         }
 
         return [

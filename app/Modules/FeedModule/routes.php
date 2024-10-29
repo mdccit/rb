@@ -23,6 +23,8 @@ Route::group(['namespace' => 'App\Modules\FeedModule\Controllers', 'prefix' => '
             Route::post('/posts/{id}/comment', 'PostController@addComment')->name('posts.add_comment');
             Route::put('/comments/{id}', 'PostController@updateComment')->name('posts.update_comment');
             Route::get('/post/{id}', 'PostController@showSinglePost')->name('posts.show_singale_post');
+            Route::get('/school-posts/{schoo_id}', 'PostController@getAllPostsSchool')->name('posts.school_index');
+            Route::get('/business-posts/{business_id}', 'PostController@getAllPostsBusiness')->name('posts.business_index');
 
             Route::get('/postcomments/{id}', 'PostController@getCommentsByPostId')->name('posts.get_all_comments');
             Route::get('/comments/{id}', 'PostController@getComment')->name('posts.get_comment');

@@ -308,4 +308,26 @@ class PostController extends Controller
         $sortOrder = $request->query('sortOrder', 'desc');
         return $this->feedService->getAllPostsLoggedUser($type, $sortBy, $sortOrder);
     }
+
+    public function getAllPostsSchool($school_id,Request $request)
+    {
+        // Retrieve the query parameters from the request
+        $type = $request->query('type');
+        $sortBy = $request->query('sortBy', 'created_at');
+        $sortOrder = $request->query('sortOrder', 'desc');
+        
+
+        return $this->feedService->getAllPostsSchool($type, $sortBy, $sortOrder, $school_id);
+    }
+
+    public function getAllPostsBusiness($business_id,Request $request)
+    {
+        // Retrieve the query parameters from the request
+        $type = $request->query('type');
+        $sortBy = $request->query('sortBy', 'created_at');
+        $sortOrder = $request->query('sortOrder', 'desc');
+        
+
+        return $this->feedService->getAllPostsBusiness($type, $sortBy, $sortOrder, $business_id);
+    }
 }

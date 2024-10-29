@@ -23,7 +23,7 @@ Route::group(['namespace' => 'App\Modules\AuthModule\Controllers', 'prefix' => '
                 //TODO whatever need to authenticate
                 Route::put('/logout', 'AuthController@authLogout')->name('auth.logout');
 
-                Route::get('/account-delete', 'UserController@userDelete')->name('auth.account.delete');
+                Route::post('/account-delete', 'UserController@userDelete')->name('auth.account.delete');
 
                 Route::get('/browser-other-tokens-logout', 'BrowserSessionController@logOutOtherBrowserSession')->name('auth.browser-session.logout');
                 //update password
