@@ -69,7 +69,8 @@ class TransferPlayerService
         if ($search_key != null) {
             $query->where(function ($q) use ($search_key) {
                 $q->where('first_name', 'LIKE', '%' . $search_key . '%')
-                    ->orWhere('last_name', 'LIKE', '%' . $search_key . '%');
+                    ->orWhere('last_name', 'LIKE', '%' . $search_key . '%')
+                    ->orWhere('email', 'LIKE', '%' . $search_key . '%');
             });
         }
 

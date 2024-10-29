@@ -662,7 +662,7 @@ class FeedService
     {
         try {
             $userId = Auth::id();
-            $azureBlobStorageService = app()->make(AzureBlobStorageService::class); // Make an instance of the AzureBlobStorageService
+           // $azureBlobStorageService = app()->make(AzureBlobStorageService::class); // Make an instance of the AzureBlobStorageService
     
             $query = Post::connect(config('database.secondary'))
                 ->where('school_id',$school_id)
@@ -690,14 +690,14 @@ class FeedService
             // Sort posts by the specified sort column and order
             $query->orderBy($sortBy, $sortOrder);
     
-            $posts = $query->paginate(10)->through(function ($post) use ($userId, $azureBlobStorageService) {
+            $posts = $query->paginate(10)->through(function ($post) use ($userId) {
                 // Add the user's like status to each post
                 $post->user_has_liked = $post->likes->contains('user_id', $userId);
                 unset($post->likes); // Remove the likes relationship
             
                 // Conditionally call getMediaByEntity if has_media is 1
                 if ($post->has_media === 1) {
-                    $mediaItems = $azureBlobStorageService->getMediaByEntity($post->id, 'post'); // Assuming entity_type is 'post'
+                    $mediaItems = $this->getMultipleFilesByEntityId($post->id, 'post'); // Assuming entity_type is 'post'
                     $post->media = $mediaItems; // Attach media items to the post
                 } else {
                     $post->media = null; // Set media to null if no media
@@ -738,7 +738,7 @@ class FeedService
     {
         try {
             $userId = Auth::id();
-            $azureBlobStorageService = app()->make(AzureBlobStorageService::class); // Make an instance of the AzureBlobStorageService
+            // $azureBlobStorageService = app()->make(AzureBlobStorageService::class); // Make an instance of the AzureBlobStorageService
     
             $query = Post::connect(config('database.secondary'))
                 ->where('business_id',$business_id)
@@ -766,14 +766,14 @@ class FeedService
             // Sort posts by the specified sort column and order
             $query->orderBy($sortBy, $sortOrder);
     
-            $posts = $query->paginate(10)->through(function ($post) use ($userId, $azureBlobStorageService) {
+            $posts = $query->paginate(10)->through(function ($post) use ($userId) {
                 // Add the user's like status to each post
                 $post->user_has_liked = $post->likes->contains('user_id', $userId);
                 unset($post->likes); // Remove the likes relationship
             
                 // Conditionally call getMediaByEntity if has_media is 1
                 if ($post->has_media === 1) {
-                    $mediaItems = $azureBlobStorageService->getMediaByEntity($post->id, 'post'); // Assuming entity_type is 'post'
+                    $mediaItems = $this->getMultipleFilesByEntityId($post->id, 'post'); // Assuming entity_type is 'post'
                     $post->media = $mediaItems; // Attach media items to the post
                 } else {
                     $post->media = null; // Set media to null if no media

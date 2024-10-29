@@ -35,7 +35,7 @@ class UserController extends Controller
             }
             $user =User::connect(config('database.secondary'))->where('id',auth()->id())->first();
 
-            if($user->user_role_id !=2){
+            if($user->user_role_id != config('app.user_roles.admin')){
             $this->userService->userDelete();
                 
                 return CommonResponse::getResponse(

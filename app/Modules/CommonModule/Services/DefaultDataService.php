@@ -78,7 +78,7 @@ class DefaultDataService
             ],
             [
                 'label' => 'Both',
-                '' => 'both'
+                'value' => 'both'
             ]
         ];
     }
