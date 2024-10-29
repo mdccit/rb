@@ -22,8 +22,9 @@ class ConversationService
                              ->Where('conversations.user2_id', auth()->id());
                         })
                         ->first();
+            
         if(!$conversations){
-            Conversation::connect(config('database.default'))
+            $conversations = Conversation::connect(config('database.default'))
                 ->create([
                     'user1_id' => auth()->id(),
                     'user2_id' => $data['user2_id'],
@@ -31,6 +32,8 @@ class ConversationService
                     'is_delete_user2' => false
                 ]);
         }
+
+        return $conversations;
        
     }
     

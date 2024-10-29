@@ -61,12 +61,15 @@ class ConversationController extends Controller
                 );
             }
 
-            $this->conversationService->createConversation($request->all());
-
+            $data = $this->conversationService->createConversation($request->all());
+            $responseData = [
+                'dataSets' => $data,
+            ];
             return CommonResponse::getResponse(
                 200,
                 'Successfully Conversation Created',
-                'Successfully Conversation Created'
+                'Successfully Conversation Created',
+                $responseData
             );
         }catch (\Exception $e){
             return CommonResponse::getResponse(
