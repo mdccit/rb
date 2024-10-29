@@ -39,16 +39,17 @@ class ConnectionController extends Controller
 
             $existingRequest = ConnectionRequest::connect(config('database.secondary'))
                                 ->whereIn('connection_status',['pending','accepted'])
-                                 ->where(function ($query) use ($request) {
-                                    $query->where('sender_id', auth()->id())
-                                        ->where('receiver_id', $request['receiver_id']);
-                                })
-                                ->orWhere(function ($query) use ($request) {
-                                    $query->where('sender_id', $request['receiver_id'])
-                                        ->where('receiver_id', auth()->id());
+                                ->where(function ($query) use ($request) {
+                                    $query->where(function ($q) use ($request) {
+                                        $q->where('sender_id', auth()->id())
+                                          ->where('receiver_id', $request['receiver_id']);
+                                    })
+                                    ->orWhere(function ($q) use ($request) {
+                                        $q->where('sender_id', $request['receiver_id'])
+                                          ->where('receiver_id', auth()->id());
+                                    });
                                 })
                                 ->exists();
-            
             if($existingRequest){
 
                 return CommonResponse::getResponse(
