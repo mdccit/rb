@@ -141,6 +141,44 @@ class SubscriptionService
         }
     }
 
+    
+
+    public function createRecurringSubscription($user, $data)
+    {
+        $stripeCustomerId = $user->stripe_id;
+
+        if (!$stripeCustomerId) {
+            // Create customer if not exists
+            $stripeCustomerId = $this->stripeAPI->createCustomer($user);
+            $user->stripe_id = $stripeCustomerId;
+            $user->save();
+        }
+
+        // Attach Payment Method
+        $paymentMethodId = $data['payment_method_id'];
+        $paymentMethod = PaymentMethod::retrieve($paymentMethodId);
+        $paymentMethod->attach(['customer' => $stripeCustomerId]);
+
+        // Set default payment method for future invoices
+        Customer::update($stripeCustomerId, [
+            'invoice_settings' => ['default_payment_method' => $paymentMethodId],
+        ]);
+
+        // Create Stripe subscription
+        $stripeSubscription = $this->stripeAPI->createSubscription($stripeCustomerId, $data['plan_id'], $paymentMethodId);
+
+        // Save the subscription to the local database
+        $userSubscription = new Subscription();
+        $userSubscription->user_id = $user->id;
+        $userSubscription->stripe_subscription_id = $stripeSubscription->id;
+        $userSubscription->status = 'active';
+        $userSubscription->start_date = Carbon::now();
+        $userSubscription->end_date = $this->calculateEndDate($data['plan_id']); // Calculate based on the plan
+        $userSubscription->save();
+
+        return $userSubscription;
+    }
+
 
     // Cancel the current subscription of the user
     public function cancelSubscription($user)
@@ -289,8 +327,8 @@ class SubscriptionService
 
         // Check if the payment method is being used in any active subscription
         foreach ($subscriptions->data as $subscription) {
-            if ($subscription->default_payment_method === $paymentMethodId) {
-                throw new \Exception('Cannot remove payment method as it is attached to an active subscription.');
+            if ($subscription->default_payment_method === $paymentMethodId && !$subscription->cancel_at_period_end) {
+                throw new \Exception('Cannot remove payment method as it is attached to an active subscription .');
             }
         }
 
@@ -303,42 +341,6 @@ class SubscriptionService
         }
     }
 
-
-    public function createRecurringSubscription($user, $data)
-    {
-        $stripeCustomerId = $user->stripe_id;
-
-        if (!$stripeCustomerId) {
-            // Create customer if not exists
-            $stripeCustomerId = $this->stripeAPI->createCustomer($user);
-            $user->stripe_id = $stripeCustomerId;
-            $user->save();
-        }
-
-        // Attach Payment Method
-        $paymentMethodId = $data['payment_method_id'];
-        $paymentMethod = PaymentMethod::retrieve($paymentMethodId);
-        $paymentMethod->attach(['customer' => $stripeCustomerId]);
-
-        // Set default payment method for future invoices
-        Customer::update($stripeCustomerId, [
-            'invoice_settings' => ['default_payment_method' => $paymentMethodId],
-        ]);
-
-        // Create Stripe subscription
-        $stripeSubscription = $this->stripeAPI->createSubscription($stripeCustomerId, $data['plan_id'], $paymentMethodId);
-
-        // Save the subscription to the local database
-        $userSubscription = new Subscription();
-        $userSubscription->user_id = $user->id;
-        $userSubscription->stripe_subscription_id = $stripeSubscription->id;
-        $userSubscription->status = 'active';
-        $userSubscription->start_date = Carbon::now();
-        $userSubscription->end_date = $this->calculateEndDate($data['plan_id']); // Calculate based on the plan
-        $userSubscription->save();
-
-        return $userSubscription;
-    }
 
 
     public function cancelRecurringSubscription($user)
@@ -397,6 +399,6 @@ class SubscriptionService
 
         return $subscription;
     }
-
+   
 
 }

@@ -4,13 +4,18 @@ namespace App\Extra\ThirdPartyAPI;
 
 use Stripe\Stripe;
 use Stripe\Customer;
+use Stripe\Price;
+use Stripe\Charge;
 use Stripe\Subscription;
 use Stripe\PaymentIntent;
 use Stripe\PaymentMethod;
 use Stripe\Invoice;
 use Stripe\SetupIntent;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
+use App\Models\Subscription as SubscriptionLocal;
+use Illuminate\Support\Facades\Auth;
 
 class StripeAPI
 {
@@ -206,41 +211,113 @@ class StripeAPI
   }
 
 
+  public function createOneTimeSubscription($customerId, $subscriptionType, $paymentMethodId)
+  {
+    try {
+      $effectiveSubscriptionType = ($subscriptionType === 'monthly_onetime') ? 'monthly' : $subscriptionType;
+
+      // Get the price ID based on the subscription type
+      $priceId = $this->getPriceIdFromSubscriptionType($effectiveSubscriptionType);
+
+      // Retrieve the authenticated user ID
+      $userId = Auth::id();
+
+      Log::debug('Creating one-time subscription for Price ID: ' . $priceId);
+
+      // Step 1: Create the subscription with Stripe
+      $subscription = Subscription::create([
+        'customer' => $customerId,
+        'items' => [['price' => $priceId]],
+        'default_payment_method' => $paymentMethodId,
+        'expand' => ['latest_invoice.payment_intent'], // Optional: Expand for more details
+        'automatic_tax' => ['enabled' => false],
+      ]);
+
+      if (!isset($subscription->id)) {
+        Log::error('Failed to create subscription: ' . json_encode($subscription));
+        throw new \Exception('Failed to create subscription. Subscription object does not have an ID.');
+      }
+
+
+      // Log the subscription response for debugging
+      Log::debug('Subscription Response: ' . json_encode($subscription));
+
+      $stripeSubscription = Subscription::retrieve($subscription->id);
+      $stripeSubscription->cancel_at_period_end = true;
+      $stripeSubscription->save();
+
+         // Log the subscription response for debugging
+         Log::debug('Subscription Response 2: ' . json_encode($stripeSubscription));
+
+
+      // Step 3: Calculate the subscription period locally
+      $startDate = Carbon::now();
+      $endDate = ($subscriptionType === 'monthly') ? $startDate->copy()->addMonth() : $startDate->copy()->addYear();
+
+      // Store the subscription details in the local database
+      $oneTimeSubscription = new SubscriptionLocal();
+      $oneTimeSubscription->user_id = $userId;
+      $oneTimeSubscription->subscription_type = 'monthly';  // or 'annually', based on your requirement
+      $oneTimeSubscription->status = 'active';
+      $oneTimeSubscription->is_auto_renewal = false;
+      $oneTimeSubscription->start_date = $startDate;
+      $oneTimeSubscription->end_date = $endDate;
+      $oneTimeSubscription->payment_status = 'paid';
+      $oneTimeSubscription->stripe_subscription_id = $subscription->id; // Store the Subscription ID for reference
+      $oneTimeSubscription->save();
+
+      // Return success response
+      return response()->json(['status' => 'success', 'message' => 'One-time subscription created successfully']);
+
+    } catch (\Exception $e) {
+      Log::error('One-Time Subscription Creation Error: ' . $e->getMessage());
+      return response()->json(['status' => 'error', 'message' => 'Failed to create one-time subscription: ' . $e->getMessage()], 500);
+    }
+  }
+
   public function createSubscriptionWithTrial($customerId, $subscriptionType, $paymentMethodId, $trialDays = 30)
   {
-      try {
-          // Attach the payment method to the customer if not already attached
-          $this->attachPaymentMethodToCustomer($customerId, $paymentMethodId);
-  
-          // Determine the price ID for the trial (typically, this is the same as the monthly/annual plan)
-          $priceId = $this->getPriceIdFromSubscriptionType($subscriptionType);
-  
-          // Create a subscription with a trial period
-          $subscription = Subscription::create([
-              'customer' => $customerId,
-              'items' => [['price' => $priceId]], // Price ID for the subscription plan
-              'trial_period_days' => $trialDays,  // Set the trial period duration (e.g., 30 days)
-              'default_payment_method' => $paymentMethodId,
-              'automatic_tax' => ['enabled' => false],
-              'expand' => ['latest_invoice.payment_intent'],
-          ]);
-  
-          return $subscription;
-  
-      } catch (\Exception $e) {
-          Log::error('Stripe Subscription Trial Creation Error: ' . $e->getMessage());
-          throw new \Exception('Failed to create trial subscription: ' . $e->getMessage());
-      }
+    try {
+      // Attach the payment method to the customer if not already attached
+      $this->attachPaymentMethodToCustomer($customerId, $paymentMethodId);
+
+      // Determine the price ID for the trial (typically, this is the same as the monthly/annual plan)
+      $priceId = $this->getPriceIdFromSubscriptionType($subscriptionType);
+
+      // Create a subscription with a trial period
+      $subscription = Subscription::create([
+        'customer' => $customerId,
+        'items' => [['price' => $priceId]], // Price ID for the subscription plan
+        'trial_period_days' => $trialDays,  // Set the trial period duration (e.g., 30 days)
+        'default_payment_method' => $paymentMethodId,
+        'automatic_tax' => ['enabled' => false],
+        'expand' => ['latest_invoice.payment_intent'],
+      ]);
+
+      return $subscription;
+
+    } catch (\Exception $e) {
+      Log::error('Stripe Subscription Trial Creation Error: ' . $e->getMessage());
+      throw new \Exception('Failed to create trial subscription: ' . $e->getMessage());
+    }
   }
 
   // Create a payment intent (useful for one-time charges)
-  public function createPaymentIntent($amount, $currency = 'usd')
+  public function createOneTimePaymentIntent($amount, $currency = 'usd', $paymentMethodId = null, $confirm = false)
   {
-    return PaymentIntent::create([
+    $intentData = [
       'amount' => $amount,
       'currency' => $currency,
-    ]);
+    ];
+
+    if ($paymentMethodId) {
+      $intentData['payment_method'] = $paymentMethodId;
+      $intentData['confirm'] = $confirm;
+    }
+
+    return PaymentIntent::create($intentData);
   }
+
 
   // Get the price ID based on the subscription type (trial, monthly, annually)
   private function getPriceIdFromSubscriptionType($subscriptionType)
@@ -251,13 +328,8 @@ class StripeAPI
       'annually' => config('services.stripe.annual_price_id'), // Annual plan price ID from .env
     ];
 
-    // Log the subscription type and price ID for debugging purposes
-    Log::info('Retrieving price ID for subscription type: ' . $subscriptionType);
-    Log::info(' price ID for subscription : ' . $priceIds[$subscriptionType]);
-
     // Check if the price ID is available
     if (!isset($priceIds[$subscriptionType]) || empty($priceIds[$subscriptionType])) {
-      Log::error('Invalid price ID for subscription type: ' . $subscriptionType);
       throw new \Exception('Invalid price ID for subscription type');
     }
 
@@ -382,39 +454,39 @@ class StripeAPI
 
   public function getCustomerPaymentMethods($customerId)
   {
-      try {
-          // Set up Stripe with your secret key
-          Stripe::setApiKey(config('services.stripe.secret'));
-          
-          // Retrieve the customer object to get the default payment method ID
-          $customer = Customer::retrieve($customerId);
-          $defaultPaymentMethodId = $customer->invoice_settings->default_payment_method;
-  
-          // Retrieve all payment methods for the customer
-          $paymentMethods = PaymentMethod::all([
-              'customer' => $customerId,
-              'type' => 'card',
-          ]);
-  
-          // Append 'is_default' flag to each payment method
-          $paymentMethodsWithDefaultStatus = collect($paymentMethods->data)->map(function ($method) use ($defaultPaymentMethodId) {
-              return [
-                  'id' => $method->id,
-                  'brand' => $method->card->brand,
-                  'last4' => $method->card->last4,
-                  'exp_month' => $method->card->exp_month,
-                  'exp_year' => $method->card->exp_year,
-                  'is_default' => $method->id === $defaultPaymentMethodId, // Set default status
-              ];
-          });
-  
-          return response()->json([
-              'success' => true,
-              'data' => $paymentMethodsWithDefaultStatus,
-          ]);
-      } catch (\Exception $e) {
-          return response()->json(['error' => $e->getMessage()], 500);
-      }
+    try {
+      // Set up Stripe with your secret key
+      Stripe::setApiKey(config('services.stripe.secret'));
+
+      // Retrieve the customer object to get the default payment method ID
+      $customer = Customer::retrieve($customerId);
+      $defaultPaymentMethodId = $customer->invoice_settings->default_payment_method;
+
+      // Retrieve all payment methods for the customer
+      $paymentMethods = PaymentMethod::all([
+        'customer' => $customerId,
+        'type' => 'card',
+      ]);
+
+      // Append 'is_default' flag to each payment method
+      $paymentMethodsWithDefaultStatus = collect($paymentMethods->data)->map(function ($method) use ($defaultPaymentMethodId) {
+        return [
+          'id' => $method->id,
+          'brand' => $method->card->brand,
+          'last4' => $method->card->last4,
+          'exp_month' => $method->card->exp_month,
+          'exp_year' => $method->card->exp_year,
+          'is_default' => $method->id === $defaultPaymentMethodId, // Set default status
+        ];
+      });
+
+      return response()->json([
+        'success' => true,
+        'data' => $paymentMethodsWithDefaultStatus,
+      ]);
+    } catch (\Exception $e) {
+      return response()->json(['error' => $e->getMessage()], 500);
+    }
   }
 
   /**
@@ -469,8 +541,26 @@ class StripeAPI
 
   public function cancelRecurringSubscription($stripeSubscriptionId)
   {
-    $subscription = \Stripe\Subscription::retrieve($stripeSubscriptionId);
+    $subscription = Subscription::retrieve($stripeSubscriptionId);
     $subscription->cancel();  // Optionally, use cancel_at_period_end to delay cancellation until the end of the billing cycle
   }
+
+
+
+  private function getAmountForPriceId($priceId)
+  {
+    try {
+      // Retrieve the price from Stripe using the price ID
+      $price = Price::retrieve($priceId);
+
+      // Return the amount in cents (Stripe uses smallest currency unit)
+      return $price->unit_amount;
+    } catch (\Exception $e) {
+      Log::error('Error retrieving amount for price ID: ' . $priceId . ' - ' . $e->getMessage());
+      throw new \Exception('Failed to retrieve amount for price ID: ' . $e->getMessage());
+    }
+  }
+
+
 
 }

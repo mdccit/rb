@@ -35,6 +35,9 @@ Route::group(['namespace' => 'App\Modules\SubscriptionModule\Controllers', 'pref
          Route::get('/status', 'SubscriptionController@checkStatus')->name('subscription.checkStatus');
          Route::get('/stripe/invoice-preview', 'SubscriptionController@getUpcomingInvoice')->name('subscription.stripe.invoice.preview');
          Route::put('/update-payment-method', 'SubscriptionController@updatePaymentMethod')->name('subscription.updatePaymentMethod');
+         Route::put('/set-default-payment-method', 'SubscriptionController@setDefaultPaymentMethod')->name('subscription.set.default.payment.method');
+         Route::put('/add-new-card', 'SubscriptionController@addNewCardToCustomer')->name('add.new.card');
+         Route::put('/add-new-default-card', 'SubscriptionController@addNewDefaultCardToCustomer')->name('add.new.defaultcard');
 
 
         // New Stripe payment-related routes
