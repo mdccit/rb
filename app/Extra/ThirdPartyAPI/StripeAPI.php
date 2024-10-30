@@ -246,11 +246,7 @@ class StripeAPI
       $stripeSubscription->cancel_at_period_end = true;
       $stripeSubscription->save();
 
-         // Log the subscription response for debugging
-         Log::debug('Subscription Response 2: ' . json_encode($stripeSubscription));
-
-
-      // Step 3: Calculate the subscription period locally
+       // Step 3: Calculate the subscription period locally
       $startDate = Carbon::now();
       $endDate = ($subscriptionType === 'monthly') ? $startDate->copy()->addMonth() : $startDate->copy()->addYear();
 
@@ -434,18 +430,20 @@ class StripeAPI
 
       // Format the payment history data
       $paymentHistory = [];
+      // Filter only invoices that match the customer ID
       foreach ($invoices->data as $invoice) {
-        $paymentHistory[] = [
-          'invoice_id' => $invoice->id,
-          'amount_paid' => $invoice->amount_paid / 100, // Convert amount to dollars
-          'currency' => $invoice->currency,
-          'status' => $invoice->status,
-          'created' => date('Y-m-d H:i:s', $invoice->created),
-          'payment_method' => $invoice->payment_method,
-          'hosted_invoice_url' => $invoice->hosted_invoice_url // Link to Stripe invoice
-        ];
+        if ($invoice->customer === $stripeCustomerId) {
+          $paymentHistory[] = [
+            'invoice_id' => $invoice->id,
+            'amount_paid' => $invoice->amount_paid / 100, // Convert amount to dollars
+            'currency' => $invoice->currency,
+            'status' => $invoice->status,
+            'created' => date('Y-m-d H:i:s', $invoice->created),
+            'payment_method' => $invoice->payment_method,
+            'hosted_invoice_url' => $invoice->hosted_invoice_url
+          ];
+        }
       }
-
       return $paymentHistory;
     } catch (\Exception $e) {
       return ['error' => $e->getMessage()];
