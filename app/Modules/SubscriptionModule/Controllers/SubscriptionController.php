@@ -220,10 +220,13 @@ class SubscriptionController extends Controller
       'is_auto_renewal' => 'required|boolean', // Boolean: true or false
     ]);
 
-
     $paymentMethodId = $validatedData['payment_method_id'];
     $subscriptionType = $validatedData['subscription_type'];
     $isRecurring = $validatedData['is_auto_renewal'];
+
+    $paymentMethodId = preg_replace('/[^a-zA-Z0-9_-]/', '', $paymentMethodId); // Removes any characters except alphanumeric, underscore, and dash
+    $subscriptionType = strtolower(trim($subscriptionType)); // Formats to lowercase and removes extra spaces
+    $isRecurring = filter_var($isRecurring, FILTER_VALIDATE_BOOLEAN); // Ensures it is a boolean value
 
     try {
       // Check if user already has an active subscription
@@ -276,7 +279,7 @@ class SubscriptionController extends Controller
         $userSubscription->save();
 
         if ($stripeSubscription) {
-          $amount = $stripeSubscription->amount/100;
+          $amount = $stripeSubscription->amount / 100;
           $currency = strtoupper($stripeSubscription->currency);
           $user->has_used_trial = 1;
           $user->user_type_id = 3;
@@ -314,10 +317,10 @@ class SubscriptionController extends Controller
         $userSubscription->stripe_subscription_id = $subscriptionId;
         $userSubscription->save();
 
-        Log::info('subscription amount ::: '. $stripeSubscription);
+        Log::info('subscription amount ::: ' . $stripeSubscription);
 
         if ($stripeSubscription) {
-          $amount = $stripeSubscription->plan->amount/100;
+          $amount = $stripeSubscription->plan->amount / 100;
           $currency = strtoupper($stripeSubscription->currency);
           $user->has_used_trial = 1;
           $user->user_type_id = 3;
