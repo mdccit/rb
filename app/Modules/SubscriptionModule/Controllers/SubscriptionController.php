@@ -276,7 +276,7 @@ class SubscriptionController extends Controller
         $userSubscription->save();
 
         if ($stripeSubscription) {
-          $amount = $stripeSubscription->amount;
+          $amount = $stripeSubscription->amount/100;
           $currency = strtoupper($stripeSubscription->currency);
           $user->has_used_trial = 1;
           $user->user_type_id = 3;
@@ -314,8 +314,10 @@ class SubscriptionController extends Controller
         $userSubscription->stripe_subscription_id = $subscriptionId;
         $userSubscription->save();
 
+        Log::info('subscription amount ::: '. $stripeSubscription);
+
         if ($stripeSubscription) {
-          $amount = $stripeSubscription->amount;
+          $amount = $stripeSubscription->plan->amount/100;
           $currency = strtoupper($stripeSubscription->currency);
           $user->has_used_trial = 1;
           $user->user_type_id = 3;

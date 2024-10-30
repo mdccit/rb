@@ -7,6 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Log;
+use Stripe\Invoice;
 
 class PaymentSuccessEmail extends Notification implements ShouldQueue
 {
@@ -32,10 +33,13 @@ class PaymentSuccessEmail extends Notification implements ShouldQueue
   public function toMail($notifiable)
   {
 
+    $invoice = Invoice::retrieve($this->subscription->latest_invoice);
+    $subscription_amount = $invoice->total / 100;
+
     // Log the start of the email sending process
     Log::info('Attempting to send Payment Success Email', [
       'subscription_id' => $this->subscription->id,
-      'amount' => $this->price,
+      'amount' => $subscription_amount,
       'currency' => $this->currency,
       'email' => $notifiable->email,
       'display_name' => $this->display_name
@@ -47,7 +51,7 @@ class PaymentSuccessEmail extends Notification implements ShouldQueue
         ->subject('Payment Success for Your Subscription')
         ->view('vendor.emails.subscription.payment-success', [
           'subscription' => $this->subscription,
-          'amount' => $this->price,
+          'amount' => $subscription_amount,
           'currency' => $this->currency,
           'display_name' => $this->display_name,
         ]);
@@ -70,14 +74,5 @@ class PaymentSuccessEmail extends Notification implements ShouldQueue
       // Optionally, rethrow the exception if you want to handle it elsewhere
       throw $e;
     }
-  }
-
-  public function toArray($notifiable)
-  {
-    return [
-      'subscription_id' => $this->subscription->id,
-      'amount' => $this->price,
-      'currency' => $this->currency,
-    ];
   }
 }
