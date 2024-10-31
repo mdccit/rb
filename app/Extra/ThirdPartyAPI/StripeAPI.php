@@ -185,30 +185,61 @@ class StripeAPI
   // Create a new subscription for a customer with optional trial and subscription type
   public function createSubscription($customerId, $subscriptionType, $paymentMethodId = null, $isAutoRenewal = true)
   {
-    try {
-      // Attach the payment method to the customer if provided
-      if ($paymentMethodId) {
-        $this->attachPaymentMethodToCustomer($customerId, $paymentMethodId);
+      try {
+          Log::info('Starting subscription creation process', [
+              'customerId' => $customerId,
+              'subscriptionType' => $subscriptionType,
+              'isAutoRenewal' => $isAutoRenewal,
+              'paymentMethodId' => $paymentMethodId
+          ]);
+  
+          // Attach the payment method to the customer if provided
+          if ($paymentMethodId) {
+              Log::info('Attaching payment method to customer', [
+                  'customerId' => $customerId,
+                  'paymentMethodId' => $paymentMethodId
+              ]);
+              $this->attachPaymentMethodToCustomer($customerId, $paymentMethodId);
+          }
+  
+          // Get the price ID based on the subscription type
+          $priceId = $this->getPriceIdFromSubscriptionType($subscriptionType);
+          Log::info('Retrieved Price ID', [
+              'subscriptionType' => $subscriptionType,
+              'priceId' => $priceId
+          ]);
+  
+          // Create the subscription with Stripe
+          $subscription = Subscription::create([
+              'customer' => $customerId,
+              'items' => [['price' => $priceId]],  // Pass the price ID
+              'expand' => ['latest_invoice.payment_intent'],  // Expand for additional details if needed
+              'automatic_tax' => ['enabled' => false],
+              'default_payment_method' => $paymentMethodId
+          ]);
+  
+          Log::info('Stripe subscription created successfully', [
+              'subscriptionId' => $subscription->id,
+              'customerId' => $customerId,
+              'subscriptionType' => $subscriptionType,
+              'priceId' => $priceId
+          ]);
+  
+          return $subscription;
+  
+      } catch (\Exception $e) {
+          Log::error('Stripe Subscription Creation Error', [
+              'customerId' => $customerId,
+              'subscriptionType' => $subscriptionType,
+              'paymentMethodId' => $paymentMethodId,
+              'isAutoRenewal' => $isAutoRenewal,
+              'errorMessage' => $e->getMessage()
+          ]);
+  
+          throw new \Exception('Failed to create subscription: ' . $e->getMessage());
       }
-
-      $priceId = $this->getPriceIdFromSubscriptionType($subscriptionType);
-
-      // Create a subscription with auto-renewal
-      $subscription = Subscription::create([
-        'customer' => $customerId,
-        'items' => [['price' => $priceId]],  // Pass the price ID
-        'expand' => ['latest_invoice.payment_intent'],  // Optional: Expand the payment intent for more details
-        'automatic_tax' => ['enabled' => false],
-        'default_payment_method' => $paymentMethodId
-      ]);
-
-      return $subscription;
-
-    } catch (\Exception $e) {
-      Log::error('Stripe Subscription Creation Error: ' . $e->getMessage());
-      throw new \Exception('Failed to create subscription: ' . $e->getMessage());
-    }
   }
+  
 
 
   public function createOneTimeSubscription($customerId, $subscriptionType, $paymentMethodId)
@@ -420,7 +451,6 @@ class StripeAPI
   public function getCustomerPaymentHistory($stripeCustomerId)
   {
     try {
-      Stripe::setApiKey(config('services.stripe.secret'));
 
       // Retrieve all invoices for the customer
       $invoices = Invoice::all([
@@ -453,8 +483,6 @@ class StripeAPI
   public function getCustomerPaymentMethods($customerId)
   {
     try {
-      // Set up Stripe with your secret key
-      Stripe::setApiKey(config('services.stripe.secret'));
 
       // Retrieve the customer object to get the default payment method ID
       $customer = Customer::retrieve($customerId);

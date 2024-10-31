@@ -213,12 +213,17 @@ class SubscriptionController extends Controller
     $user = $request->user(); // Assuming the user is authenticated
     $displayName = $user->display_name;
 
+
+    Log::info('Request URL: ' . $request->fullUrl());
+    Log::info('Headers: ', $request->headers->all());
+    Log::info('Data: ', $request->all());
+
     // Validate the required inputs
     $validatedData = $request->validate([
-      'payment_method_id' => 'required|string',
-      'subscription_type' => 'required|in:trial,premium', // Accept only 'trial' or 'premium'
+      'payment_method_id' => 'required|string|regex:/^[a-zA-Z0-9_-]+$/', // Alphanumeric, underscores, and dashes only
+      'subscription_type' => 'required|string|in:trial,premium', // Accept only 'trial' or 'premium'
       'is_auto_renewal' => 'required|boolean', // Boolean: true or false
-    ]);
+  ]);
 
     $paymentMethodId = $validatedData['payment_method_id'];
     $subscriptionType = $validatedData['subscription_type'];
@@ -230,7 +235,7 @@ class SubscriptionController extends Controller
 
     try {
       // Check if user already has an active subscription
-      if ($user->subscription) {
+      if ($user->activeSubscription) {
         throw new \Exception('User already has an active subscription.');
       }
 
@@ -265,13 +270,11 @@ class SubscriptionController extends Controller
         $endDate = Carbon::createFromTimestamp($stripeSubscription->current_period_end);
         $paymentStatus = $stripeSubscription->status;
 
-
-
         // Save the trial subscription to the database
         $userSubscription = new Subscription();
         $userSubscription->user_id = $user->id;
         $userSubscription->subscription_type = 'trial';
-        $userSubscription->status = 'active'; // Set status to 'trial'
+        $userSubscription->status = 'active';
         $userSubscription->start_date = $startDate;
         $userSubscription->end_date = $endDate;
         $userSubscription->payment_status = $paymentStatus;
@@ -307,24 +310,29 @@ class SubscriptionController extends Controller
         $paymentStatus = $stripeSubscription->status;
 
         // Save the subscription details to the database
-        $userSubscription = new Subscription();
-        $userSubscription->user_id = $user->id;
-        $userSubscription->subscription_type = 'monthly';
-        $userSubscription->status = 'active';
-        $userSubscription->start_date = $startDate;
-        $userSubscription->end_date = $endDate;
-        $userSubscription->payment_status = $paymentStatus;
-        $userSubscription->stripe_subscription_id = $subscriptionId;
-        $userSubscription->save();
+        try {
+          $userSubscription = new Subscription();
+          $userSubscription->user_id = $user->id;
+          $userSubscription->subscription_type = 'monthly';
+          $userSubscription->status = 'active';
+          $userSubscription->start_date = $startDate ?? now();
+          $userSubscription->end_date = $endDate ?? now()->addMonth();
+          $userSubscription->payment_status = $paymentStatus ?? 'unpaid';
+          $userSubscription->stripe_subscription_id = $subscriptionId;
+          $userSubscription->save();
+        } catch (\Exception $e) {
+          // Log the error for further analysis
+          Log::error('Error saving subscription: ' . $e->getMessage());
 
-        Log::info('subscription amount ::: ' . $stripeSubscription);
+        }
+
 
         if ($stripeSubscription) {
           $amount = $stripeSubscription->plan->amount / 100;
           $currency = strtoupper($stripeSubscription->currency);
           $user->has_used_trial = 1;
           $user->user_type_id = 3;
-          $user->save();  // Save the user with the updated user_type
+          $user->save();
 
           // Trigger the payment success email notification
           $user->notify(new PaymentSuccessEmail($stripeSubscription, $amount, $currency, $displayName));
