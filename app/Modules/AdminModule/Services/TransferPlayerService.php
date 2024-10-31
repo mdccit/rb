@@ -62,8 +62,10 @@ class TransferPlayerService
                 'created_by',
                 'other_data->utr_score_manual as utr_score_manual',
                 'other_data->handedness as handedness',
-                'sports.name as sport_name'
-            );
+                'sports.name as sport_name',
+                'transfer_players.created_at'
+            )
+            ->orderBy('transfer_players.created_at', 'DESC');
 
 
         if ($search_key != null) {
