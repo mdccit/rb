@@ -44,4 +44,26 @@ class SubscriptionSummaryEvent extends Model
     {
         return $this->belongsTo(Subscription::class);
     }
+
+
+
+     /**
+     * Create a new subscription summary event record.
+     *
+     * @param int $userId - The ID of the user related to the event.
+     * @param int $subscriptionId - The ID of the subscription related to the event.
+     * @param string $eventType - The type of event (e.g., 'payment_success', 'subscription_expired').
+     * @param string|null $description - Optional description for the event.
+     * @return SubscriptionSummaryEvent - Returns the created SubscriptionSummaryEvent record.
+     */
+    public static function logEvent($userId, $subscriptionId, $eventType, $description = null)
+    {
+        // Insert the record and return it
+        return self::create([
+            'user_id' => $userId,
+            'subscription_id' => $subscriptionId,
+            'event_type' => $eventType,
+            'description' => $description,
+        ]);
+    }
 }

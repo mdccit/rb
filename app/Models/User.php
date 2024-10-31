@@ -134,14 +134,17 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(Subscription::class, 'user_id', 'id');
     }
 
+    public function activeSubscription()
+    {
+        return $this->hasOne(Subscription::class, 'user_id', 'id')
+                    ->where('status', 'active');
+    }
+    
+
     public function isPremium()
     {
         return $this->user_type_id === 3; // Check if the user is premium
     }
 
-    public function activeSubscription()
-    {
-        return $this->subscription()->where('status', 'active')->first();
-    }
 
 }

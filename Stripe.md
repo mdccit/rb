@@ -1,3 +1,8 @@
+
+``` 
+stripe listen --forward-to http://127.0.0.1:8000/api/v2/stripe/webhook
+```
+
 stripe trigger invoice.payment_succeeded
 
 stripe trigger invoice.payment_failed
